@@ -14,5 +14,7 @@ npx create-expo-app@latest -t
 
 ### Developer tools
 
-- ESLint
-- Prettier
+- 🧰 TypeScript - for static type-checking
+- 🛠️ ESLint and Prettier - for linting and code formatting
+- 🐶 Husky - to lint commit messages, code, and run tests upon committing or pushing
+- 🧪 Jest - for testing components and features
