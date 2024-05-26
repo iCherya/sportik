@@ -12,6 +12,10 @@ This project was initiated using the Expo CLI with the navigation template in Ty
 npx create-expo-app@latest -t
 ```
 
+### ChatGPT code review
+
+A code review github action workflow powered by ChatGPT. It provides automated code reviews for pull requests. The workflow is triggered when a pull request is opened or updated.
+
 ### Developer tools
 
 - 🧰 TypeScript - for static type-checking
