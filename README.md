@@ -12,7 +12,7 @@ The app is being migrated from a web prototype (`_migration/sportik-full.jsx`) t
 | 1 | Foundation files (theme, i18n, data, storage, fonts) | ✅ Done |
 | 2 | Root app and navigation | ✅ Done |
 | 3 | Shared UI components | ✅ Done |
-| 4 | Screens (Home, Tools, Events, Account) | ⏳ Pending |
+| 4 | Screens (Home, Tools, Events, Account) | ✅ Done |
 | 5 | Overlays | ⏳ Pending |
 | 6 | Tools (15 components) | ⏳ Pending |
 | 7 | Onboarding | ⏳ Pending |

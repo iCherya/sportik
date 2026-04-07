@@ -103,3 +103,31 @@ This file tracks all completed migration work. Update it after every phase or si
 
 - `npx tsc --noEmit --skipLibCheck` — clean
 - `npx eslint src/components/ src/MainApp.tsx --max-warnings=0` — clean
+
+---
+
+## Phase 4 — Screens
+
+**Date:** 2026-04-07 | **Status:** ✅ Complete
+
+### Phase 4 — Files created / modified
+
+| File | Description |
+| --- | --- |
+| `src/screens/HomeScreen.tsx` | Greeting, QuoteCard (horizontal paginating ScrollView), race countdown, weekly load bars, today's training with checkboxes + progress bar, quick tools, training plans |
+| `src/screens/ToolsScreen.tsx` | Fixed header, horizontal sport filter tabs, scrollable tool list with sport-colored accent stripes |
+| `src/screens/EventsScreen.tsx` | Discover/My Events tabs, filter chips, EventCard, EventDetail (Overlay), AddEventSheet, SuggestSheet |
+| `src/screens/AccountScreen.tsx` | Hero (avatar, PRs), Training Profile group, Preferences group, App group, Log Out — all rows use `Row` component, all pickers use `Sheet` |
+| `src/MainApp.tsx` | Wired all 4 screens via `renderScreen()` switch; stub overlay placeholder for types not yet built in Phase 5 |
+
+### Phase 4 — Architecture notes
+
+- `QuoteCard` uses a horizontal paginating `ScrollView` (not PanResponder) — more reliable inside vertical ScrollView on both platforms
+- All shared state (`favs`, `personalEvents`, `doneSessions`, `qi`) persists to AsyncStorage via Phase 2 effects in `MainApp`
+- `Event` type imported from `'../data'`, not `'../types'`
+- Sport indexing uses `s.sport as SportKey` cast where TypeScript can't infer it from mapped data
+
+### Phase 4 — Verification
+
+- `npx tsc --noEmit --skipLibCheck` — clean
+- `npx eslint src/screens/ src/MainApp.tsx --max-warnings=0` — clean (after Prettier auto-fix)

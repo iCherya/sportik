@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from './components/AppText';
 import { BottomNav } from './components/BottomNav';
 import type { Lang } from './context/LangContext';
-import { EVENTS_DATA, type Event } from './data';
+import { EVENTS_DATA, type Event, type Tool } from './data';
+import { AccountScreen } from './screens/AccountScreen';
+import { EventsScreen } from './screens/EventsScreen';
+import { HomeScreen } from './screens/HomeScreen';
+import { ToolsScreen } from './screens/ToolsScreen';
 import { STORAGE_KEYS, Storage } from './storage';
 import { Colors } from './theme';
 import type { OverlayType, Profile, Screen } from './types';
@@ -18,15 +22,13 @@ type Props = {
   setProfile: (p: Profile) => void;
 };
 
-// Props are passed to child screens in Phase 4 — unused in placeholder render
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function MainApp({ isDark, setIsDark, lang, setLang, profile, setProfile }: Props) {
   const [screen, setScreen] = useState<Screen>('home');
-  const [_overlay, setOverlay] = useState<OverlayType | null>(null);
+  const [overlay, setOverlay] = useState<OverlayType | null>(null);
   const [favs, setFavs] = useState<number[]>([1]);
   const [personalEvents, setPersonalEvents] = useState<Event[]>([EVENTS_DATA[6]]);
   const [doneSessions, setDoneSessions] = useState<Record<string, boolean>>({});
-  const [_qi, _setQi] = useState(0);
+  const [qi, setQi] = useState(0);
   const mounted = useRef(false);
 
   // Load persisted state on mount
@@ -61,12 +63,12 @@ export function MainApp({ isDark, setIsDark, lang, setLang, profile, setProfile 
 
   // Derived: nearest upcoming favourited event
   const allEvents = [...EVENTS_DATA.filter((e) => e.global), ...personalEvents];
-  const _nextRace =
+  const nextRace =
     allEvents.filter((e) => favs.includes(e.id) && e.days > 0).sort((a, b) => a.days - b.days)[0] ??
     null;
 
   // Derived: live date string
-  const _dateStr = new Date().toLocaleDateString('en-GB', {
+  const dateStr = new Date().toLocaleDateString('en-GB', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -74,28 +76,89 @@ export function MainApp({ isDark, setIsDark, lang, setLang, profile, setProfile 
 
   // Derived: greeting
   const hour = new Date().getHours();
-  const _greeting = hour < 12 ? 'Morning' : hour < 17 ? 'Afternoon' : 'Evening';
+  const greeting = hour < 12 ? 'Morning' : hour < 17 ? 'Afternoon' : 'Evening';
 
   const navigateTo = (id: Screen) => {
     setScreen(id);
     setOverlay(null);
   };
 
+  const handleOpenTool = (tool: Tool) => {
+    setOverlay({ type: 'tool', tool });
+  };
+
+  const renderScreen = () => {
+    switch (screen) {
+      case 'home':
+        return (
+          <HomeScreen
+            profile={profile}
+            nextRace={nextRace}
+            dateStr={dateStr}
+            greeting={greeting}
+            doneSessions={doneSessions}
+            setDoneSessions={setDoneSessions}
+            qi={qi}
+            setQi={setQi}
+            onOpenTool={handleOpenTool}
+            onOpenPlan={() => setOverlay({ type: 'plan' })}
+          />
+        );
+      case 'tools':
+        return <ToolsScreen onSelect={(tool) => setOverlay({ type: 'tool', tool })} />;
+      case 'events':
+        return (
+          <EventsScreen
+            favs={favs}
+            setFavs={setFavs}
+            personalEvents={personalEvents}
+            setPersonalEvents={setPersonalEvents}
+          />
+        );
+      case 'account':
+        return (
+          <AccountScreen
+            setOverlay={setOverlay}
+            isDark={isDark}
+            setIsDark={setIsDark}
+            profile={profile}
+            setProfile={setProfile}
+            lang={lang}
+            setLang={setLang}
+          />
+        );
+    }
+  };
+
   return (
     <View style={styles.container}>
-      {/* Screen area — replaced with real screens in Phase 4 */}
-      <View style={styles.screen}>
-        <AppText condensed weight="black" size={28} style={{ letterSpacing: 4 }}>
-          {screen.toUpperCase()}
-        </AppText>
-        <AppText size={12} color={Colors.textDim} style={{ marginTop: 8 }}>
-          Screen coming in Phase 4
-        </AppText>
-      </View>
-
-      {/* Overlay area — wired in Phase 5 */}
+      {renderScreen()}
 
       <BottomNav screen={screen} onNavigate={navigateTo} />
+
+      {/* Overlay placeholder — real overlay content wired in Phase 5 */}
+      {overlay &&
+        overlay.type !== 'tool' &&
+        overlay.type !== 'plan' &&
+        overlay.type !== 'pr' &&
+        overlay.type !== 'about' &&
+        overlay.type !== 'editProfile' &&
+        overlay.type !== 'hrZones' && <View style={styles.overlayStub} pointerEvents="box-none" />}
+      {overlay && (overlay.type === 'plan' || overlay.type === 'about') && (
+        <View style={[styles.overlayStub, { justifyContent: 'center', alignItems: 'center' }]}>
+          <AppText condensed weight="black" size={22} color={Colors.accent}>
+            {overlay.type.toUpperCase()} OVERLAY
+          </AppText>
+          <AppText size={12} color={Colors.textDim} style={{ marginTop: 8 }}>
+            Coming in Phase 5
+          </AppText>
+          <Pressable onPress={() => setOverlay(null)}>
+            <AppText weight="semibold" size={14} color={Colors.textMid} style={{ marginTop: 20 }}>
+              ← Close
+            </AppText>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }
@@ -105,9 +168,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.bg,
   },
-  screen: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  overlayStub: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: Colors.bg,
+    zIndex: 80,
   },
 });
