@@ -20,4 +20,4 @@ A code review github action workflow powered by OpenAI GPT-3.5 Turbo. It provide
 
 - 🧰 TypeScript - for static type-checking
 - 🛠️ ESLint and Prettier - for linting and code formatting
-- 🐶 Husky - to lint commit messages, code upon committing or pushing
+- 🐶 Husky - to lint commit messages and code upon committing or pushing
