@@ -1,10 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import { AppText } from './components/AppText';
 import { BottomNav } from './components/BottomNav';
 import type { Lang } from './context/LangContext';
 import { EVENTS_DATA, type Event, type Tool } from './data';
+import { AboutOverlay } from './overlays/AboutOverlay';
+import { EditProfileOverlay } from './overlays/EditProfileOverlay';
+import { HRZonesOverlay } from './overlays/HRZonesOverlay';
+import { PlanOverlay } from './overlays/PlanOverlay';
+import { PRDetail } from './overlays/PRDetail';
+import { ToolDetail } from './overlays/ToolDetail';
 import { AccountScreen } from './screens/AccountScreen';
 import { EventsScreen } from './screens/EventsScreen';
 import { HomeScreen } from './screens/HomeScreen';
@@ -130,35 +135,40 @@ export function MainApp({ isDark, setIsDark, lang, setLang, profile, setProfile 
     }
   };
 
+  const renderOverlay = () => {
+    if (!overlay) return null;
+    const close = () => setOverlay(null);
+
+    switch (overlay.type) {
+      case 'tool':
+        return <ToolDetail tool={overlay.tool} onBack={close} />;
+      case 'pr':
+        return <PRDetail pr={overlay.pr} onBack={close} />;
+      case 'plan':
+        return <PlanOverlay onBack={close} />;
+      case 'about':
+        return <AboutOverlay onBack={close} />;
+      case 'editProfile':
+        return (
+          <EditProfileOverlay profile={overlay.profile} onSave={overlay.onSave} onBack={close} />
+        );
+      case 'hrZones':
+        return (
+          <HRZonesOverlay
+            maxHR={overlay.maxHR}
+            hrMethod={overlay.hrMethod}
+            onSave={overlay.onSave}
+            onBack={close}
+          />
+        );
+    }
+  };
+
   return (
     <View style={styles.container}>
       {renderScreen()}
-
       <BottomNav screen={screen} onNavigate={navigateTo} />
-
-      {/* Overlay placeholder — real overlay content wired in Phase 5 */}
-      {overlay &&
-        overlay.type !== 'tool' &&
-        overlay.type !== 'plan' &&
-        overlay.type !== 'pr' &&
-        overlay.type !== 'about' &&
-        overlay.type !== 'editProfile' &&
-        overlay.type !== 'hrZones' && <View style={styles.overlayStub} pointerEvents="box-none" />}
-      {overlay && (overlay.type === 'plan' || overlay.type === 'about') && (
-        <View style={[styles.overlayStub, { justifyContent: 'center', alignItems: 'center' }]}>
-          <AppText condensed weight="black" size={22} color={Colors.accent}>
-            {overlay.type.toUpperCase()} OVERLAY
-          </AppText>
-          <AppText size={12} color={Colors.textDim} style={{ marginTop: 8 }}>
-            Coming in Phase 5
-          </AppText>
-          <Pressable onPress={() => setOverlay(null)}>
-            <AppText weight="semibold" size={14} color={Colors.textMid} style={{ marginTop: 20 }}>
-              ← Close
-            </AppText>
-          </Pressable>
-        </View>
-      )}
+      {renderOverlay()}
     </View>
   );
 }
@@ -167,10 +177,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.bg,
-  },
-  overlayStub: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: Colors.bg,
-    zIndex: 80,
   },
 });

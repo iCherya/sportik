@@ -15,10 +15,12 @@ import { AppText } from './AppText';
 type Props = {
   onBack: () => void;
   title: string;
+  backLabel?: string;
+  badge?: React.ReactNode;
   children: React.ReactNode;
 };
 
-export function Overlay({ onBack, title, children }: Props) {
+export function Overlay({ onBack, title, backLabel = 'Back', badge, children }: Props) {
   const insets = useSafeAreaInsets();
   const translateY = useSharedValue(800);
 
@@ -50,9 +52,10 @@ export function Overlay({ onBack, title, children }: Props) {
             ←
           </AppText>
           <AppText weight="medium" size={13} color={Colors.textMid}>
-            Back
+            {backLabel}
           </AppText>
         </Pressable>
+        {badge}
         <AppText
           condensed
           weight="black"

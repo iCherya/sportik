@@ -131,3 +131,34 @@ This file tracks all completed migration work. Update it after every phase or si
 
 - `npx tsc --noEmit --skipLibCheck` — clean
 - `npx eslint src/screens/ src/MainApp.tsx --max-warnings=0` — clean (after Prettier auto-fix)
+
+---
+
+## Phase 5 — Overlays
+
+**Date:** 2026-04-07 | **Status:** ✅ Complete
+
+### Phase 5 — Files created / modified
+
+| File | Description |
+| --- | --- |
+| `src/components/Overlay.tsx` | Added `backLabel?: string` (defaults to `'Back'`) and `badge?: React.ReactNode` props for contextual back labels and sport chips |
+| `src/overlays/ToolDetail.tsx` | Overlay with sport badge + tool name header; tool body placeholder until Phase 6 fills in the 15 tool components |
+| `src/overlays/HRZonesOverlay.tsx` | Full HR zones config: method picker (Max HR % / HR Reserve), max HR input with age presets, optional resting HR input, 5 expandable zone rows with manual BPM override + per-zone reset, save callback |
+| `src/overlays/PRDetail.tsx` | PR hero card, history list with BEST badge (empty state when only 1 result), inline log-new-result form with time + event inputs |
+| `src/overlays/PlanOverlay.tsx` | Plan meta row, week header with progress bar, session list with sport stripes + tap-to-toggle checkboxes, AI plans promo card |
+| `src/overlays/EditProfileOverlay.tsx` | Emoji avatar picker (10 options), name + city TextInputs, sport focus selector, save writes back to root profile state |
+| `src/overlays/AboutOverlay.tsx` | SPORTIK wordmark, version, BETA badge, info rows card, privacy/terms/oss link rows |
+| `src/MainApp.tsx` | Replaced overlay stub with `renderOverlay()` switch wiring all 6 overlay components |
+
+### Phase 5 — Architecture notes
+
+- `Overlay.tsx` `badge` prop renders between the back button and title — used by ToolDetail, PRDetail, HRZonesOverlay, PlanOverlay for sport chips
+- `backLabel` defaults to `'Back'` for backwards compatibility; overlays pass `t('nav_tools')` / `t('nav_account')` / `t('nav_home')` as appropriate
+- `ToolDetail` body renders a placeholder ("Tool UI coming in Phase 6") — the component map will be filled in Phase 6
+- HR zone BPM values are kept as strings throughout to avoid lossy int↔string conversion in TextInput; `calcAuto` returns `string` via `String(...)`
+
+### Phase 5 — Verification
+
+- `npx tsc --noEmit --skipLibCheck` — clean
+- `npx eslint src/overlays/ src/components/Overlay.tsx src/MainApp.tsx --max-warnings=0` — clean (after Prettier auto-fix)
