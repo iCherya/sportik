@@ -1,6 +1,7 @@
 import type { Tool } from './data';
 
 export type Screen = 'home' | 'tools' | 'events' | 'account';
+export const NAV_ORDER: Screen[] = ['home', 'tools', 'events', 'account'];
 
 export type Profile = {
   name: string;

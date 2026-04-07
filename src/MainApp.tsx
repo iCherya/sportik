@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
+import { AppText } from './components/AppText';
+import { BottomNav } from './components/BottomNav';
 import type { Lang } from './context/LangContext';
 import { EVENTS_DATA, type Event } from './data';
 import { STORAGE_KEYS, Storage } from './storage';
@@ -14,14 +16,6 @@ type Props = {
   setLang: (v: Lang) => void;
   profile: Profile;
   setProfile: (p: Profile) => void;
-};
-
-const NAV_ORDER: Screen[] = ['home', 'tools', 'events', 'account'];
-const NAV_ICONS: Record<Screen, string> = {
-  home: '🏠',
-  tools: '🛠',
-  events: '📅',
-  account: '👤',
 };
 
 // Props are passed to child screens in Phase 4 — unused in placeholder render
@@ -91,19 +85,17 @@ export function MainApp({ isDark, setIsDark, lang, setLang, profile, setProfile 
     <View style={styles.container}>
       {/* Screen area — replaced with real screens in Phase 4 */}
       <View style={styles.screen}>
-        <Text style={styles.placeholder}>{screen.toUpperCase()}</Text>
-        <Text style={styles.sub}>Screen coming in Phase 4</Text>
+        <AppText condensed weight="black" size={28} style={{ letterSpacing: 4 }}>
+          {screen.toUpperCase()}
+        </AppText>
+        <AppText size={12} color={Colors.textDim} style={{ marginTop: 8 }}>
+          Screen coming in Phase 4
+        </AppText>
       </View>
 
-      {/* Bottom nav — replaced with BottomNav component in Phase 3 */}
-      <View style={styles.nav}>
-        {NAV_ORDER.map((s) => (
-          <Pressable key={s} style={styles.navItem} onPress={() => navigateTo(s)}>
-            <Text style={styles.navIcon}>{NAV_ICONS[s]}</Text>
-            <Text style={[styles.navLabel, screen === s && styles.navLabelActive]}>{s}</Text>
-          </Pressable>
-        ))}
-      </View>
+      {/* Overlay area — wired in Phase 5 */}
+
+      <BottomNav screen={screen} onNavigate={navigateTo} />
     </View>
   );
 }
@@ -117,41 +109,5 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  placeholder: {
-    color: Colors.text,
-    fontSize: 28,
-    letterSpacing: 4,
-  },
-  sub: {
-    color: Colors.textDim,
-    fontSize: 12,
-    marginTop: 8,
-  },
-  nav: {
-    flexDirection: 'row',
-    backgroundColor: Colors.surface,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    paddingBottom: 20,
-  },
-  navItem: {
-    flex: 1,
-    alignItems: 'center',
-    paddingTop: 12,
-    paddingBottom: 4,
-  },
-  navIcon: {
-    fontSize: 20,
-  },
-  navLabel: {
-    color: Colors.textMid,
-    fontSize: 10,
-    marginTop: 3,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  navLabelActive: {
-    color: Colors.accent,
   },
 });

@@ -1,0 +1,90 @@
+import { useEffect } from 'react';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import Animated, {
+  Easing,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
+
+import { Colors, Font, Space } from '../theme';
+import { AppText } from './AppText';
+
+type Props = {
+  onClose: () => void;
+  title?: string;
+  children: React.ReactNode;
+};
+
+export function Sheet({ onClose, title, children }: Props) {
+  const translateY = useSharedValue(600);
+
+  useEffect(() => {
+    translateY.value = withTiming(0, {
+      duration: 260,
+      easing: Easing.bezier(0.4, 0, 0.2, 1),
+    });
+  }, [translateY]);
+
+  const handleClose = () => {
+    translateY.value = withTiming(
+      600,
+      { duration: 220, easing: Easing.bezier(0.4, 0, 0.2, 1) },
+      () => runOnJS(onClose)()
+    );
+  };
+
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+      <Pressable style={[StyleSheet.absoluteFill, styles.backdrop]} onPress={handleClose} />
+      <View style={styles.anchor} pointerEvents="box-none">
+        <Animated.View style={[styles.sheet, animStyle]} onStartShouldSetResponder={() => true}>
+          <View style={styles.handle} />
+          {title && (
+            <AppText
+              condensed
+              weight="black"
+              size={22}
+              style={{ marginBottom: 18, fontFamily: Font.condensedBlack }}>
+              {title}
+            </AppText>
+          )}
+          <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+            {children}
+          </ScrollView>
+        </Animated.View>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  backdrop: {
+    backgroundColor: 'rgba(0,0,0,0.65)',
+  },
+  anchor: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  sheet: {
+    backgroundColor: Colors.surface,
+    borderTopLeftRadius: Space.radius.overlay,
+    borderTopRightRadius: Space.radius.overlay,
+    padding: 20,
+    paddingBottom: 32,
+    maxHeight: '80%',
+  },
+  handle: {
+    width: 36,
+    height: 4,
+    backgroundColor: Colors.border,
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: 18,
+  },
+});
