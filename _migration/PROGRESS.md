@@ -38,3 +38,31 @@ This file tracks all completed migration work. Update it after every phase or si
 
 ### Notes
 - TypeScript check passed clean (`npx tsc --noEmit --skipLibCheck`)
+
+---
+
+## Phase 2 — Root app and navigation
+**Date:** 2026-04-07
+**Status:** ✅ Complete
+
+### Files created / modified
+
+| File | Description |
+| --- | --- |
+| `src/types.ts` | `Screen`, `Profile`, `PRData`, `OverlayType` TypeScript types |
+| `app/_layout.tsx` | Rewritten: font loading via `useSportikFonts`, splash screen management, bare `<Stack>` |
+| `app/index.tsx` | Entry route: loads persisted `isDark`/`lang`/`profile`, provides `ThemeContext` + `LangContext`, renders `MainApp` |
+| `src/MainApp.tsx` | App shell: `screen`, `overlay`, `favs`, `personalEvents`, `doneSessions`, `qi` state; persist on change; placeholder nav + screen area |
+| `.eslintrc.js` | Added `@typescript-eslint/no-unused-vars` rule with `varsIgnorePattern`/`argsIgnorePattern: '^_'` |
+
+### Architecture notes
+
+- `isDark` and `lang` are managed in `app/index.tsx` (not `_layout.tsx`) so their setters can be passed as props to `MainApp` → `AccountScreen`
+- Onboarding is auto-skipped with a default profile until Phase 7 builds the real flow
+- Derived values (`nextRace`, `dateStr`, `greeting`) and `qi`/`overlay` are declared in `MainApp` but prefixed `_` until Phase 4 screens consume them
+- `MainApp` renders a placeholder screen area and a functional emoji nav bar
+
+### Verification
+
+- `npx tsc --noEmit --skipLibCheck` — clean
+- `npx eslint ... --max-warnings=0` — clean
