@@ -127,10 +127,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
     flexShrink: 0,
+    flexGrow: 0,
   },
   tabsContent: {
     paddingHorizontal: Space.screen,
-    paddingTop: 16,
+    paddingTop: 10,
     gap: 4,
   },
   tab: {
@@ -138,7 +139,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     paddingHorizontal: 12,
-    paddingBottom: 12,
+    paddingBottom: 10,
     borderBottomWidth: 2,
     borderBottomColor: 'transparent',
     flexShrink: 0,
