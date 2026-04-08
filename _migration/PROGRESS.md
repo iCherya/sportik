@@ -162,3 +162,43 @@ This file tracks all completed migration work. Update it after every phase or si
 
 - `npx tsc --noEmit --skipLibCheck` — clean
 - `npx eslint src/overlays/ src/components/Overlay.tsx src/MainApp.tsx --max-warnings=0` — clean (after Prettier auto-fix)
+
+---
+
+## Phase 6 — Tools (15 components)
+
+**Date:** 2026-04-08 | **Status:** ✅ Complete
+
+### Phase 6 — Files created / modified
+
+| File | Description |
+| --- | --- |
+| `src/tools/PaceCalc.tsx` | Sport selector (run/bike/swim), h/m/s + distance inputs, pace + speed result, marathon equiv |
+| `src/tools/SpeedPace.tsx` | Bidirectional km/h ↔ min/km converter with bike time info rows |
+| `src/tools/PowerZones.tsx` | FTP input → 7 power zones (Z1–Z7), 'Max' label for neuromuscular zone |
+| `src/tools/HRZones.tsx` | Max HR / HR Reserve method selector, 5 zones with mini percentage bars |
+| `src/tools/RaceTimePredictor.tsx` | Known time + distance → Riegel formula predictions for 5K/10K/HM/Marathon presets |
+| `src/tools/NutritionCalc.tsx` | Duration + intensity → carbs/fluid/sodium/gels per hour |
+| `src/tools/SwolfCalc.tsx` | Pool selector, strokes + seconds → SWOLF score with Elite/Advanced/Intermediate/Developing rating |
+| `src/tools/WetsuitGuide.tsx` | Water temp → 6-tier wetsuit rule table (Danger/Required/Allowed/Optional/Banned/Too Hot) |
+| `src/tools/CalorieBurn.tsx` | Sport + weight + duration + intensity → kcal via MET table |
+| `src/tools/RaceSplitPlanner.tsx` | 4 triathlon distances + target time → 5 split rows (swim/T1/bike/T2/run) |
+| `src/tools/TransitionEstimator.tsx` | Experience level → T1/T2 time estimates + tips checklist |
+| `src/tools/TaperCalc.tsx` | Race type + weeks out → phase rows with swim/bike/run volume bar charts |
+| `src/tools/CadenceBeeper.tsx` | BPM metronome with expo-haptics tactile beat, +/−1/+/−5 buttons, presets, sport selector |
+| `src/tools/RaceChecklist.tsx` | Race type selector (tri/run/bike), grouped checklist with tap-to-check and progress bar |
+| `src/tools/PoolCounter.tsx` | Multi-swimmer lap counter with live timer, lap history table, pause/undo/reset, add-swimmer modal |
+| `src/overlays/ToolDetail.tsx` | `TOOL_BODIES` map wiring all 15 tool IDs to their JSX elements |
+
+### Phase 6 — Architecture notes
+
+- No `@react-native-community/slider` installed — `CadenceBeeper` uses +/−1/+/−5 `Pressable` buttons for BPM control; `expo-haptics` replaces Web Audio API oscillators
+- `PoolCounter` uses `_tick` (underscore-prefixed) for the 100ms display-ticker state to satisfy `@typescript-eslint/no-unused-vars` (only the setState call matters for re-renders)
+- `AppText` `style` prop accepts only flat `TextStyle`, not arrays — all tools use flat inline style objects
+- `CalorieBurn` includes an `'all'` entry in the METS record with fallback values so `Sports[sport]` indexing satisfies TypeScript without casts
+- All 15 tools have internal state only, no props — composed directly as JSX in the `TOOL_BODIES` constant
+
+### Phase 6 — Verification
+
+- `npx tsc --noEmit` — clean
+- `npx eslint src/tools/ src/overlays/ToolDetail.tsx --max-warnings=0` — clean (after Prettier auto-fix + removing unused `useRef` import in PoolCounter)

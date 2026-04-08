@@ -14,7 +14,7 @@ The app is being migrated from a web prototype (`_migration/sportik-full.jsx`) t
 | 3 | Shared UI components | ✅ Done |
 | 4 | Screens (Home, Tools, Events, Account) | ✅ Done |
 | 5 | Overlays | ✅ Done |
-| 6 | Tools (15 components) | ⏳ Pending |
+| 6 | Tools (15 components) | ✅ Done |
 | 7 | Onboarding | ⏳ Pending |
 | 8 | Persistence wiring | ⏳ Pending |
 
