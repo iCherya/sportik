@@ -5,6 +5,8 @@ import type { Lang } from '../src/context/LangContext';
 import { LangContext } from '../src/context/LangContext';
 import { ThemeContext } from '../src/context/ThemeContext';
 import { MainApp } from '../src/MainApp';
+import type { OBData } from '../src/onboarding/Onboarding';
+import { Onboarding } from '../src/onboarding/Onboarding';
 import { STORAGE_KEYS, Storage } from '../src/storage';
 import { Colors } from '../src/theme';
 import type { Profile } from '../src/types';
@@ -44,16 +46,30 @@ export default function Index() {
     });
   }, []);
 
-  // Auto-complete onboarding with defaults until Phase 7 builds the real flow
-  useEffect(() => {
-    if (!loading && !onboarded) {
-      Storage.set(STORAGE_KEYS.profile, DEFAULT_PROFILE);
-      Storage.set(STORAGE_KEYS.onboarded, true);
-      setOnboarded(true);
-    }
-  }, [loading, onboarded]);
+  const handleOnboardingComplete = (data: OBData) => {
+    const p: Profile = {
+      ...DEFAULT_PROFILE,
+      name: data.name || 'Athlete',
+      sports: data.sports,
+      raceType: data.raceType,
+      raceDate: data.raceDate,
+      maxHR: data.maxHR,
+      ftp: data.ftp,
+      hoursPerWeek: data.hoursPerWeek,
+    };
+    Storage.set(STORAGE_KEYS.profile, p);
+    Storage.set(STORAGE_KEYS.onboarded, true);
+    setProfile(p);
+    setOnboarded(true);
+  };
 
-  if (loading || !onboarded) {
+  const handleSkipAll = () => {
+    Storage.set(STORAGE_KEYS.profile, DEFAULT_PROFILE);
+    Storage.set(STORAGE_KEYS.onboarded, true);
+    setOnboarded(true);
+  };
+
+  if (loading) {
     return (
       <View
         style={{
@@ -64,6 +80,16 @@ export default function Index() {
         }}>
         <ActivityIndicator color={Colors.accent} />
       </View>
+    );
+  }
+
+  if (!onboarded) {
+    return (
+      <ThemeContext.Provider value={isDark}>
+        <LangContext.Provider value={lang}>
+          <Onboarding onComplete={handleOnboardingComplete} onSkipAll={handleSkipAll} />
+        </LangContext.Provider>
+      </ThemeContext.Provider>
     );
   }
 

@@ -202,3 +202,31 @@ This file tracks all completed migration work. Update it after every phase or si
 
 - `npx tsc --noEmit` — clean
 - `npx eslint src/tools/ src/overlays/ToolDetail.tsx --max-warnings=0` — clean (after Prettier auto-fix + removing unused `useRef` import in PoolCounter)
+
+---
+
+## Phase 7 — Onboarding
+
+**Date:** 2026-04-08 | **Status:** ✅ Complete
+
+### Phase 7 — Files created / modified
+
+| File | Description |
+| --- | --- |
+| `src/onboarding/Onboarding.tsx` | Full 6-step onboarding flow: Welcome → Sport Focus → Goal Race → Baseline → Training Hours → Ready |
+| `app/index.tsx` | Removed auto-complete placeholder; renders `<Onboarding>` when `!onboarded`; `handleOnboardingComplete` builds `Profile` and persists it |
+
+### Phase 7 — Architecture notes
+
+- Slide transitions use Reanimated `useSharedValue` + `withTiming` (320ms) via a keyed `SlideIn` wrapper — same pattern as `Overlay.tsx` but horizontal instead of vertical
+- No `@react-native-community/datetimepicker` — GoalRace uses a plain `TextInput` with `YYYY-MM-DD` placeholder for the race date
+- No range slider — TrainingHours uses +1/−1 `Pressable` buttons (min 3, max 20) plus 6 preset chips (3/5/8/12/16/20h)
+- `OBData` is exported from `Onboarding.tsx` so `app/index.tsx` can type the `handleOnboardingComplete` callback
+- `onSkipAll` writes the `DEFAULT_PROFILE` and sets `onboarded = true` without entering the flow
+- FTP card in Baseline is only shown when sports includes `'bike'` or `'tri'`
+- "Skip onboarding entirely" floating pill appears on steps 1–4 (not Welcome or Ready)
+
+### Phase 7 — Verification
+
+- `npx tsc --noEmit` — clean
+- `npx eslint src/onboarding/ app/index.tsx --max-warnings=0` — clean (after Prettier auto-fix)
