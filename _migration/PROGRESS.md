@@ -230,3 +230,32 @@ This file tracks all completed migration work. Update it after every phase or si
 
 - `npx tsc --noEmit` — clean
 - `npx eslint src/onboarding/ app/index.tsx --max-warnings=0` — clean (after Prettier auto-fix)
+
+---
+
+## Phase 8 — Persistence wiring
+
+**Date:** 2026-04-08 | **Status:** ✅ Complete
+
+### Phase 8 — Files modified
+
+| File | Change |
+| --- | --- |
+| `app/index.tsx` | Added `handleSetProfile` wrapper that calls `Storage.set(STORAGE_KEYS.profile, p)` before `setProfile(p)`; passed as `setProfile` prop to `MainApp` so all profile edits (EditProfileOverlay, etc.) are automatically persisted |
+| `src/overlays/PRDetail.tsx` | Replaced hardcoded `useState` history with `useEffect` load from `STORAGE_KEYS.prHistory` (keyed by `pr.label`) and `saveHistory` write on each new log entry |
+
+### Phase 8 — What was already wired (no changes needed)
+
+| State | Where persisted |
+| --- | --- |
+| `isDark` | `AccountScreen` — `Storage.set` in `handleToggleDark` |
+| `lang` | `AccountScreen` — `Storage.set` in `handleLangSelect` |
+| `favs` | `MainApp` — `useEffect` on change |
+| `personalEvents` | `MainApp` — `useEffect` on change |
+| `doneSessions` | `MainApp` — `useEffect` on change |
+| `profile` / `onboarded` | `app/index.tsx` — written on onboarding complete |
+
+### Phase 8 — Verification
+
+- `npx tsc --noEmit` — clean
+- `npx eslint src/overlays/PRDetail.tsx app/index.tsx --max-warnings=0` — clean

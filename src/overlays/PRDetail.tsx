@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
 import { Button } from '../components/Button';
 import { Overlay } from '../components/Overlay';
 import { useT } from '../i18n';
+import { STORAGE_KEYS, Storage } from '../storage';
 import { Colors, Sports, type SportKey } from '../theme';
 import type { PRData } from '../types';
 
@@ -26,9 +27,23 @@ export function PRDetail({ pr, onBack }: Props) {
   const [showLog, setShowLog] = useState(false);
   const [logTime, setLogTime] = useState('');
   const [logEvent, setLogEvent] = useState('');
-  const [history, setHistory] = useState<HistoryEntry[]>([
+  const defaultHistory: HistoryEntry[] = [
     { date: '2025-02-10', event: 'Training', time: pr.val, best: true },
-  ]);
+  ];
+  const [history, setHistory] = useState<HistoryEntry[]>(defaultHistory);
+
+  useEffect(() => {
+    Storage.get<Record<string, HistoryEntry[]>>(STORAGE_KEYS.prHistory).then((all) => {
+      const saved = all?.[pr.label];
+      if (saved && saved.length > 0) setHistory(saved);
+    });
+  }, [pr.label]);
+
+  const saveHistory = (next: HistoryEntry[]) => {
+    Storage.get<Record<string, HistoryEntry[]>>(STORAGE_KEYS.prHistory).then((all) => {
+      Storage.set(STORAGE_KEYS.prHistory, { ...all, [pr.label]: next });
+    });
+  };
 
   const handleLog = () => {
     if (!logTime.trim()) return;
@@ -38,7 +53,9 @@ export function PRDetail({ pr, onBack }: Props) {
       time: logTime.trim(),
       best: false,
     };
-    setHistory((h) => [newEntry, ...h]);
+    const next = [newEntry, ...history];
+    setHistory(next);
+    saveHistory(next);
     setLogTime('');
     setLogEvent('');
     setShowLog(false);

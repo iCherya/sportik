@@ -46,6 +46,11 @@ export default function Index() {
     });
   }, []);
 
+  const handleSetProfile = (p: Profile) => {
+    Storage.set(STORAGE_KEYS.profile, p);
+    setProfile(p);
+  };
+
   const handleOnboardingComplete = (data: OBData) => {
     const p: Profile = {
       ...DEFAULT_PROFILE,
@@ -102,7 +107,7 @@ export default function Index() {
           lang={lang}
           setLang={setLang}
           profile={profile}
-          setProfile={setProfile}
+          setProfile={handleSetProfile}
         />
       </LangContext.Provider>
     </ThemeContext.Provider>
