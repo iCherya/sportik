@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
@@ -9,7 +9,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Colors, Font } from '../theme';
+import { useColors } from '../context/ThemeContext';
+import { type ColorPalette, Font } from '../theme';
 import { AppText } from './AppText';
 
 type Props = {
@@ -20,8 +21,35 @@ type Props = {
   children: React.ReactNode;
 };
 
+const makeStyles = (c: ColorPalette) =>
+  StyleSheet.create({
+    container: {
+      backgroundColor: c.bg,
+      zIndex: 80,
+    },
+    header: {
+      paddingHorizontal: 20,
+      paddingBottom: 18,
+      borderBottomWidth: 1,
+      borderBottomColor: c.border,
+    },
+    back: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginBottom: 14,
+    },
+    body: {
+      flex: 1,
+      paddingHorizontal: 20,
+      paddingTop: 20,
+    },
+  });
+
 export function Overlay({ onBack, title, backLabel = 'Back', badge, children }: Props) {
   const insets = useSafeAreaInsets();
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const translateY = useSharedValue(800);
 
   useEffect(() => {
@@ -45,13 +73,12 @@ export function Overlay({ onBack, title, backLabel = 'Back', badge, children }: 
 
   return (
     <Animated.View style={[StyleSheet.absoluteFill, styles.container, animStyle]}>
-      {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <Pressable style={styles.back} onPress={handleBack}>
-          <AppText size={18} color={Colors.textMid}>
+          <AppText size={18} color={colors.textMid}>
             ←
           </AppText>
-          <AppText weight="medium" size={13} color={Colors.textMid}>
+          <AppText weight="medium" size={13} color={colors.textMid}>
             {backLabel}
           </AppText>
         </Pressable>
@@ -65,7 +92,6 @@ export function Overlay({ onBack, title, backLabel = 'Back', badge, children }: 
         </AppText>
       </View>
 
-      {/* Body */}
       <ScrollView
         style={styles.body}
         contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
@@ -75,27 +101,3 @@ export function Overlay({ onBack, title, backLabel = 'Back', badge, children }: 
     </Animated.View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: Colors.bg,
-    zIndex: 80,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingBottom: 18,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  back: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 14,
-  },
-  body: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
-});

@@ -1,6 +1,7 @@
 import { Text, type TextStyle } from 'react-native';
 
-import { Colors, Font } from '../theme';
+import { useColors } from '../context/ThemeContext';
+import { Font } from '../theme';
 
 type Weight = 'regular' | 'medium' | 'semibold' | 'bold' | 'extrabold' | 'black';
 
@@ -31,11 +32,12 @@ export function AppText({
   size = 14,
   weight = 'regular',
   condensed = false,
-  color = Colors.text,
+  color,
   style,
   numberOfLines,
   uppercase = false,
 }: Props) {
+  const colors = useColors();
   return (
     <Text
       numberOfLines={numberOfLines}
@@ -43,7 +45,7 @@ export function AppText({
         {
           fontFamily: resolveFont(condensed, weight),
           fontSize: size,
-          color,
+          color: color ?? colors.text,
           textTransform: uppercase ? 'uppercase' : undefined,
         },
         style,

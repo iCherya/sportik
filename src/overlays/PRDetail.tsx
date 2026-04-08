@@ -1,12 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
 import { Button } from '../components/Button';
 import { Overlay } from '../components/Overlay';
+import { useColors } from '../context/ThemeContext';
 import { useT } from '../i18n';
 import { STORAGE_KEYS, Storage } from '../storage';
-import { Colors, Sports, type SportKey } from '../theme';
+import { type ColorPalette, Sports, type SportKey } from '../theme';
 import type { PRData } from '../types';
 
 type HistoryEntry = {
@@ -21,8 +22,90 @@ type Props = {
   onBack: () => void;
 };
 
+const makeStyles = (c: ColorPalette) =>
+  StyleSheet.create({
+    hero: {
+      borderWidth: 1,
+      borderRadius: 18,
+      padding: 20,
+      alignItems: 'center',
+      marginBottom: 20,
+    },
+    emptyCard: {
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 16,
+      padding: 24,
+      paddingHorizontal: 20,
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    historyCard: {
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 16,
+      overflow: 'hidden',
+      marginBottom: 16,
+    },
+    historyRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+    },
+    logCard: {
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 18,
+      padding: 18,
+      marginBottom: 16,
+    },
+    logTimeInput: {
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderRadius: 12,
+      padding: 12,
+      fontFamily: 'BarlowCondensedBlack',
+      fontSize: 22,
+      color: c.text,
+      textAlign: 'center',
+      marginBottom: 12,
+    },
+    logEventInput: {
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 12,
+      padding: 12,
+      fontFamily: 'Barlow',
+      fontWeight: '500',
+      fontSize: 14,
+      color: c.text,
+      marginBottom: 14,
+    },
+    cancelBtn: {
+      flex: 1,
+      padding: 12,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: c.border,
+      alignItems: 'center',
+    },
+    saveBtn: {
+      flex: 2,
+      padding: 12,
+      borderRadius: 12,
+      alignItems: 'center',
+    },
+  });
+
 export function PRDetail({ pr, onBack }: Props) {
   const t = useT();
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const sport = Sports[pr.sport as SportKey];
   const [showLog, setShowLog] = useState(false);
   const [logTime, setLogTime] = useState('');
@@ -99,7 +182,7 @@ export function PRDetail({ pr, onBack }: Props) {
         <AppText condensed weight="black" size={48} color={sport.color}>
           {pr.val}
         </AppText>
-        <AppText size={12} color={Colors.textMid} style={{ marginTop: 4 }}>
+        <AppText size={12} color={colors.textMid} style={{ marginTop: 4 }}>
           Set on Feb 10, 2025 · Training
         </AppText>
       </View>
@@ -109,7 +192,7 @@ export function PRDetail({ pr, onBack }: Props) {
         condensed
         weight="bold"
         size={13}
-        color={Colors.textDim}
+        color={colors.textDim}
         uppercase
         style={{ letterSpacing: 2, marginBottom: 10 }}>
         {t('account_pr_history')}
@@ -125,11 +208,11 @@ export function PRDetail({ pr, onBack }: Props) {
             condensed
             weight="black"
             size={16}
-            color={Colors.textMid}
+            color={colors.textMid}
             style={{ marginBottom: 6 }}>
             {t('account_pr_only_one')}
           </AppText>
-          <AppText size={12} color={Colors.textDim} style={{ lineHeight: 18, textAlign: 'center' }}>
+          <AppText size={12} color={colors.textDim} style={{ lineHeight: 18, textAlign: 'center' }}>
             {t('account_pr_only_one_sub')}
           </AppText>
         </View>
@@ -142,7 +225,7 @@ export function PRDetail({ pr, onBack }: Props) {
                 styles.historyRow,
                 i < history.length - 1 && {
                   borderBottomWidth: 1,
-                  borderBottomColor: Colors.borderSub,
+                  borderBottomColor: colors.borderSub,
                 },
                 h.best && { backgroundColor: `${sport.color}08` },
               ]}>
@@ -150,7 +233,7 @@ export function PRDetail({ pr, onBack }: Props) {
                 <AppText weight="semibold" size={14}>
                   {h.event}
                 </AppText>
-                <AppText size={12} color={Colors.textMid} style={{ marginTop: 2 }}>
+                <AppText size={12} color={colors.textMid} style={{ marginTop: 2 }}>
                   {h.date}
                 </AppText>
               </View>
@@ -159,7 +242,7 @@ export function PRDetail({ pr, onBack }: Props) {
                   condensed
                   weight="black"
                   size={16}
-                  color={h.best ? sport.color : Colors.text}>
+                  color={h.best ? sport.color : colors.text}>
                   {h.time}
                 </AppText>
                 {h.best && (
@@ -191,7 +274,7 @@ export function PRDetail({ pr, onBack }: Props) {
             condensed
             weight="bold"
             size={11}
-            color={Colors.textDim}
+            color={colors.textDim}
             uppercase
             style={{ letterSpacing: 2, marginBottom: 6 }}>
             {t('account_log_time')}
@@ -200,14 +283,14 @@ export function PRDetail({ pr, onBack }: Props) {
             value={logTime}
             onChangeText={setLogTime}
             placeholder={pr.val}
-            placeholderTextColor={Colors.textDim}
-            style={[styles.logTimeInput, { borderColor: logTime ? sport.color : Colors.border }]}
+            placeholderTextColor={colors.textDim}
+            style={[styles.logTimeInput, { borderColor: logTime ? sport.color : colors.border }]}
           />
           <AppText
             condensed
             weight="bold"
             size={11}
-            color={Colors.textDim}
+            color={colors.textDim}
             uppercase
             style={{ letterSpacing: 2, marginBottom: 6 }}>
             {t('account_log_event')}
@@ -216,7 +299,7 @@ export function PRDetail({ pr, onBack }: Props) {
             value={logEvent}
             onChangeText={setLogEvent}
             placeholder={t('account_log_ph')}
-            placeholderTextColor={Colors.textDim}
+            placeholderTextColor={colors.textDim}
             style={styles.logEventInput}
           />
           <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -227,14 +310,17 @@ export function PRDetail({ pr, onBack }: Props) {
                 setLogTime('');
                 setLogEvent('');
               }}>
-              <AppText condensed weight="bold" size={14} color={Colors.textMid}>
+              <AppText condensed weight="bold" size={14} color={colors.textMid}>
                 {t('cancel')}
               </AppText>
             </Pressable>
             <Pressable
-              style={[styles.saveBtn, { backgroundColor: logTime ? Colors.accent : '#333' }]}
+              style={[
+                styles.saveBtn,
+                { backgroundColor: logTime ? colors.accent : colors.surface },
+              ]}
               onPress={handleLog}>
-              <AppText condensed weight="black" size={14} color={logTime ? '#000' : Colors.textDim}>
+              <AppText condensed weight="black" size={14} color={logTime ? '#000' : colors.textDim}>
                 {t('account_save_result')}
               </AppText>
             </Pressable>
@@ -251,82 +337,3 @@ export function PRDetail({ pr, onBack }: Props) {
     </Overlay>
   );
 }
-
-const styles = StyleSheet.create({
-  hero: {
-    borderWidth: 1,
-    borderRadius: 18,
-    padding: 20,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  emptyCard: {
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 16,
-    padding: 24,
-    paddingHorizontal: 20,
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  historyCard: {
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 16,
-    overflow: 'hidden',
-    marginBottom: 16,
-  },
-  historyRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-  },
-  logCard: {
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 18,
-    padding: 18,
-    marginBottom: 16,
-  },
-  logTimeInput: {
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 12,
-    fontFamily: 'BarlowCondensedBlack',
-    fontSize: 22,
-    color: Colors.text,
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  logEventInput: {
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    padding: 12,
-    fontFamily: 'Barlow',
-    fontWeight: '500',
-    fontSize: 14,
-    color: Colors.text,
-    marginBottom: 14,
-  },
-  cancelBtn: {
-    flex: 1,
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    alignItems: 'center',
-  },
-  saveBtn: {
-    flex: 2,
-    padding: 12,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-});

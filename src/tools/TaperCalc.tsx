@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
-import { Colors } from '../theme';
+import { useColors } from '../context/ThemeContext';
+import { type ColorPalette, Sports } from '../theme';
 
 type RaceType = 'sprint' | 'olympic' | '70.3' | 'ironman';
 
@@ -57,12 +58,75 @@ const RACE_OPTIONS: { id: RaceType; l: string }[] = [
 ];
 
 const BARS: { k: 'swim' | 'bike' | 'run'; c: string; l: string; key: keyof WeekPlan }[] = [
-  { k: 'swim', c: Colors.swim, l: 'Swim', key: 's' },
-  { k: 'bike', c: Colors.bike, l: 'Bike', key: 'b' },
-  { k: 'run', c: Colors.run, l: 'Run', key: 'r' },
+  { k: 'swim', c: Sports.swim.color, l: 'Swim', key: 's' },
+  { k: 'bike', c: Sports.bike.color, l: 'Bike', key: 'b' },
+  { k: 'run', c: Sports.run.color, l: 'Run', key: 'r' },
 ];
 
+const makeStyles = (c: ColorPalette) =>
+  StyleSheet.create({
+    segGroup: { flexDirection: 'row', gap: 6, marginBottom: 12 },
+    segBtn: {
+      flex: 1,
+      paddingVertical: 8,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.card,
+      alignItems: 'center',
+    },
+    field: { marginBottom: 14 },
+    fieldLabel: { letterSpacing: 2, marginBottom: 6 },
+    inputRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    input: {
+      flex: 1,
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 12,
+      padding: 14,
+      fontFamily: 'BarlowCondensedBlack',
+      fontSize: 24,
+      color: c.text,
+      textAlign: 'center',
+    },
+    unit: {
+      paddingHorizontal: 10,
+      paddingVertical: 12,
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 10,
+    },
+    weekCard: {
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 14,
+      padding: 14,
+    },
+    weekHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 10,
+    },
+    barGroup: { flexDirection: 'row', gap: 8, height: 60 },
+    barCol: { flex: 1, alignItems: 'center' },
+    barTrack: {
+      flex: 1,
+      width: '100%',
+      backgroundColor: c.surface,
+      borderRadius: 4,
+      overflow: 'hidden',
+      justifyContent: 'flex-end',
+    },
+    barFill: { width: '100%', borderRadius: 4 },
+  });
+
 export function TaperCalc() {
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [raceType, setRaceType] = useState<RaceType>('olympic');
   const [weeksOut, setWeeksOut] = useState('8');
 
@@ -88,10 +152,16 @@ export function TaperCalc() {
               key={r.id}
               style={[
                 styles.segBtn,
-                active && { borderColor: Colors.tri, backgroundColor: `${Colors.tri}18` },
+                active && {
+                  borderColor: Sports.tri.color,
+                  backgroundColor: `${Sports.tri.color}18`,
+                },
               ]}
               onPress={() => setRaceType(r.id)}>
-              <AppText size={12} weight="semibold" color={active ? Colors.tri : Colors.textMid}>
+              <AppText
+                size={12}
+                weight="semibold"
+                color={active ? Sports.tri.color : colors.textMid}>
                 {r.l}
               </AppText>
             </Pressable>
@@ -105,7 +175,7 @@ export function TaperCalc() {
           condensed
           weight="bold"
           size={11}
-          color={Colors.textDim}
+          color={colors.textDim}
           uppercase>
           Weeks to Race
         </AppText>
@@ -114,12 +184,12 @@ export function TaperCalc() {
             value={weeksOut}
             onChangeText={setWeeksOut}
             placeholder="8"
-            placeholderTextColor={Colors.textDim}
+            placeholderTextColor={colors.textDim}
             keyboardType="numeric"
             style={styles.input}
           />
           <View style={styles.unit}>
-            <AppText size={12} color={Colors.textMid}>
+            <AppText size={12} color={colors.textMid}>
               weeks
             </AppText>
           </View>
@@ -133,23 +203,23 @@ export function TaperCalc() {
             style={[
               styles.weekCard,
               p.isRace && {
-                borderColor: `${Colors.accent}66`,
-                backgroundColor: `${Colors.accent}08`,
+                borderColor: `${colors.accent}66`,
+                backgroundColor: `${colors.accent}08`,
               },
-              p.isTaper && !p.isRace && { borderColor: `${Colors.tri}44` },
+              p.isTaper && !p.isRace && { borderColor: `${Sports.tri.color}44` },
             ]}>
             <View style={styles.weekHeader}>
               <AppText
                 condensed
                 weight="bold"
                 size={14}
-                color={p.isRace ? Colors.accent : Colors.text}>
+                color={p.isRace ? colors.accent : colors.text}>
                 {p.label}
               </AppText>
               <AppText
                 size={13}
                 weight="semibold"
-                color={p.isRace ? Colors.accent : p.isTaper ? Colors.tri : Colors.textMid}>
+                color={p.isRace ? colors.accent : p.isTaper ? Sports.tri.color : colors.textMid}>
                 {p.isRace ? '🏁 Race Day' : `${p.s}% volume`}
               </AppText>
             </View>
@@ -181,69 +251,9 @@ export function TaperCalc() {
         ))}
       </View>
 
-      <AppText size={11} color={Colors.textDim} style={{ textAlign: 'center', marginTop: 12 }}>
+      <AppText size={11} color={colors.textDim} style={{ textAlign: 'center', marginTop: 12 }}>
         Reduce volume, not intensity.
       </AppText>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  segGroup: { flexDirection: 'row', gap: 6, marginBottom: 12 },
-  segBtn: {
-    flex: 1,
-    paddingVertical: 8,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.card,
-    alignItems: 'center',
-  },
-  field: { marginBottom: 14 },
-  fieldLabel: { letterSpacing: 2, marginBottom: 6 },
-  inputRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  input: {
-    flex: 1,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    padding: 14,
-    fontFamily: 'BarlowCondensedBlack',
-    fontSize: 24,
-    color: Colors.text,
-    textAlign: 'center',
-  },
-  unit: {
-    paddingHorizontal: 10,
-    paddingVertical: 12,
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 10,
-  },
-  weekCard: {
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 14,
-    padding: 14,
-  },
-  weekHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  barGroup: { flexDirection: 'row', gap: 8, height: 60 },
-  barCol: { flex: 1, alignItems: 'center' },
-  barTrack: {
-    flex: 1,
-    width: '100%',
-    backgroundColor: Colors.surface,
-    borderRadius: 4,
-    overflow: 'hidden',
-    justifyContent: 'flex-end',
-  },
-  barFill: { width: '100%', borderRadius: 4 },
-});

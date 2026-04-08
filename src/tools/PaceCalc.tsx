@@ -1,12 +1,75 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
-import { Colors, Sports, type SportKey } from '../theme';
+import { useColors } from '../context/ThemeContext';
+import { type ColorPalette, Sports, type SportKey } from '../theme';
 
 const SPORTS: SportKey[] = ['run', 'bike', 'swim'];
 
+const makeStyles = (c: ColorPalette) =>
+  StyleSheet.create({
+    segGroup: { flexDirection: 'row', gap: 8, marginBottom: 16 },
+    segBtn: {
+      flex: 1,
+      paddingVertical: 9,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.card,
+      alignItems: 'center',
+    },
+    field: { marginBottom: 14 },
+    fieldLabel: { letterSpacing: 2, marginBottom: 6 },
+    inputRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    input: {
+      flex: 1,
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 12,
+      padding: 14,
+      fontFamily: 'BarlowCondensedBlack',
+      fontSize: 24,
+      color: c.text,
+      textAlign: 'center',
+    },
+    unit: {
+      paddingHorizontal: 10,
+      paddingVertical: 12,
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 10,
+    },
+    resultBox: {
+      borderWidth: 1,
+      borderRadius: 18,
+      padding: 20,
+      alignItems: 'center',
+      marginBottom: 14,
+    },
+    infoBox: {
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 14,
+      overflow: 'hidden',
+    },
+    infoRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: c.borderSub,
+    },
+  });
+
 export function PaceCalc() {
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [h, setH] = useState('0');
   const [m, setM] = useState('45');
   const [s, setS] = useState('00');
@@ -51,7 +114,7 @@ export function PaceCalc() {
               <AppText
                 size={13}
                 weight="semibold"
-                color={active ? Sports[id].color : Colors.textMid}>
+                color={active ? Sports[id].color : colors.textMid}>
                 {Sports[id].icon} {Sports[id].label}
               </AppText>
             </Pressable>
@@ -66,7 +129,7 @@ export function PaceCalc() {
           condensed
           weight="bold"
           size={11}
-          color={Colors.textDim}
+          color={colors.textDim}
           uppercase>
           Target Time
         </AppText>
@@ -75,12 +138,12 @@ export function PaceCalc() {
             value={h}
             onChangeText={setH}
             placeholder="0"
-            placeholderTextColor={Colors.textDim}
+            placeholderTextColor={colors.textDim}
             keyboardType="numeric"
             style={[styles.input, { flex: 1 }]}
           />
           <View style={styles.unit}>
-            <AppText size={12} color={Colors.textMid}>
+            <AppText size={12} color={colors.textMid}>
               h
             </AppText>
           </View>
@@ -88,12 +151,12 @@ export function PaceCalc() {
             value={m}
             onChangeText={setM}
             placeholder="45"
-            placeholderTextColor={Colors.textDim}
+            placeholderTextColor={colors.textDim}
             keyboardType="numeric"
             style={[styles.input, { flex: 1 }]}
           />
           <View style={styles.unit}>
-            <AppText size={12} color={Colors.textMid}>
+            <AppText size={12} color={colors.textMid}>
               m
             </AppText>
           </View>
@@ -101,12 +164,12 @@ export function PaceCalc() {
             value={s}
             onChangeText={setS}
             placeholder="00"
-            placeholderTextColor={Colors.textDim}
+            placeholderTextColor={colors.textDim}
             keyboardType="numeric"
             style={[styles.input, { flex: 1 }]}
           />
           <View style={styles.unit}>
-            <AppText size={12} color={Colors.textMid}>
+            <AppText size={12} color={colors.textMid}>
               s
             </AppText>
           </View>
@@ -120,7 +183,7 @@ export function PaceCalc() {
           condensed
           weight="bold"
           size={11}
-          color={Colors.textDim}
+          color={colors.textDim}
           uppercase>
           Distance
         </AppText>
@@ -129,12 +192,12 @@ export function PaceCalc() {
             value={dist}
             onChangeText={setDist}
             placeholder="10"
-            placeholderTextColor={Colors.textDim}
+            placeholderTextColor={colors.textDim}
             keyboardType="decimal-pad"
             style={styles.input}
           />
           <View style={styles.unit}>
-            <AppText size={12} color={Colors.textMid}>
+            <AppText size={12} color={colors.textMid}>
               {sport === 'swim' ? '×100m' : 'km'}
             </AppText>
           </View>
@@ -155,7 +218,7 @@ export function PaceCalc() {
         <AppText condensed weight="black" size={52} color={sp.color}>
           {pace}
         </AppText>
-        <AppText size={13} color={Colors.textMid} style={{ marginTop: 2 }}>
+        <AppText size={13} color={colors.textMid} style={{ marginTop: 2 }}>
           min / {sport === 'swim' ? '100m' : 'km'}
         </AppText>
       </View>
@@ -167,7 +230,7 @@ export function PaceCalc() {
           ['Marathon equiv', marathonEquiv],
         ].map(([l, v]) => (
           <View key={l} style={styles.infoRow}>
-            <AppText size={13} color={Colors.textMid}>
+            <AppText size={13} color={colors.textMid}>
               {l}
             </AppText>
             <AppText condensed weight="bold" size={14}>
@@ -179,62 +242,3 @@ export function PaceCalc() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  segGroup: { flexDirection: 'row', gap: 8, marginBottom: 16 },
-  segBtn: {
-    flex: 1,
-    paddingVertical: 9,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.card,
-    alignItems: 'center',
-  },
-  field: { marginBottom: 14 },
-  fieldLabel: { letterSpacing: 2, marginBottom: 6 },
-  inputRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  input: {
-    flex: 1,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    padding: 14,
-    fontFamily: 'BarlowCondensedBlack',
-    fontSize: 24,
-    color: Colors.text,
-    textAlign: 'center',
-  },
-  unit: {
-    paddingHorizontal: 10,
-    paddingVertical: 12,
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 10,
-  },
-  resultBox: {
-    borderWidth: 1,
-    borderRadius: 18,
-    padding: 20,
-    alignItems: 'center',
-    marginBottom: 14,
-  },
-  infoBox: {
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 14,
-    overflow: 'hidden',
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderSub,
-  },
-});

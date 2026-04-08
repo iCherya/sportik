@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
@@ -8,9 +8,10 @@ import { Row } from '../components/Row';
 import { Sheet } from '../components/Sheet';
 import { Toggle } from '../components/Toggle';
 import type { Lang } from '../context/LangContext';
+import { useColors } from '../context/ThemeContext';
 import { useT } from '../i18n';
 import { STORAGE_KEYS, Storage } from '../storage';
-import { Colors, Font, Space, Sports } from '../theme';
+import { type ColorPalette, Font, Space, Sports } from '../theme';
 import type { OverlayType, Profile } from '../types';
 
 type Props = {
@@ -35,7 +36,168 @@ type SheetId =
   | 'logout'
   | null;
 
-// ─── PickerRow ───────────────────────────────────────────────────────────────
+const PR_DATA = [
+  { sport: 'swim' as const, icon: '🏊', val: '28:42', label: '1.5km Swim' },
+  { sport: 'bike' as const, icon: '🚴', val: '1:02h', label: '40km Bike' },
+  { sport: 'run' as const, icon: '🏃', val: '42:10', label: '10km Run' },
+  { sport: 'tri' as const, icon: '🔱', val: '4:38h', label: 'Olympic Tri' },
+];
+
+const makeStyles = (c: ColorPalette) =>
+  StyleSheet.create({
+    scroll: { flex: 1, backgroundColor: c.bg },
+    content: { paddingBottom: 20 },
+    hero: {
+      backgroundColor: c.surface,
+      borderBottomWidth: 1,
+      borderBottomColor: c.border,
+      padding: Space.screen,
+      marginBottom: 20,
+    },
+    heroTop: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    editBtn: {
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 10,
+      paddingHorizontal: 14,
+      paddingVertical: 6,
+    },
+    avatarRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+    avatarWrap: { position: 'relative', flexShrink: 0 },
+    proBadge: {
+      position: 'absolute',
+      bottom: -4,
+      right: -4,
+      backgroundColor: c.accent,
+      borderRadius: 6,
+      paddingHorizontal: 5,
+      paddingVertical: 2,
+    },
+    prRow: { flexDirection: 'row', gap: 8, marginTop: 18 },
+    prBox: {
+      flex: 1,
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 14,
+      padding: 10,
+      alignItems: 'center',
+    },
+    group: { marginHorizontal: Space.screen, marginBottom: 16 },
+    groupLabel: { marginBottom: 8, letterSpacing: 1 },
+    groupItems: {
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: Space.radius.card,
+      overflow: 'hidden',
+    },
+    rowRight: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    logoutBtn: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: 10,
+      marginHorizontal: Space.screen,
+      marginTop: 8,
+      paddingVertical: 16,
+      borderRadius: Space.radius.md,
+      borderWidth: 1,
+      borderColor: `${c.heart}44`,
+      backgroundColor: `${c.heart}0a`,
+    },
+    pickerRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 14,
+      paddingHorizontal: 4,
+      borderBottomWidth: 1,
+      borderBottomColor: c.borderSub,
+    },
+    langRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 14,
+      paddingVertical: 18,
+      paddingHorizontal: 4,
+      borderBottomWidth: 1,
+      borderBottomColor: c.borderSub,
+    },
+    langRowActive: { backgroundColor: `${c.accent}0a` },
+    radioCircle: {
+      width: 22,
+      height: 22,
+      borderRadius: 11,
+      borderWidth: 2,
+      borderColor: c.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    radioCircleActive: { backgroundColor: c.accent, borderColor: c.accent },
+    unitsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 16,
+      paddingHorizontal: 4,
+      borderBottomWidth: 1,
+      borderBottomColor: c.borderSub,
+      gap: 14,
+    },
+    hrMethodRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      paddingVertical: 14,
+      paddingHorizontal: 4,
+      borderBottomWidth: 1,
+      borderBottomColor: c.borderSub,
+      gap: 14,
+    },
+    textarea: {
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 14,
+      padding: 14,
+      fontFamily: 'Barlow',
+      fontSize: 14,
+      color: c.text,
+      height: 120,
+      textAlignVertical: 'top',
+      marginBottom: 14,
+    },
+    starsRow: { flexDirection: 'row', justifyContent: 'center', gap: 12, marginBottom: 16 },
+    logoutButtons: { flexDirection: 'row', gap: 10 },
+    cancelBtn: {
+      flex: 1,
+      padding: 16,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.card,
+      alignItems: 'center',
+    },
+    confirmLogoutBtn: {
+      flex: 1,
+      padding: 16,
+      borderRadius: 16,
+      backgroundColor: c.heart,
+      alignItems: 'center',
+    },
+    loggedOutScreen: {
+      flex: 1,
+      backgroundColor: c.bg,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 40,
+    },
+  });
 
 function PickerRow({
   label,
@@ -46,32 +208,25 @@ function PickerRow({
   selected: boolean;
   onSelect: () => void;
 }) {
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <Pressable style={styles.pickerRow} onPress={onSelect}>
       <AppText
         weight="medium"
         size={14}
-        color={selected ? Colors.text : Colors.textMid}
+        color={selected ? colors.text : colors.textMid}
         style={{ flex: 1 }}>
         {label}
       </AppText>
       {selected && (
-        <AppText size={18} color={Colors.accent}>
+        <AppText size={18} color={colors.accent}>
           ✓
         </AppText>
       )}
     </Pressable>
   );
 }
-
-// ─── AccountScreen ───────────────────────────────────────────────────────────
-
-const PR_DATA = [
-  { sport: 'swim' as const, icon: '🏊', val: '28:42', label: '1.5km Swim' },
-  { sport: 'bike' as const, icon: '🚴', val: '1:02h', label: '40km Bike' },
-  { sport: 'run' as const, icon: '🏃', val: '42:10', label: '10km Run' },
-  { sport: 'tri' as const, icon: '🔱', val: '4:38h', label: 'Olympic Tri' },
-];
 
 export function AccountScreen({
   setOverlay,
@@ -83,6 +238,8 @@ export function AccountScreen({
   setLang,
 }: Props) {
   const t = useT();
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [notif, setNotif] = useState(true);
   const [ftp, setFtp] = useState(profile.ftp || '245');
   const [maxHR, setMaxHR] = useState(profile.maxHR || '185');
@@ -123,7 +280,7 @@ export function AccountScreen({
           style={{ textAlign: 'center', marginBottom: 8 }}>
           {t('account_logged_out')}
         </AppText>
-        <AppText size={13} color={Colors.textMid} style={{ textAlign: 'center', marginBottom: 24 }}>
+        <AppText size={13} color={colors.textMid} style={{ textAlign: 'center', marginBottom: 24 }}>
           {t('account_logged_out_sub')}
         </AppText>
         <Button
@@ -158,13 +315,12 @@ export function AccountScreen({
             <AppText
               weight="semibold"
               size={12}
-              color={Colors.accent}
+              color={colors.accent}
               style={{ letterSpacing: 0.5 }}>
               {t('account_edit')}
             </AppText>
           </Pressable>
         </View>
-
         <View style={styles.avatarRow}>
           <View style={styles.avatarWrap}>
             <AppText size={40}>{profile.avatar}</AppText>
@@ -173,7 +329,7 @@ export function AccountScreen({
                 condensed
                 weight="black"
                 size={9}
-                color={Colors.bg}
+                color={colors.bg}
                 uppercase
                 style={{ letterSpacing: 0.5 }}>
                 PRO
@@ -184,18 +340,16 @@ export function AccountScreen({
             <AppText condensed weight="black" size={24} style={{ lineHeight: 28 }}>
               {profile.name}
             </AppText>
-            <AppText weight="medium" size={13} color={Colors.textMid} style={{ marginTop: 2 }}>
+            <AppText weight="medium" size={13} color={colors.textMid} style={{ marginTop: 2 }}>
               {profile.focus} · {profile.city} 🇺🇦
             </AppText>
-            <AppText size={12} color={Colors.textDim} style={{ marginTop: 4 }}>
+            <AppText size={12} color={colors.textDim} style={{ marginTop: 4 }}>
               {profile.raceType
                 ? `${t('account_goal_label')}: ${profile.raceType} · ${t('account_active_plan')}`
                 : t('account_no_plan')}
             </AppText>
           </View>
         </View>
-
-        {/* PR boxes */}
         <View style={styles.prRow}>
           {PR_DATA.map((p) => (
             <Pressable
@@ -215,7 +369,7 @@ export function AccountScreen({
               </AppText>
               <AppText
                 size={9}
-                color={Colors.textDim}
+                color={colors.textDim}
                 style={{ textAlign: 'center', marginTop: 2 }}>
                 {p.label}
               </AppText>
@@ -229,7 +383,7 @@ export function AccountScreen({
         <AppText
           weight="semibold"
           size={11}
-          color={Colors.textDim}
+          color={colors.textDim}
           uppercase
           style={styles.groupLabel}>
           {t('account_training')}
@@ -241,10 +395,10 @@ export function AccountScreen({
             label={t('account_ftp')}
             right={
               <View style={styles.rowRight}>
-                <AppText weight="semibold" size={13} color={Colors.textMid}>
+                <AppText weight="semibold" size={13} color={colors.textMid}>
                   {ftp} W
                 </AppText>
-                <AppText size={14} color={Colors.textDim}>
+                <AppText size={14} color={colors.textDim}>
                   ›
                 </AppText>
               </View>
@@ -257,10 +411,10 @@ export function AccountScreen({
             label={t('account_maxhr')}
             right={
               <View style={styles.rowRight}>
-                <AppText weight="semibold" size={13} color={Colors.textMid}>
+                <AppText weight="semibold" size={13} color={colors.textMid}>
                   {maxHR} bpm
                 </AppText>
-                <AppText size={14} color={Colors.textDim}>
+                <AppText size={14} color={colors.textDim}>
                   ›
                 </AppText>
               </View>
@@ -288,12 +442,12 @@ export function AccountScreen({
                 <AppText
                   weight="semibold"
                   size={13}
-                  color={Colors.textMid}
+                  color={colors.textMid}
                   numberOfLines={1}
                   style={{ maxWidth: 100 }}>
                   {goal}
                 </AppText>
-                <AppText size={14} color={Colors.textDim}>
+                <AppText size={14} color={colors.textDim}>
                   ›
                 </AppText>
               </View>
@@ -308,7 +462,7 @@ export function AccountScreen({
         <AppText
           weight="semibold"
           size={11}
-          color={Colors.textDim}
+          color={colors.textDim}
           uppercase
           style={styles.groupLabel}>
           {t('account_prefs')}
@@ -332,10 +486,10 @@ export function AccountScreen({
             label={t('account_units')}
             right={
               <View style={styles.rowRight}>
-                <AppText weight="semibold" size={13} color={Colors.textMid}>
+                <AppText weight="semibold" size={13} color={colors.textMid}>
                   {units === 'km' ? 'km · kg · °C' : 'mi · lb · °F'}
                 </AppText>
-                <AppText size={14} color={Colors.textDim}>
+                <AppText size={14} color={colors.textDim}>
                   ›
                 </AppText>
               </View>
@@ -351,12 +505,12 @@ export function AccountScreen({
                 <AppText
                   weight="semibold"
                   size={13}
-                  color={Colors.textMid}
+                  color={colors.textMid}
                   numberOfLines={1}
                   style={{ maxWidth: 120 }}>
                   {hrMethod}
                 </AppText>
-                <AppText size={14} color={Colors.textDim}>
+                <AppText size={14} color={colors.textDim}>
                   ›
                 </AppText>
               </View>
@@ -371,7 +525,7 @@ export function AccountScreen({
         <AppText
           weight="semibold"
           size={11}
-          color={Colors.textDim}
+          color={colors.textDim}
           uppercase
           style={styles.groupLabel}>
           {t('account_app')}
@@ -382,7 +536,7 @@ export function AccountScreen({
             iconBg="#1a1200"
             label={t('account_suggest')}
             right={
-              <AppText size={14} color={Colors.textDim}>
+              <AppText size={14} color={colors.textDim}>
                 ›
               </AppText>
             }
@@ -397,7 +551,7 @@ export function AccountScreen({
             iconBg="#1a1500"
             label={t('account_rate')}
             right={
-              <AppText size={14} color={Colors.textDim}>
+              <AppText size={14} color={colors.textDim}>
                 ›
               </AppText>
             }
@@ -413,10 +567,10 @@ export function AccountScreen({
             label={t('lang_title')}
             right={
               <View style={styles.rowRight}>
-                <AppText weight="semibold" size={13} color={Colors.textMid}>
+                <AppText weight="semibold" size={13} color={colors.textMid}>
                   {lang === 'uk' ? '🇺🇦 UA' : '🇬🇧 EN'}
                 </AppText>
-                <AppText size={14} color={Colors.textDim}>
+                <AppText size={14} color={colors.textDim}>
                   ›
                 </AppText>
               </View>
@@ -429,10 +583,10 @@ export function AccountScreen({
             label={t('account_about')}
             right={
               <View style={styles.rowRight}>
-                <AppText weight="semibold" size={13} color={Colors.textMid}>
+                <AppText weight="semibold" size={13} color={colors.textMid}>
                   v1.0.0
                 </AppText>
-                <AppText size={14} color={Colors.textDim}>
+                <AppText size={14} color={colors.textDim}>
                   ›
                 </AppText>
               </View>
@@ -442,18 +596,15 @@ export function AccountScreen({
         </View>
       </View>
 
-      {/* Log Out */}
       <Pressable style={styles.logoutBtn} onPress={() => setSheet('logout')}>
         <AppText size={18}>🚪</AppText>
-        <AppText weight="semibold" size={14} color={Colors.heart}>
+        <AppText weight="semibold" size={14} color={colors.heart}>
           {t('account_logout')}
         </AppText>
       </Pressable>
       <View style={{ height: 8 }} />
 
-      {/* ── Sheets ────────────────────────────────────────────── */}
-
-      {/* FTP */}
+      {/* FTP Sheet */}
       {sheet === 'ftp' && (
         <Sheet onClose={closeSheet} title={t('ftp_title')}>
           <NumberInput
@@ -473,7 +624,7 @@ export function AccountScreen({
         </Sheet>
       )}
 
-      {/* Language */}
+      {/* Language Sheet */}
       {sheet === 'lang' && (
         <Sheet onClose={closeSheet} title={t('lang_title')}>
           {[
@@ -489,14 +640,14 @@ export function AccountScreen({
                 <AppText
                   weight="semibold"
                   size={15}
-                  color={lang === l.id ? Colors.text : Colors.textMid}>
+                  color={lang === l.id ? colors.text : colors.textMid}>
                   {l.label}
                 </AppText>
                 {lang === l.id && (
                   <AppText
                     weight="semibold"
                     size={11}
-                    color={Colors.accent}
+                    color={colors.accent}
                     style={{ marginTop: 2 }}>
                     ✓ Active
                   </AppText>
@@ -504,7 +655,7 @@ export function AccountScreen({
               </View>
               <View style={[styles.radioCircle, lang === l.id && styles.radioCircleActive]}>
                 {lang === l.id && (
-                  <AppText size={12} color={Colors.bg} style={{ fontFamily: Font.condensedBlack }}>
+                  <AppText size={12} color={colors.bg} style={{ fontFamily: Font.condensedBlack }}>
                     ✓
                   </AppText>
                 )}
@@ -513,12 +664,12 @@ export function AccountScreen({
           ))}
           <AppText
             size={12}
-            color={Colors.textDim}
+            color={colors.textDim}
             style={{
               marginTop: 14,
               lineHeight: 18,
               borderTopWidth: 1,
-              borderTopColor: Colors.borderSub,
+              borderTopColor: colors.borderSub,
               paddingTop: 12,
             }}>
             🌐 {'Changing language updates all screens instantly.'}
@@ -526,7 +677,7 @@ export function AccountScreen({
         </Sheet>
       )}
 
-      {/* Season Goal */}
+      {/* Goal Sheet */}
       {sheet === 'goal' && (
         <Sheet onClose={closeSheet} title={t('goal_title')}>
           {[
@@ -552,10 +703,10 @@ export function AccountScreen({
         </Sheet>
       )}
 
-      {/* Units */}
+      {/* Units Sheet */}
       {sheet === 'units' && (
         <Sheet onClose={closeSheet} title={t('units_title')}>
-          <AppText size={13} color={Colors.textMid} style={{ marginBottom: 16, lineHeight: 19 }}>
+          <AppText size={13} color={colors.textMid} style={{ marginBottom: 16, lineHeight: 19 }}>
             {t('units_sub')}
           </AppText>
           {[
@@ -573,15 +724,15 @@ export function AccountScreen({
                 <AppText
                   weight="semibold"
                   size={15}
-                  color={units === u.id ? Colors.text : Colors.textMid}>
+                  color={units === u.id ? colors.text : colors.textMid}>
                   {u.label}
                 </AppText>
-                <AppText size={12} color={Colors.textDim} style={{ marginTop: 2 }}>
+                <AppText size={12} color={colors.textDim} style={{ marginTop: 2 }}>
                   {u.sub}
                 </AppText>
               </View>
               {units === u.id && (
-                <AppText size={18} color={Colors.accent}>
+                <AppText size={18} color={colors.accent}>
                   ✓
                 </AppText>
               )}
@@ -590,10 +741,10 @@ export function AccountScreen({
         </Sheet>
       )}
 
-      {/* HR Method */}
+      {/* HR Method Sheet */}
       {sheet === 'hrmethod' && (
         <Sheet onClose={closeSheet} title={t('hrmethod_title')}>
-          <AppText size={13} color={Colors.textMid} style={{ marginBottom: 16, lineHeight: 19 }}>
+          <AppText size={13} color={colors.textMid} style={{ marginBottom: 16, lineHeight: 19 }}>
             {t('hrmethod_sub')}
           </AppText>
           {[
@@ -612,15 +763,15 @@ export function AccountScreen({
                 <AppText
                   weight="semibold"
                   size={14}
-                  color={hrMethod === m.id ? Colors.text : Colors.textMid}>
+                  color={hrMethod === m.id ? colors.text : colors.textMid}>
                   {m.label}
                 </AppText>
-                <AppText size={12} color={Colors.textDim} style={{ marginTop: 3, lineHeight: 17 }}>
+                <AppText size={12} color={colors.textDim} style={{ marginTop: 3, lineHeight: 17 }}>
                   {m.sub}
                 </AppText>
               </View>
               {hrMethod === m.id && (
-                <AppText size={18} color={Colors.accent} style={{ marginTop: 2 }}>
+                <AppText size={18} color={colors.accent} style={{ marginTop: 2 }}>
                   ✓
                 </AppText>
               )}
@@ -629,7 +780,7 @@ export function AccountScreen({
         </Sheet>
       )}
 
-      {/* Suggest a Feature */}
+      {/* Suggest Sheet */}
       {sheet === 'suggest' && (
         <Sheet onClose={closeSheet} title={t('suggest_title')}>
           {suggestSent ? (
@@ -642,7 +793,7 @@ export function AccountScreen({
               </AppText>
               <AppText
                 size={13}
-                color={Colors.textMid}
+                color={colors.textMid}
                 style={{ lineHeight: 20, marginBottom: 24, textAlign: 'center' }}>
                 {t('suggest_sent_sub')}
               </AppText>
@@ -652,7 +803,7 @@ export function AccountScreen({
             <>
               <AppText
                 size={13}
-                color={Colors.textMid}
+                color={colors.textMid}
                 style={{ marginBottom: 14, lineHeight: 19 }}>
                 {t('suggest_sub')}
               </AppText>
@@ -660,7 +811,7 @@ export function AccountScreen({
                 value={suggestText}
                 onChangeText={setSuggestText}
                 placeholder={t('suggest_ph')}
-                placeholderTextColor={Colors.textDim}
+                placeholderTextColor={colors.textDim}
                 multiline
                 numberOfLines={4}
                 style={styles.textarea}
@@ -677,7 +828,7 @@ export function AccountScreen({
         </Sheet>
       )}
 
-      {/* Rate Sportik */}
+      {/* Rate Sheet */}
       {sheet === 'rate' && (
         <Sheet onClose={closeSheet} title={t('rate_title')}>
           {rated ? (
@@ -690,7 +841,7 @@ export function AccountScreen({
               </AppText>
               <AppText
                 size={13}
-                color={Colors.textMid}
+                color={colors.textMid}
                 style={{ lineHeight: 20, marginBottom: 24, textAlign: 'center' }}>
                 {t('rate_sent_sub_pre')} {stars}⭐ {t('rate_sent_sub_suf')}
               </AppText>
@@ -700,7 +851,7 @@ export function AccountScreen({
             <>
               <AppText
                 size={13}
-                color={Colors.textMid}
+                color={colors.textMid}
                 style={{ marginBottom: 24, lineHeight: 19 }}>
                 {t('rate_sub')}
               </AppText>
@@ -734,10 +885,10 @@ export function AccountScreen({
         </Sheet>
       )}
 
-      {/* Log Out */}
+      {/* Logout Sheet */}
       {sheet === 'logout' && (
         <Sheet onClose={closeSheet} title={t('logout_title')}>
-          <AppText size={14} color={Colors.textMid} style={{ lineHeight: 22, marginBottom: 24 }}>
+          <AppText size={14} color={colors.textMid} style={{ lineHeight: 22, marginBottom: 24 }}>
             {t('account_logout_confirm')}
           </AppText>
           <View style={styles.logoutButtons}>
@@ -746,7 +897,7 @@ export function AccountScreen({
                 condensed
                 weight="black"
                 size={16}
-                color={Colors.textMid}
+                color={colors.textMid}
                 uppercase
                 style={{ letterSpacing: 1 }}>
                 {t('cancel')}
@@ -774,166 +925,3 @@ export function AccountScreen({
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  scroll: { flex: 1, backgroundColor: Colors.bg },
-  content: { paddingBottom: 20 },
-
-  // Hero
-  hero: {
-    backgroundColor: Colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-    padding: Space.screen,
-    marginBottom: 20,
-  },
-  heroTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  editBtn: {
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-  },
-  avatarRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  avatarWrap: { position: 'relative', flexShrink: 0 },
-  proBadge: {
-    position: 'absolute',
-    bottom: -4,
-    right: -4,
-    backgroundColor: Colors.accent,
-    borderRadius: 6,
-    paddingHorizontal: 5,
-    paddingVertical: 2,
-  },
-  prRow: { flexDirection: 'row', gap: 8, marginTop: 18 },
-  prBox: {
-    flex: 1,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 14,
-    padding: 10,
-    alignItems: 'center',
-  },
-
-  // Groups
-  group: { marginHorizontal: Space.screen, marginBottom: 16 },
-  groupLabel: { marginBottom: 8, letterSpacing: 1 },
-  groupItems: {
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: Space.radius.card,
-    overflow: 'hidden',
-  },
-  rowRight: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-
-  // Logout
-  logoutBtn: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 10,
-    marginHorizontal: Space.screen,
-    marginTop: 8,
-    paddingVertical: 16,
-    borderRadius: Space.radius.md,
-    borderWidth: 1,
-    borderColor: `${Colors.heart}44`,
-    backgroundColor: `${Colors.heart}0a`,
-  },
-
-  // Sheet rows
-  pickerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 14,
-    paddingHorizontal: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderSub,
-  },
-  langRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    paddingVertical: 18,
-    paddingHorizontal: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderSub,
-  },
-  langRowActive: { backgroundColor: `${Colors.accent}0a` },
-  radioCircle: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 2,
-    borderColor: Colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  radioCircleActive: { backgroundColor: Colors.accent, borderColor: Colors.accent },
-  unitsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderSub,
-    gap: 14,
-  },
-  hrMethodRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    paddingVertical: 14,
-    paddingHorizontal: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderSub,
-    gap: 14,
-  },
-  textarea: {
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 14,
-    padding: 14,
-    fontFamily: 'Barlow',
-    fontSize: 14,
-    color: Colors.text,
-    height: 120,
-    textAlignVertical: 'top',
-    marginBottom: 14,
-  },
-  starsRow: { flexDirection: 'row', justifyContent: 'center', gap: 12, marginBottom: 16 },
-  logoutButtons: { flexDirection: 'row', gap: 10 },
-  cancelBtn: {
-    flex: 1,
-    padding: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.card,
-    alignItems: 'center',
-  },
-  confirmLogoutBtn: {
-    flex: 1,
-    padding: 16,
-    borderRadius: 16,
-    backgroundColor: Colors.heart,
-    alignItems: 'center',
-  },
-  loggedOutScreen: {
-    flex: 1,
-    backgroundColor: Colors.bg,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 40,
-  },
-});

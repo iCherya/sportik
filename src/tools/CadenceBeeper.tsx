@@ -1,9 +1,10 @@
 import * as Haptics from 'expo-haptics';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
-import { Colors, Sports, type SportKey } from '../theme';
+import { useColors } from '../context/ThemeContext';
+import { type ColorPalette, Sports, type SportKey } from '../theme';
 
 const PRESETS: Record<SportKey, number[]> = {
   run: [160, 170, 175, 180, 185, 190],
@@ -15,7 +16,53 @@ const PRESETS: Record<SportKey, number[]> = {
 
 const SPORT_OPTIONS: SportKey[] = ['run', 'bike'];
 
+const makeStyles = (c: ColorPalette) =>
+  StyleSheet.create({
+    segGroup: { flexDirection: 'row', gap: 8, marginBottom: 8 },
+    segBtn: {
+      flex: 1,
+      paddingVertical: 9,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.card,
+      alignItems: 'center',
+    },
+    bpmDisplay: { alignItems: 'center', marginVertical: 8 },
+    beatOuter: { alignItems: 'center', marginBottom: 16 },
+    beatDot: { width: 20, height: 20, borderRadius: 10 },
+    bpmControls: { flexDirection: 'row', gap: 8, marginBottom: 14 },
+    bpmBtn: {
+      flex: 1,
+      paddingVertical: 10,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.card,
+      alignItems: 'center',
+    },
+    playBtn: {
+      paddingVertical: 16,
+      borderRadius: 14,
+      alignItems: 'center',
+      marginBottom: 14,
+    },
+    presets: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
+    preset: {
+      flex: 1,
+      paddingVertical: 8,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.surface,
+      alignItems: 'center',
+      minWidth: '14%',
+    },
+  });
+
 export function CadenceBeeper() {
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [bpm, setBpm] = useState(85);
   const [playing, setPlaying] = useState(false);
   const [beat, setBeat] = useState(false);
@@ -75,7 +122,7 @@ export function CadenceBeeper() {
               <AppText
                 size={13}
                 weight="semibold"
-                color={active ? Sports[id].color : Colors.textMid}>
+                color={active ? Sports[id].color : colors.textMid}>
                 {Sports[id].icon} {Sports[id].label}
               </AppText>
             </Pressable>
@@ -85,10 +132,10 @@ export function CadenceBeeper() {
 
       {/* BPM display */}
       <View style={styles.bpmDisplay}>
-        <AppText condensed weight="black" size={72} color={Colors.text}>
+        <AppText condensed weight="black" size={72} color={colors.text}>
           {bpm}
         </AppText>
-        <AppText size={14} color={Colors.textMid}>
+        <AppText size={14} color={colors.textMid}>
           BPM
         </AppText>
       </View>
@@ -109,22 +156,22 @@ export function CadenceBeeper() {
       {/* +/- BPM controls */}
       <View style={styles.bpmControls}>
         <Pressable style={styles.bpmBtn} onPress={() => adjustBpm(-5)}>
-          <AppText condensed weight="black" size={20} color={Colors.textMid}>
+          <AppText condensed weight="black" size={20} color={colors.textMid}>
             −5
           </AppText>
         </Pressable>
         <Pressable style={styles.bpmBtn} onPress={() => adjustBpm(-1)}>
-          <AppText condensed weight="black" size={20} color={Colors.textMid}>
+          <AppText condensed weight="black" size={20} color={colors.textMid}>
             −1
           </AppText>
         </Pressable>
         <Pressable style={styles.bpmBtn} onPress={() => adjustBpm(1)}>
-          <AppText condensed weight="black" size={20} color={Colors.textMid}>
+          <AppText condensed weight="black" size={20} color={colors.textMid}>
             +1
           </AppText>
         </Pressable>
         <Pressable style={styles.bpmBtn} onPress={() => adjustBpm(5)}>
-          <AppText condensed weight="black" size={20} color={Colors.textMid}>
+          <AppText condensed weight="black" size={20} color={colors.textMid}>
             +5
           </AppText>
         </Pressable>
@@ -132,7 +179,7 @@ export function CadenceBeeper() {
 
       {/* Play / Stop */}
       <Pressable
-        style={[styles.playBtn, { backgroundColor: playing ? Colors.heart : Colors.accent }]}
+        style={[styles.playBtn, { backgroundColor: playing ? colors.heart : colors.accent }]}
         onPress={() => setPlaying((p) => !p)}>
         <AppText
           condensed
@@ -157,7 +204,7 @@ export function CadenceBeeper() {
                 active && { borderColor: sp.color, backgroundColor: `${sp.color}22` },
               ]}
               onPress={() => setBpm(v)}>
-              <AppText condensed weight="bold" size={13} color={active ? sp.color : Colors.textDim}>
+              <AppText condensed weight="bold" size={13} color={active ? sp.color : colors.textDim}>
                 {v}
               </AppText>
             </Pressable>
@@ -167,46 +214,3 @@ export function CadenceBeeper() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  segGroup: { flexDirection: 'row', gap: 8, marginBottom: 8 },
-  segBtn: {
-    flex: 1,
-    paddingVertical: 9,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.card,
-    alignItems: 'center',
-  },
-  bpmDisplay: { alignItems: 'center', marginVertical: 8 },
-  beatOuter: { alignItems: 'center', marginBottom: 16 },
-  beatDot: { width: 20, height: 20, borderRadius: 10 },
-  bpmControls: { flexDirection: 'row', gap: 8, marginBottom: 14 },
-  bpmBtn: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.card,
-    alignItems: 'center',
-  },
-  playBtn: {
-    paddingVertical: 16,
-    borderRadius: 14,
-    alignItems: 'center',
-    marginBottom: 14,
-  },
-  presets: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
-  preset: {
-    flex: 1,
-    paddingVertical: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.surface,
-    alignItems: 'center',
-    minWidth: '14%',
-  },
-});

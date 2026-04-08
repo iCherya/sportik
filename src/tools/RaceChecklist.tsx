@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
-import { Colors } from '../theme';
+import { useColors } from '../context/ThemeContext';
+import { type ColorPalette } from '../theme';
 
 type RaceType = 'tri' | 'run' | 'bike';
 
@@ -40,7 +41,72 @@ const RACE_OPTIONS: { id: RaceType; l: string }[] = [
   { id: 'bike', l: '🚴 Bike' },
 ];
 
+const makeStyles = (c: ColorPalette) =>
+  StyleSheet.create({
+    segGroup: { flexDirection: 'row', gap: 8, marginBottom: 12 },
+    segBtn: {
+      flex: 1,
+      paddingVertical: 9,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.card,
+      alignItems: 'center',
+    },
+    progressRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      marginBottom: 14,
+    },
+    progressBg: {
+      flex: 1,
+      height: 4,
+      backgroundColor: c.surface,
+      borderRadius: 2,
+      overflow: 'hidden',
+    },
+    progressFill: {
+      height: '100%',
+      backgroundColor: c.accent,
+      borderRadius: 2,
+    },
+    listCard: {
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 16,
+      overflow: 'hidden',
+    },
+    catHeader: {
+      paddingHorizontal: 16,
+      paddingTop: 12,
+      paddingBottom: 4,
+      backgroundColor: c.surface,
+    },
+    checkRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 14,
+      paddingVertical: 13,
+      paddingHorizontal: 16,
+      borderTopWidth: 1,
+      borderTopColor: c.borderSub,
+    },
+    checkbox: {
+      width: 22,
+      height: 22,
+      borderRadius: 6,
+      borderWidth: 1.5,
+      borderColor: c.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  });
+
 export function RaceChecklist() {
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [raceType, setRaceType] = useState<RaceType>('tri');
   const [checked, setChecked] = useState<Record<string, boolean>>({});
 
@@ -64,13 +130,13 @@ export function RaceChecklist() {
               key={r.id}
               style={[
                 styles.segBtn,
-                active && { borderColor: Colors.accent, backgroundColor: `${Colors.accent}18` },
+                active && { borderColor: colors.accent, backgroundColor: `${colors.accent}18` },
               ]}
               onPress={() => {
                 setRaceType(r.id);
                 setChecked({});
               }}>
-              <AppText size={13} weight="semibold" color={active ? Colors.accent : Colors.textMid}>
+              <AppText size={13} weight="semibold" color={active ? colors.accent : colors.textMid}>
                 {r.l}
               </AppText>
             </Pressable>
@@ -80,7 +146,7 @@ export function RaceChecklist() {
 
       {/* Progress bar */}
       <View style={styles.progressRow}>
-        <AppText weight="semibold" size={13} color={Colors.textMid}>
+        <AppText weight="semibold" size={13} color={colors.textMid}>
           {doneCount}/{items.length}
         </AppText>
         <View style={styles.progressBg}>
@@ -92,7 +158,7 @@ export function RaceChecklist() {
           />
         </View>
         <Pressable onPress={() => setChecked({})}>
-          <AppText size={11} color={Colors.textDim}>
+          <AppText size={11} color={colors.textDim}>
             Reset
           </AppText>
         </Pressable>
@@ -107,7 +173,7 @@ export function RaceChecklist() {
                 condensed
                 weight="bold"
                 size={10}
-                color={Colors.textDim}
+                color={colors.textDim}
                 uppercase
                 style={{ letterSpacing: 1.5 }}>
                 {cat}
@@ -122,7 +188,7 @@ export function RaceChecklist() {
                     <View
                       style={[
                         styles.checkbox,
-                        done && { backgroundColor: Colors.accent, borderColor: Colors.accent },
+                        done && { backgroundColor: colors.accent, borderColor: colors.accent },
                       ]}>
                       {done && (
                         <AppText size={13} color="#000">
@@ -133,7 +199,7 @@ export function RaceChecklist() {
                     <AppText
                       weight="medium"
                       size={14}
-                      color={done ? Colors.textDim : Colors.text}
+                      color={done ? colors.textDim : colors.text}
                       style={{ textDecorationLine: done ? 'line-through' : 'none' }}>
                       {item.text}
                     </AppText>
@@ -146,65 +212,3 @@ export function RaceChecklist() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  segGroup: { flexDirection: 'row', gap: 8, marginBottom: 12 },
-  segBtn: {
-    flex: 1,
-    paddingVertical: 9,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.card,
-    alignItems: 'center',
-  },
-  progressRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 14,
-  },
-  progressBg: {
-    flex: 1,
-    height: 4,
-    backgroundColor: Colors.surface,
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: Colors.accent,
-    borderRadius: 2,
-  },
-  listCard: {
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  catHeader: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 4,
-    backgroundColor: Colors.surface,
-  },
-  checkRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    paddingVertical: 13,
-    paddingHorizontal: 16,
-    borderTopWidth: 1,
-    borderTopColor: Colors.borderSub,
-  },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    borderWidth: 1.5,
-    borderColor: Colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

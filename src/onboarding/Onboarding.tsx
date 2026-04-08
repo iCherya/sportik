@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Dimensions, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppText } from '../components/AppText';
+import { useColors } from '../context/ThemeContext';
 import { useT } from '../i18n';
-import { Colors } from '../theme';
+import { type ColorPalette, Sports } from '../theme';
 
 export type OBData = {
   sports: string[];
@@ -37,6 +38,327 @@ function SlideIn({ dir, children }: { dir: 'fwd' | 'bwd'; children: React.ReactN
   return <Animated.View style={[StyleSheet.absoluteFill, style]}>{children}</Animated.View>;
 }
 
+const makeStyles = (c: ColorPalette) =>
+  StyleSheet.create({
+    shell: { flex: 1 },
+    screen: { flex: 1, backgroundColor: c.bg },
+
+    /* progress */
+    progressWrap: { paddingHorizontal: 20, flexShrink: 0 },
+    progressTrack: {
+      height: 3,
+      backgroundColor: c.surface,
+      borderRadius: 3,
+      overflow: 'hidden',
+      marginBottom: 16,
+    },
+    progressFill: { height: '100%', borderRadius: 3, backgroundColor: c.accent },
+    progressRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    progressBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 4 },
+    progressSkipBtn: { paddingVertical: 4, width: 60, alignItems: 'flex-end' },
+    progressSlot: { width: 60 },
+
+    /* header */
+    stepHeader: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 4 },
+
+    /* cta button */
+    ctaBtn: {
+      width: '100%',
+      paddingVertical: 18,
+      borderRadius: 18,
+      backgroundColor: c.accent,
+      alignItems: 'center',
+    },
+    ctaBtnDisabled: { backgroundColor: c.surface },
+    bottomPad: { paddingHorizontal: 20, paddingTop: 16 },
+
+    /* welcome */
+    welcomeSkipRow: {
+      paddingHorizontal: 20,
+      alignItems: 'flex-end',
+      flexShrink: 0,
+    },
+    skipChip: {
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: 8,
+      borderWidth: 1,
+    },
+    welcomeCenter: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 32,
+      paddingBottom: 20,
+    },
+    accentBar: {
+      width: 48,
+      height: 3,
+      backgroundColor: c.accent,
+      borderRadius: 2,
+      marginVertical: 16,
+    },
+    featureChips: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+      justifyContent: 'center',
+      marginTop: 28,
+    },
+    featureChip: {
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 20,
+      backgroundColor: `${c.accent}18`,
+      borderWidth: 1,
+      borderColor: `${c.accent}33`,
+    },
+    sportIcons: { flexDirection: 'row', gap: 16, marginTop: 32 },
+    sportIconBox: {
+      width: 52,
+      height: 52,
+      borderRadius: 16,
+      borderWidth: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+    /* sport focus */
+    sportList: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8, gap: 10 },
+    sportCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 14,
+      borderRadius: 20,
+      padding: 16,
+    },
+    sportCardIcon: {
+      width: 52,
+      height: 52,
+      borderRadius: 15,
+      borderWidth: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
+    },
+    sportCardCheck: {
+      width: 24,
+      height: 24,
+      borderRadius: 8,
+      borderWidth: 2,
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
+    },
+
+    /* goal race */
+    yesNoRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 20, paddingTop: 16 },
+    yesNoBtn: {
+      flex: 1,
+      paddingVertical: 14,
+      borderRadius: 16,
+      borderWidth: 2,
+      alignItems: 'center',
+    },
+    raceList: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
+    raceRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      padding: 12,
+      borderRadius: 14,
+      borderWidth: 1.5,
+      marginBottom: 8,
+    },
+    noRaceCenter: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 32,
+    },
+    dateInput: {
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 12,
+      padding: 14,
+      fontFamily: 'BarlowCondensedBold',
+      fontSize: 16,
+      color: c.text,
+    },
+
+    /* baseline */
+    baselineList: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
+    baseCard: {
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 20,
+      padding: 20,
+    },
+    baseCardHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14 },
+    baseCardIcon: {
+      width: 36,
+      height: 36,
+      borderRadius: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    inputRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    baseInput: {
+      flex: 1,
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 12,
+      padding: 14,
+      fontFamily: 'BarlowCondensedBlack',
+      fontSize: 28,
+      color: c.text,
+      textAlign: 'center',
+    },
+    unitBadge: {
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 12,
+    },
+    agePresets: { flexDirection: 'row', gap: 6, marginTop: 10 },
+    ageBtn: {
+      flex: 1,
+      paddingVertical: 6,
+      borderRadius: 8,
+      borderWidth: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+    /* training hours */
+    hoursCenter: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 24,
+    },
+    hrsControls: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginBottom: 24,
+      width: '100%',
+    },
+    hrsBtn: {
+      width: 44,
+      height: 44,
+      borderRadius: 12,
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
+    },
+    hrsPresets: {
+      flex: 1,
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 4,
+      justifyContent: 'center',
+    },
+    hrsPreset: {
+      paddingHorizontal: 8,
+      paddingVertical: 5,
+      borderRadius: 8,
+      borderWidth: 1,
+    },
+    levelBadge: {
+      width: '100%',
+      borderRadius: 20,
+      borderWidth: 1,
+      padding: 18,
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    breakdownRow: { flexDirection: 'row', gap: 8, width: '100%' },
+    breakdownCard: {
+      flex: 1,
+      borderRadius: 14,
+      borderWidth: 1,
+      padding: 10,
+      alignItems: 'center',
+    },
+
+    /* ready */
+    readyList: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
+    nameInput: {
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderRadius: 14,
+      padding: 16,
+      fontFamily: 'BarlowCondensedBold',
+      fontSize: 22,
+      color: c.text,
+      marginBottom: 20,
+    },
+    summaryCard: {
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 20,
+      overflow: 'hidden',
+      marginBottom: 12,
+    },
+    summaryRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      padding: 12,
+      paddingHorizontal: 16,
+    },
+    skippedCard: {
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 16,
+      padding: 14,
+      paddingHorizontal: 16,
+      marginBottom: 16,
+    },
+    skippedChip: {
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      borderRadius: 8,
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+    },
+    promiseCard: {
+      flexDirection: 'row',
+      gap: 12,
+      borderRadius: 16,
+      borderWidth: 1,
+      padding: 14,
+      alignItems: 'flex-start',
+    },
+
+    /* skip-all pill */
+    skipAllWrap: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      alignItems: 'center',
+      pointerEvents: 'box-none',
+    },
+    skipAllBtn: {
+      paddingHorizontal: 16,
+      paddingVertical: 6,
+      borderRadius: 20,
+      borderWidth: 1,
+    },
+  });
+
 /* ── Progress bar + back/skip row ── */
 function OBProgress({
   step,
@@ -54,6 +376,8 @@ function OBProgress({
   showSkip: boolean;
 }) {
   const t = useT();
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
   return (
     <View style={[styles.progressWrap, { paddingTop: insets.top + 16 }]}>
@@ -65,22 +389,22 @@ function OBProgress({
       <View style={styles.progressRow}>
         {showBack ? (
           <Pressable style={styles.progressBtn} onPress={onBack}>
-            <AppText size={18} color={Colors.textMid}>
+            <AppText size={18} color={colors.textMid}>
               ←
             </AppText>
-            <AppText size={13} weight="medium" color={Colors.textMid}>
+            <AppText size={13} weight="medium" color={colors.textMid}>
               {t('back')}
             </AppText>
           </Pressable>
         ) : (
           <View style={styles.progressSlot} />
         )}
-        <AppText size={12} weight="semibold" color={Colors.textDim} style={{ letterSpacing: 1 }}>
+        <AppText size={12} weight="semibold" color={colors.textDim} style={{ letterSpacing: 1 }}>
           {step} / {total}
         </AppText>
         {showSkip ? (
           <Pressable style={styles.progressSkipBtn} onPress={onSkip}>
-            <AppText size={13} weight="semibold" color={Colors.textDim}>
+            <AppText size={13} weight="semibold" color={colors.textDim}>
               {t('skip')}
             </AppText>
           </Pressable>
@@ -102,6 +426,8 @@ function OBBtn({
   onPress: () => void;
   disabled?: boolean;
 }) {
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <Pressable
       style={[styles.ctaBtn, disabled && styles.ctaBtnDisabled]}
@@ -111,7 +437,7 @@ function OBBtn({
         weight="black"
         size={20}
         style={{ letterSpacing: 2 }}
-        color={disabled ? '#555' : '#000'}
+        color={disabled ? colors.textDim : '#000'}
         uppercase>
         {label}
       </AppText>
@@ -122,23 +448,25 @@ function OBBtn({
 /* ── Screen 1: Welcome ── */
 function OBWelcome({ onNext, onSkipAll }: { onNext: () => void; onSkipAll: () => void }) {
   const t = useT();
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
   const features = [t('tool_pace'), t('nav_events'), t('home_plans'), t('tool_hr'), 'Multi-sport'];
   const sportIcons = [
-    { icon: '🏊', color: Colors.swim },
-    { icon: '🚴', color: Colors.bike },
-    { icon: '🏃', color: Colors.run },
-    { icon: '🔱', color: Colors.tri },
+    { icon: '🏊', color: Sports.swim.color },
+    { icon: '🚴', color: Sports.bike.color },
+    { icon: '🏃', color: Sports.run.color },
+    { icon: '🔱', color: Sports.tri.color },
   ];
 
   return (
-    <View style={[styles.screen, { backgroundColor: Colors.bg }]}>
+    <View style={[styles.screen, { backgroundColor: colors.bg }]}>
       {/* Skip button top-right */}
       <View style={[styles.welcomeSkipRow, { paddingTop: insets.top + 12 }]}>
         <Pressable
-          style={[styles.skipChip, { borderColor: Colors.border, backgroundColor: Colors.surface }]}
+          style={[styles.skipChip, { borderColor: colors.border, backgroundColor: colors.surface }]}
           onPress={onSkipAll}>
-          <AppText size={13} weight="semibold" color={Colors.textDim}>
+          <AppText size={13} weight="semibold" color={colors.textDim}>
             {t('ob_skip')}
           </AppText>
         </Pressable>
@@ -148,7 +476,7 @@ function OBWelcome({ onNext, onSkipAll }: { onNext: () => void; onSkipAll: () =>
       <View style={styles.welcomeCenter}>
         <AppText condensed weight="black" size={52} style={{ letterSpacing: 8, lineHeight: 52 }}>
           SPORT
-          <AppText condensed weight="black" size={52} color={Colors.accent}>
+          <AppText condensed weight="black" size={52} color={colors.accent}>
             IK
           </AppText>
         </AppText>
@@ -159,7 +487,7 @@ function OBWelcome({ onNext, onSkipAll }: { onNext: () => void; onSkipAll: () =>
           condensed
           weight="bold"
           size={22}
-          color={Colors.textMid}
+          color={colors.textMid}
           style={{ letterSpacing: 1, lineHeight: 30, textAlign: 'center' }}>
           {t('ob_tagline')}
         </AppText>
@@ -167,7 +495,7 @@ function OBWelcome({ onNext, onSkipAll }: { onNext: () => void; onSkipAll: () =>
         <View style={styles.featureChips}>
           {features.map((f) => (
             <View key={f} style={styles.featureChip}>
-              <AppText size={12} weight="bold" color={Colors.accent} style={{ letterSpacing: 0.3 }}>
+              <AppText size={12} weight="bold" color={colors.accent} style={{ letterSpacing: 0.3 }}>
                 {f}
               </AppText>
             </View>
@@ -193,7 +521,7 @@ function OBWelcome({ onNext, onSkipAll }: { onNext: () => void; onSkipAll: () =>
         <OBBtn label={t('ob_get_started')} onPress={onNext} />
         <AppText
           size={12}
-          color={Colors.textDim}
+          color={colors.textDim}
           style={{ textAlign: 'center', marginTop: 14, lineHeight: 18 }}>
           {t('ob_takes')}
         </AppText>
@@ -215,6 +543,8 @@ function OBSportFocus({
   setData: React.Dispatch<React.SetStateAction<OBData>>;
 }) {
   const t = useT();
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
   const sports = [
     {
@@ -222,35 +552,35 @@ function OBSportFocus({
       icon: '🔱',
       label: t('ob_sport_tri'),
       sub: t('ob_sport_tri_sub'),
-      color: Colors.tri,
+      color: Sports.tri.color,
     },
     {
       id: 'run',
       icon: '🏃',
       label: t('ob_sport_run'),
       sub: t('ob_sport_run_sub'),
-      color: Colors.run,
+      color: Sports.run.color,
     },
     {
       id: 'bike',
       icon: '🚴',
       label: t('ob_sport_bike'),
       sub: t('ob_sport_bike_sub'),
-      color: Colors.bike,
+      color: Sports.bike.color,
     },
     {
       id: 'swim',
       icon: '🏊',
       label: t('ob_sport_swim'),
       sub: t('ob_sport_swim_sub'),
-      color: Colors.swim,
+      color: Sports.swim.color,
     },
     {
       id: 'tbd',
       icon: '🤔',
       label: t('ob_sport_tbd'),
       sub: t('ob_sport_tbd_sub'),
-      color: Colors.textMid,
+      color: colors.textMid,
     },
   ];
   const toggle = (id: string) =>
@@ -266,7 +596,7 @@ function OBSportFocus({
         <AppText condensed weight="black" size={32} style={{ letterSpacing: 0.5, lineHeight: 36 }}>
           {t('ob_sport_q')}
         </AppText>
-        <AppText size={14} color={Colors.textMid} style={{ marginTop: 8, lineHeight: 21 }}>
+        <AppText size={14} color={colors.textMid} style={{ marginTop: 8, lineHeight: 21 }}>
           {t('ob_sport_sub')}
         </AppText>
       </View>
@@ -282,8 +612,8 @@ function OBSportFocus({
               style={[
                 styles.sportCard,
                 {
-                  backgroundColor: sel ? `${s.color}18` : Colors.card,
-                  borderColor: sel ? s.color : Colors.border,
+                  backgroundColor: sel ? `${s.color}18` : colors.card,
+                  borderColor: sel ? s.color : colors.border,
                   borderWidth: sel ? 2 : 1,
                 },
               ]}
@@ -296,10 +626,10 @@ function OBSportFocus({
                 <AppText size={26}>{s.icon}</AppText>
               </View>
               <View style={{ flex: 1 }}>
-                <AppText condensed weight="bold" size={18} color={sel ? s.color : Colors.text}>
+                <AppText condensed weight="bold" size={18} color={sel ? s.color : colors.text}>
                   {s.label}
                 </AppText>
-                <AppText size={12} color={Colors.textMid} style={{ marginTop: 2 }}>
+                <AppText size={12} color={colors.textMid} style={{ marginTop: 2 }}>
                   {s.sub}
                 </AppText>
               </View>
@@ -308,7 +638,7 @@ function OBSportFocus({
                   styles.sportCardCheck,
                   {
                     backgroundColor: sel ? s.color : 'transparent',
-                    borderColor: sel ? s.color : Colors.border,
+                    borderColor: sel ? s.color : colors.border,
                   },
                 ]}>
                 {sel && (
@@ -343,17 +673,19 @@ function OBGoalRace({
   setData: React.Dispatch<React.SetStateAction<OBData>>;
 }) {
   const t = useT();
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
   const [hasRace, setHasRace] = useState<boolean | null>(data.raceType ? true : null);
 
   const raceTypes = [
-    { id: 'sprint', label: 'Sprint Tri', detail: '750m · 20km · 5km', color: Colors.tri },
-    { id: 'olympic', label: 'Olympic Tri', detail: '1.5km · 40km · 10km', color: Colors.tri },
-    { id: '703', label: 'Ironman 70.3', detail: '1.9km · 90km · 21km', color: Colors.tri },
-    { id: 'ironman', label: 'Ironman', detail: '3.8km · 180km · 42km', color: Colors.tri },
-    { id: 'marathon', label: 'Marathon', detail: '42.2km', color: Colors.run },
-    { id: 'hm', label: 'Half Marathon', detail: '21.1km', color: Colors.run },
-    { id: 'fondo', label: 'Gran Fondo', detail: '80–200km', color: Colors.bike },
+    { id: 'sprint', label: 'Sprint Tri', detail: '750m · 20km · 5km', color: Sports.tri.color },
+    { id: 'olympic', label: 'Olympic Tri', detail: '1.5km · 40km · 10km', color: Sports.tri.color },
+    { id: '703', label: 'Ironman 70.3', detail: '1.9km · 90km · 21km', color: Sports.tri.color },
+    { id: 'ironman', label: 'Ironman', detail: '3.8km · 180km · 42km', color: Sports.tri.color },
+    { id: 'marathon', label: 'Marathon', detail: '42.2km', color: Sports.run.color },
+    { id: 'hm', label: 'Half Marathon', detail: '21.1km', color: Sports.run.color },
+    { id: 'fondo', label: 'Gran Fondo', detail: '80–200km', color: Sports.bike.color },
   ];
 
   return (
@@ -363,7 +695,7 @@ function OBGoalRace({
         <AppText condensed weight="black" size={32} style={{ letterSpacing: 0.5, lineHeight: 36 }}>
           {t('ob_race_q')}
         </AppText>
-        <AppText size={14} color={Colors.textMid} style={{ marginTop: 8 }}>
+        <AppText size={14} color={colors.textMid} style={{ marginTop: 8 }}>
           {t('ob_race_sub')}
         </AppText>
       </View>
@@ -378,8 +710,8 @@ function OBGoalRace({
             style={[
               styles.yesNoBtn,
               {
-                borderColor: hasRace === opt.v ? Colors.accent : Colors.border,
-                backgroundColor: hasRace === opt.v ? `${Colors.accent}18` : Colors.card,
+                borderColor: hasRace === opt.v ? colors.accent : colors.border,
+                backgroundColor: hasRace === opt.v ? `${colors.accent}18` : colors.card,
               },
             ]}
             onPress={() => {
@@ -390,7 +722,7 @@ function OBGoalRace({
               condensed
               weight="bold"
               size={15}
-              color={hasRace === opt.v ? Colors.accent : Colors.textMid}>
+              color={hasRace === opt.v ? colors.accent : colors.textMid}>
               {opt.l}
             </AppText>
           </Pressable>
@@ -406,7 +738,7 @@ function OBGoalRace({
             condensed
             weight="bold"
             size={11}
-            color={Colors.textDim}
+            color={colors.textDim}
             uppercase
             style={{ letterSpacing: 2, marginBottom: 10 }}>
             {t('ob_race_type')}
@@ -419,16 +751,16 @@ function OBGoalRace({
                 style={[
                   styles.raceRow,
                   {
-                    borderColor: sel ? r.color : Colors.border,
-                    backgroundColor: sel ? `${r.color}18` : Colors.card,
+                    borderColor: sel ? r.color : colors.border,
+                    backgroundColor: sel ? `${r.color}18` : colors.card,
                   },
                 ]}
                 onPress={() => setData((d) => ({ ...d, raceType: r.id }))}>
                 <View style={{ flex: 1 }}>
-                  <AppText condensed weight="bold" size={15} color={sel ? r.color : Colors.text}>
+                  <AppText condensed weight="bold" size={15} color={sel ? r.color : colors.text}>
                     {r.label}
                   </AppText>
-                  <AppText size={12} color={Colors.textDim}>
+                  <AppText size={12} color={colors.textDim}>
                     {r.detail}
                   </AppText>
                 </View>
@@ -445,7 +777,7 @@ function OBGoalRace({
             condensed
             weight="bold"
             size={11}
-            color={Colors.textDim}
+            color={colors.textDim}
             uppercase
             style={{ letterSpacing: 2, marginBottom: 8, marginTop: 20 }}>
             {t('ob_race_date')}
@@ -454,7 +786,7 @@ function OBGoalRace({
             value={data.raceDate}
             onChangeText={(v) => setData((d) => ({ ...d, raceDate: v }))}
             placeholder="YYYY-MM-DD"
-            placeholderTextColor={Colors.textDim}
+            placeholderTextColor={colors.textDim}
             keyboardType="numbers-and-punctuation"
             style={styles.dateInput}
           />
@@ -468,13 +800,13 @@ function OBGoalRace({
             condensed
             weight="black"
             size={18}
-            color={Colors.textMid}
+            color={colors.textMid}
             style={{ marginTop: 12 }}>
             {t('ob_race_none')}
           </AppText>
           <AppText
             size={13}
-            color={Colors.textDim}
+            color={colors.textDim}
             style={{ marginTop: 6, lineHeight: 20, textAlign: 'center' }}>
             {t('ob_race_none_sub')}
           </AppText>
@@ -509,6 +841,8 @@ function OBBaseline({
   setData: React.Dispatch<React.SetStateAction<OBData>>;
 }) {
   const t = useT();
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
   const showFTP = data.sports.includes('bike') || data.sports.includes('tri');
   const agePresets = [
@@ -526,7 +860,7 @@ function OBBaseline({
         <AppText condensed weight="black" size={32} style={{ letterSpacing: 0.5, lineHeight: 36 }}>
           {t('ob_baseline_q')}
         </AppText>
-        <AppText size={14} color={Colors.textMid} style={{ marginTop: 8, lineHeight: 21 }}>
+        <AppText size={14} color={colors.textMid} style={{ marginTop: 8, lineHeight: 21 }}>
           {t('ob_baseline_sub')}
         </AppText>
       </View>
@@ -545,7 +879,7 @@ function OBBaseline({
               <AppText condensed weight="bold" size={15}>
                 {t('hr_max')}
               </AppText>
-              <AppText size={11} color={Colors.textDim} style={{ marginTop: 1 }}>
+              <AppText size={11} color={colors.textDim} style={{ marginTop: 1 }}>
                 {t('hr_estimate')}
               </AppText>
             </View>
@@ -555,12 +889,12 @@ function OBBaseline({
               value={data.maxHR}
               onChangeText={(v) => setData((d) => ({ ...d, maxHR: v }))}
               placeholder="185"
-              placeholderTextColor={Colors.textDim}
+              placeholderTextColor={colors.textDim}
               keyboardType="numeric"
               style={styles.baseInput}
             />
             <View style={styles.unitBadge}>
-              <AppText size={13} weight="bold" color={Colors.textMid}>
+              <AppText size={13} weight="bold" color={colors.textMid}>
                 bpm
               </AppText>
             </View>
@@ -572,8 +906,8 @@ function OBBaseline({
                 style={[
                   styles.ageBtn,
                   {
-                    borderColor: data.maxHR === p.v ? Colors.accent : Colors.border,
-                    backgroundColor: data.maxHR === p.v ? `${Colors.accent}22` : Colors.surface,
+                    borderColor: data.maxHR === p.v ? colors.accent : colors.border,
+                    backgroundColor: data.maxHR === p.v ? `${colors.accent}22` : colors.surface,
                   },
                 ]}
                 onPress={() => setData((d) => ({ ...d, maxHR: p.v }))}>
@@ -581,7 +915,7 @@ function OBBaseline({
                   condensed
                   weight="bold"
                   size={11}
-                  color={data.maxHR === p.v ? Colors.accent : Colors.textDim}
+                  color={data.maxHR === p.v ? colors.accent : colors.textDim}
                   style={{ textAlign: 'center', lineHeight: 14 }}>
                   {`age\n${p.l}`}
                 </AppText>
@@ -601,7 +935,7 @@ function OBBaseline({
                 <AppText condensed weight="bold" size={15}>
                   {t('ftp_title')}
                 </AppText>
-                <AppText size={11} color={Colors.textDim} style={{ marginTop: 1 }}>
+                <AppText size={11} color={colors.textDim} style={{ marginTop: 1 }}>
                   20-min test ÷ 0.95
                 </AppText>
               </View>
@@ -611,12 +945,12 @@ function OBBaseline({
                 value={data.ftp}
                 onChangeText={(v) => setData((d) => ({ ...d, ftp: v }))}
                 placeholder="245"
-                placeholderTextColor={Colors.textDim}
+                placeholderTextColor={colors.textDim}
                 keyboardType="numeric"
                 style={styles.baseInput}
               />
               <View style={styles.unitBadge}>
-                <AppText size={13} weight="bold" color={Colors.textMid}>
+                <AppText size={13} weight="bold" color={colors.textMid}>
                   W
                 </AppText>
               </View>
@@ -647,6 +981,8 @@ function OBTrainingHours({
   setData: React.Dispatch<React.SetStateAction<OBData>>;
 }) {
   const t = useT();
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
   const hrs = data.hoursPerWeek;
   const setHrs = (v: number) =>
@@ -654,17 +990,17 @@ function OBTrainingHours({
 
   const level =
     hrs <= 5
-      ? { l: t('ob_level_base'), c: Colors.run, sub: t('ob_level_base_sub') }
+      ? { l: t('ob_level_base'), c: Sports.run.color, sub: t('ob_level_base_sub') }
       : hrs <= 10
-        ? { l: t('ob_level_inter'), c: Colors.swim, sub: t('ob_level_inter_sub') }
+        ? { l: t('ob_level_inter'), c: Sports.swim.color, sub: t('ob_level_inter_sub') }
         : hrs <= 15
-          ? { l: t('ob_level_adv'), c: Colors.bike, sub: t('ob_level_adv_sub') }
-          : { l: t('ob_level_elite'), c: Colors.tri, sub: t('ob_level_elite_sub') };
+          ? { l: t('ob_level_adv'), c: Sports.bike.color, sub: t('ob_level_adv_sub') }
+          : { l: t('ob_level_elite'), c: Sports.tri.color, sub: t('ob_level_elite_sub') };
 
   const sportBreakdown = [
-    { sport: 'swim', color: Colors.swim, icon: '🏊', pct: 0.25 },
-    { sport: 'bike', color: Colors.bike, icon: '🚴', pct: 0.45 },
-    { sport: 'run', color: Colors.run, icon: '🏃', pct: 0.3 },
+    { sport: 'swim', color: Sports.swim.color, icon: '🏊', pct: 0.25 },
+    { sport: 'bike', color: Sports.bike.color, icon: '🚴', pct: 0.45 },
+    { sport: 'run', color: Sports.run.color, icon: '🏃', pct: 0.3 },
   ].filter((s) => {
     if (data.sports.length === 0) return true;
     return (
@@ -683,7 +1019,7 @@ function OBTrainingHours({
         <AppText condensed weight="black" size={32} style={{ letterSpacing: 0.5, lineHeight: 36 }}>
           {t('ob_hours_q')}
         </AppText>
-        <AppText size={14} color={Colors.textMid} style={{ marginTop: 8 }}>
+        <AppText size={14} color={colors.textMid} style={{ marginTop: 8 }}>
           {t('ob_hours_sub')}
         </AppText>
       </View>
@@ -694,7 +1030,7 @@ function OBTrainingHours({
           <AppText condensed weight="black" size={96} style={{ lineHeight: 96 }}>
             {hrs >= 20 ? '20+' : String(hrs)}
           </AppText>
-          <AppText size={14} weight="semibold" color={Colors.textMid} style={{ letterSpacing: 1 }}>
+          <AppText size={14} weight="semibold" color={colors.textMid} style={{ letterSpacing: 1 }}>
             {t('ob_hours_unit').toUpperCase()}
           </AppText>
         </View>
@@ -702,7 +1038,7 @@ function OBTrainingHours({
         {/* +/- controls */}
         <View style={styles.hrsControls}>
           <Pressable style={styles.hrsBtn} onPress={() => setHrs(hrs - 1)} disabled={hrs <= 3}>
-            <AppText size={24} weight="black" color={hrs <= 3 ? Colors.textDim : Colors.text}>
+            <AppText size={24} weight="black" color={hrs <= 3 ? colors.textDim : colors.text}>
               −
             </AppText>
           </Pressable>
@@ -713,22 +1049,22 @@ function OBTrainingHours({
                 style={[
                   styles.hrsPreset,
                   {
-                    borderColor: hrs === p ? Colors.accent : Colors.border,
-                    backgroundColor: hrs === p ? `${Colors.accent}22` : Colors.card,
+                    borderColor: hrs === p ? colors.accent : colors.border,
+                    backgroundColor: hrs === p ? `${colors.accent}22` : colors.card,
                   },
                 ]}
                 onPress={() => setHrs(p)}>
                 <AppText
                   size={12}
                   weight="semibold"
-                  color={hrs === p ? Colors.accent : Colors.textMid}>
+                  color={hrs === p ? colors.accent : colors.textMid}>
                   {p === 20 ? '20+' : String(p)}
                 </AppText>
               </Pressable>
             ))}
           </View>
           <Pressable style={styles.hrsBtn} onPress={() => setHrs(hrs + 1)} disabled={hrs >= 20}>
-            <AppText size={24} weight="black" color={hrs >= 20 ? Colors.textDim : Colors.text}>
+            <AppText size={24} weight="black" color={hrs >= 20 ? colors.textDim : colors.text}>
               +
             </AppText>
           </Pressable>
@@ -743,7 +1079,7 @@ function OBTrainingHours({
           <AppText condensed weight="black" size={22} color={level.c} style={{ marginBottom: 6 }}>
             {level.l}
           </AppText>
-          <AppText size={13} color={Colors.textMid} style={{ lineHeight: 20, textAlign: 'center' }}>
+          <AppText size={13} color={colors.textMid} style={{ lineHeight: 20, textAlign: 'center' }}>
             {level.sub}
           </AppText>
         </View>
@@ -796,6 +1132,8 @@ function OBReady({
   setData: React.Dispatch<React.SetStateAction<OBData>>;
 }) {
   const t = useT();
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
   const [name, setName] = useState(data.name || '');
 
@@ -848,7 +1186,7 @@ function OBReady({
         <AppText condensed weight="black" size={32} style={{ letterSpacing: 0.5, lineHeight: 36 }}>
           {mostlySkipped ? t('ob_ready_q_skipped') : t('ob_ready_q')}
         </AppText>
-        <AppText size={14} color={Colors.textMid} style={{ marginTop: 8 }}>
+        <AppText size={14} color={colors.textMid} style={{ marginTop: 8 }}>
           {mostlySkipped ? t('ob_ready_sub_skipped') : t('ob_ready_sub')}
         </AppText>
       </View>
@@ -862,8 +1200,8 @@ function OBReady({
           value={name}
           onChangeText={setName}
           placeholder={t('ep_name')}
-          placeholderTextColor={Colors.textDim}
-          style={[styles.nameInput, { borderColor: name ? Colors.accent : Colors.border }]}
+          placeholderTextColor={colors.textDim}
+          style={[styles.nameInput, { borderColor: name ? colors.accent : colors.border }]}
         />
 
         {/* Filled summary */}
@@ -873,7 +1211,7 @@ function OBReady({
               condensed
               weight="bold"
               size={11}
-              color={Colors.textDim}
+              color={colors.textDim}
               uppercase
               style={{ letterSpacing: 2, padding: 16, paddingBottom: 8 }}>
               {mostlySkipped ? t('ob_ready_set') : t('ob_ready_profile')}
@@ -883,12 +1221,12 @@ function OBReady({
                 key={i}
                 style={[
                   styles.summaryRow,
-                  { borderTopWidth: 1, borderTopColor: Colors.borderSub },
+                  { borderTopWidth: 1, borderTopColor: colors.borderSub },
                 ]}>
                 <AppText size={16} style={{ width: 22, textAlign: 'center' }}>
                   {item.icon}
                 </AppText>
-                <AppText weight="medium" size={13} color={Colors.textMid} style={{ flex: 1 }}>
+                <AppText weight="medium" size={13} color={colors.textMid} style={{ flex: 1 }}>
                   {item.label}
                 </AppText>
                 <AppText
@@ -910,7 +1248,7 @@ function OBReady({
               condensed
               weight="bold"
               size={11}
-              color={Colors.textDim}
+              color={colors.textDim}
               uppercase
               style={{ letterSpacing: 2, marginBottom: 10 }}>
               {t('ob_ready_later')}
@@ -918,7 +1256,7 @@ function OBReady({
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
               {skippedItems.map((item) => (
                 <View key={item.label} style={styles.skippedChip}>
-                  <AppText size={12} weight="semibold" color={Colors.textDim}>
+                  <AppText size={12} weight="semibold" color={colors.textDim}>
                     {item.icon} {item.label}
                   </AppText>
                 </View>
@@ -931,10 +1269,10 @@ function OBReady({
         <View
           style={[
             styles.promiseCard,
-            { backgroundColor: `${Colors.accent}0f`, borderColor: `${Colors.accent}22` },
+            { backgroundColor: `${colors.accent}0f`, borderColor: `${colors.accent}22` },
           ]}>
           <AppText size={18}>🏅</AppText>
-          <AppText size={13} color={Colors.textMid} style={{ flex: 1, lineHeight: 20 }}>
+          <AppText size={13} color={colors.textMid} style={{ flex: 1, lineHeight: 20 }}>
             {t('ob_ready_promise')}
           </AppText>
         </View>
@@ -956,6 +1294,8 @@ function OBReady({
 
 /* ── Onboarding Shell ── */
 export function Onboarding({ onComplete, onSkipAll }: Props) {
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const t = useT();
   const insets = useSafeAreaInsets();
   const [step, setStep] = useState(0);
@@ -1015,7 +1355,7 @@ export function Onboarding({ onComplete, onSkipAll }: Props) {
   ];
 
   return (
-    <View style={[styles.shell, { backgroundColor: Colors.bg }]}>
+    <View style={[styles.shell, { backgroundColor: colors.bg }]}>
       <View style={StyleSheet.absoluteFill}>
         <SlideIn key={step} dir={dir}>
           {screens[step]}
@@ -1028,10 +1368,10 @@ export function Onboarding({ onComplete, onSkipAll }: Props) {
           <Pressable
             style={[
               styles.skipAllBtn,
-              { backgroundColor: `${Colors.surface}ee`, borderColor: Colors.border },
+              { backgroundColor: `${colors.surface}ee`, borderColor: colors.border },
             ]}
             onPress={onSkipAll}>
-            <AppText size={12} color={Colors.textDim}>
+            <AppText size={12} color={colors.textDim}>
               {t('ob_skip_all')}
             </AppText>
           </Pressable>
@@ -1040,317 +1380,3 @@ export function Onboarding({ onComplete, onSkipAll }: Props) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  shell: { flex: 1 },
-  screen: { flex: 1, backgroundColor: Colors.bg },
-
-  /* progress */
-  progressWrap: { paddingHorizontal: 20, flexShrink: 0 },
-  progressTrack: {
-    height: 3,
-    backgroundColor: '#222226',
-    borderRadius: 3,
-    overflow: 'hidden',
-    marginBottom: 16,
-  },
-  progressFill: { height: '100%', borderRadius: 3, backgroundColor: Colors.accent },
-  progressRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  progressBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 4 },
-  progressSkipBtn: { paddingVertical: 4, width: 60, alignItems: 'flex-end' },
-  progressSlot: { width: 60 },
-
-  /* header */
-  stepHeader: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 4 },
-
-  /* cta button */
-  ctaBtn: {
-    width: '100%',
-    paddingVertical: 18,
-    borderRadius: 18,
-    backgroundColor: Colors.accent,
-    alignItems: 'center',
-  },
-  ctaBtnDisabled: { backgroundColor: '#2a2a2e' },
-  bottomPad: { paddingHorizontal: 20, paddingTop: 16 },
-
-  /* welcome */
-  welcomeSkipRow: {
-    paddingHorizontal: 20,
-    alignItems: 'flex-end',
-    flexShrink: 0,
-  },
-  skipChip: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-    borderWidth: 1,
-  },
-  welcomeCenter: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 32,
-    paddingBottom: 20,
-  },
-  accentBar: {
-    width: 48,
-    height: 3,
-    backgroundColor: Colors.accent,
-    borderRadius: 2,
-    marginVertical: 16,
-  },
-  featureChips: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    justifyContent: 'center',
-    marginTop: 28,
-  },
-  featureChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    backgroundColor: `${Colors.accent}18`,
-    borderWidth: 1,
-    borderColor: `${Colors.accent}33`,
-  },
-  sportIcons: { flexDirection: 'row', gap: 16, marginTop: 32 },
-  sportIconBox: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  /* sport focus */
-  sportList: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8, gap: 10 },
-  sportCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    borderRadius: 20,
-    padding: 16,
-  },
-  sportCardIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 15,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  sportCardCheck: {
-    width: 24,
-    height: 24,
-    borderRadius: 8,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-
-  /* goal race */
-  yesNoRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 20, paddingTop: 16 },
-  yesNoBtn: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 16,
-    borderWidth: 2,
-    alignItems: 'center',
-  },
-  raceList: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
-  raceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    padding: 12,
-    borderRadius: 14,
-    borderWidth: 1.5,
-    marginBottom: 8,
-  },
-  noRaceCenter: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 32,
-  },
-  dateInput: {
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    padding: 14,
-    fontFamily: 'BarlowCondensedBold',
-    fontSize: 16,
-    color: Colors.text,
-  },
-
-  /* baseline */
-  baselineList: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
-  baseCard: {
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 20,
-    padding: 20,
-  },
-  baseCardHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14 },
-  baseCardIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  inputRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  baseInput: {
-    flex: 1,
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    padding: 14,
-    fontFamily: 'BarlowCondensedBlack',
-    fontSize: 28,
-    color: Colors.text,
-    textAlign: 'center',
-  },
-  unitBadge: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-  },
-  agePresets: { flexDirection: 'row', gap: 6, marginTop: 10 },
-  ageBtn: {
-    flex: 1,
-    paddingVertical: 6,
-    borderRadius: 8,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  /* training hours */
-  hoursCenter: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-  },
-  hrsControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 24,
-    width: '100%',
-  },
-  hrsBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  hrsPresets: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 4, justifyContent: 'center' },
-  hrsPreset: {
-    paddingHorizontal: 8,
-    paddingVertical: 5,
-    borderRadius: 8,
-    borderWidth: 1,
-  },
-  levelBadge: {
-    width: '100%',
-    borderRadius: 20,
-    borderWidth: 1,
-    padding: 18,
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  breakdownRow: { flexDirection: 'row', gap: 8, width: '100%' },
-  breakdownCard: {
-    flex: 1,
-    borderRadius: 14,
-    borderWidth: 1,
-    padding: 10,
-    alignItems: 'center',
-  },
-
-  /* ready */
-  readyList: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
-  nameInput: {
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderRadius: 14,
-    padding: 16,
-    fontFamily: 'BarlowCondensedBold',
-    fontSize: 22,
-    color: Colors.text,
-    marginBottom: 20,
-  },
-  summaryCard: {
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 20,
-    overflow: 'hidden',
-    marginBottom: 12,
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    padding: 12,
-    paddingHorizontal: 16,
-  },
-  skippedCard: {
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 16,
-    padding: 14,
-    paddingHorizontal: 16,
-    marginBottom: 16,
-  },
-  skippedChip: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 8,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  promiseCard: {
-    flexDirection: 'row',
-    gap: 12,
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 14,
-    alignItems: 'flex-start',
-  },
-
-  /* skip-all pill */
-  skipAllWrap: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    pointerEvents: 'box-none',
-  },
-  skipAllBtn: {
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-});

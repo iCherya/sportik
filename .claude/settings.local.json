@@ -6,7 +6,9 @@
       "Bash(npx tsc:*)",
       "Bash(npx eslint:*)",
       "Bash(echo \"EXIT:$?\")",
-      "Bash(npx prettier:*)"
+      "Bash(npx prettier:*)",
+      "Bash(python3)",
+      "Bash(grep -v \"^$\")"
     ]
   }
 }

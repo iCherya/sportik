@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
-import { Colors, Sports, type SportKey } from '../theme';
+import { useColors } from '../context/ThemeContext';
+import { type ColorPalette, Sports, type SportKey } from '../theme';
 
 type Intensity = 'low' | 'moderate' | 'high';
 
@@ -21,7 +22,54 @@ const METS: Record<SportKey, Record<Intensity, number>> = {
   all: { low: 7, moderate: 9, high: 12 },
 };
 
+const makeStyles = (c: ColorPalette) =>
+  StyleSheet.create({
+    segGroup: { flexDirection: 'row', gap: 8, marginBottom: 12 },
+    segBtn: {
+      flex: 1,
+      paddingVertical: 9,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.card,
+      alignItems: 'center',
+    },
+    row2: { flexDirection: 'row', gap: 10 },
+    field: { marginBottom: 14 },
+    fieldLabel: { letterSpacing: 2, marginBottom: 6 },
+    inputRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+    input: {
+      flex: 1,
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 6,
+      fontFamily: 'BarlowCondensedBlack',
+      fontSize: 20,
+      color: c.text,
+      textAlign: 'center',
+    },
+    unit: {
+      paddingHorizontal: 8,
+      paddingVertical: 10,
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 10,
+    },
+    resultBox: {
+      borderWidth: 1,
+      borderRadius: 18,
+      padding: 20,
+      alignItems: 'center',
+    },
+  });
+
 export function CalorieBurn() {
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [weight, setWeight] = useState('72');
   const [hours, setHours] = useState('1');
   const [mins, setMins] = useState('30');
@@ -53,7 +101,7 @@ export function CalorieBurn() {
               <AppText
                 size={13}
                 weight="semibold"
-                color={active ? Sports[id].color : Colors.textMid}>
+                color={active ? Sports[id].color : colors.textMid}>
                 {Sports[id].icon}
               </AppText>
             </Pressable>
@@ -68,7 +116,7 @@ export function CalorieBurn() {
             condensed
             weight="bold"
             size={11}
-            color={Colors.textDim}
+            color={colors.textDim}
             uppercase>
             Weight
           </AppText>
@@ -77,12 +125,12 @@ export function CalorieBurn() {
               value={weight}
               onChangeText={setWeight}
               placeholder="72"
-              placeholderTextColor={Colors.textDim}
+              placeholderTextColor={colors.textDim}
               keyboardType="decimal-pad"
               style={styles.input}
             />
             <View style={styles.unit}>
-              <AppText size={11} color={Colors.textMid}>
+              <AppText size={11} color={colors.textMid}>
                 kg
               </AppText>
             </View>
@@ -94,7 +142,7 @@ export function CalorieBurn() {
             condensed
             weight="bold"
             size={11}
-            color={Colors.textDim}
+            color={colors.textDim}
             uppercase>
             Duration
           </AppText>
@@ -103,12 +151,12 @@ export function CalorieBurn() {
               value={hours}
               onChangeText={setHours}
               placeholder="1"
-              placeholderTextColor={Colors.textDim}
+              placeholderTextColor={colors.textDim}
               keyboardType="numeric"
               style={[styles.input, { flex: 1 }]}
             />
             <View style={styles.unit}>
-              <AppText size={11} color={Colors.textMid}>
+              <AppText size={11} color={colors.textMid}>
                 h
               </AppText>
             </View>
@@ -116,12 +164,12 @@ export function CalorieBurn() {
               value={mins}
               onChangeText={setMins}
               placeholder="30"
-              placeholderTextColor={Colors.textDim}
+              placeholderTextColor={colors.textDim}
               keyboardType="numeric"
               style={[styles.input, { flex: 1 }]}
             />
             <View style={styles.unit}>
-              <AppText size={11} color={Colors.textMid}>
+              <AppText size={11} color={colors.textMid}>
                 m
               </AppText>
             </View>
@@ -135,7 +183,7 @@ export function CalorieBurn() {
           condensed
           weight="bold"
           size={11}
-          color={Colors.textDim}
+          color={colors.textDim}
           uppercase>
           Intensity
         </AppText>
@@ -150,7 +198,7 @@ export function CalorieBurn() {
                   active && { borderColor: sp.color, backgroundColor: `${sp.color}18` },
                 ]}
                 onPress={() => setIntensity(i.id)}>
-                <AppText size={13} weight="semibold" color={active ? sp.color : Colors.textMid}>
+                <AppText size={13} weight="semibold" color={active ? sp.color : colors.textMid}>
                   {i.l}
                 </AppText>
               </Pressable>
@@ -172,54 +220,10 @@ export function CalorieBurn() {
         <AppText condensed weight="black" size={52} color={sp.color}>
           {w > 0 && dur > 0 ? kcal : '--'}
         </AppText>
-        <AppText size={13} color={Colors.textMid} style={{ marginTop: 2 }}>
+        <AppText size={13} color={colors.textMid} style={{ marginTop: 2 }}>
           kcal · MET {met}
         </AppText>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  segGroup: { flexDirection: 'row', gap: 8, marginBottom: 12 },
-  segBtn: {
-    flex: 1,
-    paddingVertical: 9,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.card,
-    alignItems: 'center',
-  },
-  row2: { flexDirection: 'row', gap: 10 },
-  field: { marginBottom: 14 },
-  fieldLabel: { letterSpacing: 2, marginBottom: 6 },
-  inputRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  input: {
-    flex: 1,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 6,
-    fontFamily: 'BarlowCondensedBlack',
-    fontSize: 20,
-    color: Colors.text,
-    textAlign: 'center',
-  },
-  unit: {
-    paddingHorizontal: 8,
-    paddingVertical: 10,
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 10,
-  },
-  resultBox: {
-    borderWidth: 1,
-    borderRadius: 18,
-    padding: 20,
-    alignItems: 'center',
-  },
-});

@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
 import { Button } from '../components/Button';
 import { Overlay } from '../components/Overlay';
+import { useColors } from '../context/ThemeContext';
 import { useT } from '../i18n';
-import { Colors } from '../theme';
+import { type ColorPalette } from '../theme';
 import type { Profile } from '../types';
 
 type Props = {
@@ -16,8 +17,56 @@ type Props = {
 
 const EMOJIS = ['🧑', '👩', '🏊', '🚴', '🏃', '🔱', '💪', '🦾', '🏅', '⚡'];
 
+const makeStyles = (c: ColorPalette) =>
+  StyleSheet.create({
+    section: {
+      marginBottom: 16,
+    },
+    sectionLabel: {
+      letterSpacing: 2,
+      marginBottom: 10,
+    },
+    emojiGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 10,
+    },
+    emojiBtn: {
+      width: 48,
+      height: 48,
+      borderRadius: 14,
+      borderWidth: 2,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    input: {
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 12,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      fontFamily: 'BarlowSemiBold',
+      fontSize: 16,
+      color: c.text,
+    },
+    focusGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+    },
+    focusBtn: {
+      paddingVertical: 9,
+      paddingHorizontal: 16,
+      borderRadius: 10,
+      borderWidth: 1,
+    },
+  });
+
 export function EditProfileOverlay({ profile, onSave, onBack }: Props) {
   const t = useT();
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [name, setName] = useState(profile.name);
   const [city, setCity] = useState(profile.city);
   const [focus, setFocus] = useState(profile.focus);
@@ -39,7 +88,7 @@ export function EditProfileOverlay({ profile, onSave, onBack }: Props) {
           condensed
           weight="bold"
           size={11}
-          color={Colors.textDim}
+          color={colors.textDim}
           uppercase
           style={styles.sectionLabel}>
           {t('ep_avatar')}
@@ -53,8 +102,8 @@ export function EditProfileOverlay({ profile, onSave, onBack }: Props) {
                 style={[
                   styles.emojiBtn,
                   {
-                    borderColor: active ? Colors.accent : Colors.border,
-                    backgroundColor: active ? `${Colors.accent}22` : Colors.card,
+                    borderColor: active ? colors.accent : colors.border,
+                    backgroundColor: active ? `${colors.accent}22` : colors.card,
                   },
                 ]}
                 onPress={() => setAvatar(e)}>
@@ -71,7 +120,7 @@ export function EditProfileOverlay({ profile, onSave, onBack }: Props) {
           condensed
           weight="bold"
           size={11}
-          color={Colors.textDim}
+          color={colors.textDim}
           uppercase
           style={styles.sectionLabel}>
           {t('ep_name')}
@@ -79,7 +128,7 @@ export function EditProfileOverlay({ profile, onSave, onBack }: Props) {
         <TextInput
           value={name}
           onChangeText={setName}
-          placeholderTextColor={Colors.textDim}
+          placeholderTextColor={colors.textDim}
           style={styles.input}
         />
       </View>
@@ -90,7 +139,7 @@ export function EditProfileOverlay({ profile, onSave, onBack }: Props) {
           condensed
           weight="bold"
           size={11}
-          color={Colors.textDim}
+          color={colors.textDim}
           uppercase
           style={styles.sectionLabel}>
           {t('ep_city')}
@@ -98,7 +147,7 @@ export function EditProfileOverlay({ profile, onSave, onBack }: Props) {
         <TextInput
           value={city}
           onChangeText={setCity}
-          placeholderTextColor={Colors.textDim}
+          placeholderTextColor={colors.textDim}
           style={styles.input}
         />
       </View>
@@ -109,7 +158,7 @@ export function EditProfileOverlay({ profile, onSave, onBack }: Props) {
           condensed
           weight="bold"
           size={11}
-          color={Colors.textDim}
+          color={colors.textDim}
           uppercase
           style={styles.sectionLabel}>
           {t('ep_focus')}
@@ -123,15 +172,15 @@ export function EditProfileOverlay({ profile, onSave, onBack }: Props) {
                 style={[
                   styles.focusBtn,
                   {
-                    borderColor: active ? Colors.accent : Colors.border,
-                    backgroundColor: active ? `${Colors.accent}22` : Colors.surface,
+                    borderColor: active ? colors.accent : colors.border,
+                    backgroundColor: active ? `${colors.accent}22` : colors.surface,
                   },
                 ]}
                 onPress={() => setFocus(f)}>
                 <AppText
                   weight="semibold"
                   size={13}
-                  color={active ? Colors.accent : Colors.textMid}>
+                  color={active ? colors.accent : colors.textMid}>
                   {f}
                 </AppText>
               </Pressable>
@@ -148,48 +197,3 @@ export function EditProfileOverlay({ profile, onSave, onBack }: Props) {
     </Overlay>
   );
 }
-
-const styles = StyleSheet.create({
-  section: {
-    marginBottom: 16,
-  },
-  sectionLabel: {
-    letterSpacing: 2,
-    marginBottom: 10,
-  },
-  emojiGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  emojiBtn: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  input: {
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontFamily: 'BarlowSemiBold',
-    fontSize: 16,
-    color: Colors.text,
-  },
-  focusGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  focusBtn: {
-    paddingVertical: 9,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-    borderWidth: 1,
-  },
-});

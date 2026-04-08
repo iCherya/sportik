@@ -1,16 +1,64 @@
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
 import { Overlay } from '../components/Overlay';
+import { useColors } from '../context/ThemeContext';
 import { useT } from '../i18n';
-import { Colors } from '../theme';
+import { type ColorPalette } from '../theme';
 
 type Props = {
   onBack: () => void;
 };
 
+const makeStyles = (c: ColorPalette) =>
+  StyleSheet.create({
+    wordmarkSection: {
+      alignItems: 'center',
+      paddingVertical: 24,
+      paddingBottom: 32,
+    },
+    betaBadge: {
+      marginTop: 16,
+      backgroundColor: `${c.accent}22`,
+      paddingHorizontal: 14,
+      paddingVertical: 5,
+      borderRadius: 8,
+    },
+    infoCard: {
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 18,
+      overflow: 'hidden',
+      marginBottom: 16,
+    },
+    infoRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 13,
+      paddingHorizontal: 16,
+    },
+    madeRow: {
+      paddingVertical: 13,
+      paddingHorizontal: 16,
+    },
+    linkRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 14,
+      paddingHorizontal: 4,
+      borderBottomWidth: 1,
+      borderBottomColor: c.borderSub,
+    },
+  });
+
 export function AboutOverlay({ onBack }: Props) {
   const t = useT();
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   const infoRows = [
     { label: t('about_platform'), val: 'React Native' },
@@ -28,11 +76,11 @@ export function AboutOverlay({ onBack }: Props) {
       <View style={styles.wordmarkSection}>
         <AppText condensed weight="black" size={48} style={{ letterSpacing: 6 }}>
           SPORT
-          <AppText condensed weight="black" size={48} color={Colors.accent}>
+          <AppText condensed weight="black" size={48} color={colors.accent}>
             IK
           </AppText>
         </AppText>
-        <AppText size={13} color={Colors.textMid} style={{ marginTop: 6 }}>
+        <AppText size={13} color={colors.textMid} style={{ marginTop: 6 }}>
           Version 1.0.0 · Build 2025.03
         </AppText>
         <View style={styles.betaBadge}>
@@ -40,7 +88,7 @@ export function AboutOverlay({ onBack }: Props) {
             condensed
             weight="black"
             size={12}
-            color={Colors.accent}
+            color={colors.accent}
             uppercase
             style={{ letterSpacing: 1 }}>
             {t('about_beta')}
@@ -57,10 +105,10 @@ export function AboutOverlay({ onBack }: Props) {
               styles.infoRow,
               i < infoRows.length - 1 && {
                 borderBottomWidth: 1,
-                borderBottomColor: Colors.borderSub,
+                borderBottomColor: colors.borderSub,
               },
             ]}>
-            <AppText weight="medium" size={13} color={Colors.textMid}>
+            <AppText weight="medium" size={13} color={colors.textMid}>
               {r.label}
             </AppText>
             <AppText weight="bold" size={13}>
@@ -69,7 +117,7 @@ export function AboutOverlay({ onBack }: Props) {
           </View>
         ))}
         <View style={styles.madeRow}>
-          <AppText size={13} color={Colors.textMid}>
+          <AppText size={13} color={colors.textMid}>
             {t('about_made')}
           </AppText>
         </View>
@@ -81,7 +129,7 @@ export function AboutOverlay({ onBack }: Props) {
           <AppText weight="medium" size={14}>
             {l}
           </AppText>
-          <AppText size={14} color={Colors.textDim}>
+          <AppText size={14} color={colors.textDim}>
             ›
           </AppText>
         </Pressable>
@@ -89,46 +137,3 @@ export function AboutOverlay({ onBack }: Props) {
     </Overlay>
   );
 }
-
-const styles = StyleSheet.create({
-  wordmarkSection: {
-    alignItems: 'center',
-    paddingVertical: 24,
-    paddingBottom: 32,
-  },
-  betaBadge: {
-    marginTop: 16,
-    backgroundColor: `${Colors.accent}22`,
-    paddingHorizontal: 14,
-    paddingVertical: 5,
-    borderRadius: 8,
-  },
-  infoCard: {
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 18,
-    overflow: 'hidden',
-    marginBottom: 16,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 13,
-    paddingHorizontal: 16,
-  },
-  madeRow: {
-    paddingVertical: 13,
-    paddingHorizontal: 16,
-  },
-  linkRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderSub,
-  },
-});

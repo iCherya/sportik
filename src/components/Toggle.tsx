@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, Pressable } from 'react-native';
 
-import { Colors } from '../theme';
+import { useColors } from '../context/ThemeContext';
 
 type Props = {
   on: boolean;
@@ -9,6 +9,7 @@ type Props = {
 };
 
 export function Toggle({ on, onToggle }: Props) {
+  const colors = useColors();
   const anim = useRef(new Animated.Value(on ? 1 : 0)).current;
 
   useEffect(() => {
@@ -22,7 +23,7 @@ export function Toggle({ on, onToggle }: Props) {
 
   const bg = anim.interpolate({
     inputRange: [0, 1],
-    outputRange: [Colors.border, Colors.accent],
+    outputRange: [colors.border, colors.accent],
   });
 
   const dotLeft = anim.interpolate({

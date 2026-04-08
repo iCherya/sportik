@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
-import { Colors } from '../theme';
+import { useColors } from '../context/ThemeContext';
+import { type ColorPalette, Sports } from '../theme';
 
 type Lap = { time: number; total: number };
 
@@ -42,7 +43,156 @@ const fmtShort = (ms: number): string => {
   return mn > 0 ? `${mn}:${String(Math.floor(s % 60)).padStart(2, '0')}` : `${s.toFixed(1)}s`;
 };
 
+const makeStyles = (c: ColorPalette) =>
+  StyleSheet.create({
+    configRow: { flexDirection: 'row', gap: 12, marginBottom: 14 },
+    fieldLabel: { letterSpacing: 2, marginBottom: 6 },
+    segGroup: { flexDirection: 'row', gap: 6 },
+    segBtn: {
+      flex: 1,
+      paddingVertical: 9,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.card,
+      alignItems: 'center',
+    },
+    inputRow: { flexDirection: 'row' },
+    input: {
+      flex: 1,
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 12,
+      padding: 12,
+      fontFamily: 'BarlowCondensedBlack',
+      fontSize: 20,
+      color: c.text,
+      textAlign: 'center',
+    },
+    swTabRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14 },
+    swTab: {
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.card,
+      position: 'relative',
+    },
+    swRemove: {
+      position: 'absolute',
+      top: 4,
+      right: 4,
+      width: 16,
+      height: 16,
+      borderRadius: 8,
+      backgroundColor: c.surface,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    addSwBtn: {
+      width: 38,
+      height: 38,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderStyle: 'dashed',
+      borderColor: c.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    liveDisplay: { alignItems: 'center', paddingVertical: 8 },
+    progressBg: {
+      height: 5,
+      backgroundColor: c.surface,
+      borderRadius: 3,
+      overflow: 'hidden',
+      marginVertical: 8,
+    },
+    progressFill: { height: '100%', borderRadius: 3 },
+    tapBtn: {
+      backgroundColor: c.accent,
+      paddingVertical: 20,
+      borderRadius: 18,
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    ctrlRow: { flexDirection: 'row', gap: 8, marginBottom: 4 },
+    ctrlBtn: {
+      flex: 1,
+      paddingVertical: 12,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.card,
+      alignItems: 'center',
+    },
+    lapTable: {
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 14,
+      overflow: 'hidden',
+    },
+    lapRow: {
+      flexDirection: 'row',
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: c.borderSub,
+    },
+    lapCell: { flex: 1 },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.65)',
+      justifyContent: 'flex-end',
+    },
+    modalSheet: {
+      backgroundColor: c.surface,
+      borderRadius: 28,
+      padding: 20,
+      paddingBottom: 32,
+    },
+    modalHandle: {
+      width: 36,
+      height: 4,
+      backgroundColor: c.border,
+      borderRadius: 2,
+      alignSelf: 'center',
+      marginBottom: 18,
+    },
+    modalInput: {
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 14,
+      padding: 14,
+      fontFamily: 'Barlow',
+      fontSize: 16,
+      color: c.text,
+      marginBottom: 16,
+    },
+    modalBtns: { flexDirection: 'row', gap: 8 },
+    modalCancelBtn: {
+      flex: 1,
+      paddingVertical: 13,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: c.border,
+      alignItems: 'center',
+    },
+    modalConfirmBtn: {
+      flex: 2,
+      paddingVertical: 13,
+      borderRadius: 12,
+      backgroundColor: c.accent,
+      alignItems: 'center',
+    },
+  });
+
 export function PoolCounter() {
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [poolLen, setPoolLen] = useState('50');
   const [targetLaps, setTargetLaps] = useState('40');
   const [activeSw, setActiveSw] = useState(0);
@@ -110,7 +260,7 @@ export function PoolCounter() {
             condensed
             weight="bold"
             size={11}
-            color={Colors.textDim}
+            color={colors.textDim}
             uppercase>
             Pool
           </AppText>
@@ -121,15 +271,15 @@ export function PoolCounter() {
                 style={[
                   styles.segBtn,
                   poolLen === v && {
-                    borderColor: Colors.swim,
-                    backgroundColor: `${Colors.swim}18`,
+                    borderColor: Sports.swim.color,
+                    backgroundColor: `${Sports.swim.color}18`,
                   },
                 ]}
                 onPress={() => setPoolLen(v)}>
                 <AppText
                   size={13}
                   weight="semibold"
-                  color={poolLen === v ? Colors.swim : Colors.textMid}>
+                  color={poolLen === v ? Sports.swim.color : colors.textMid}>
                   {v}m
                 </AppText>
               </Pressable>
@@ -142,7 +292,7 @@ export function PoolCounter() {
             condensed
             weight="bold"
             size={11}
-            color={Colors.textDim}
+            color={colors.textDim}
             uppercase>
             Target (laps)
           </AppText>
@@ -151,7 +301,7 @@ export function PoolCounter() {
               value={targetLaps}
               onChangeText={setTargetLaps}
               placeholder="40"
-              placeholderTextColor={Colors.textDim}
+              placeholderTextColor={colors.textDim}
               keyboardType="numeric"
               style={styles.input}
             />
@@ -165,7 +315,7 @@ export function PoolCounter() {
         condensed
         weight="bold"
         size={11}
-        color={Colors.textDim}
+        color={colors.textDim}
         uppercase>
         Swimmers
       </AppText>
@@ -178,8 +328,8 @@ export function PoolCounter() {
                 style={[
                   styles.swTab,
                   activeSw === i && {
-                    borderColor: Colors.swim,
-                    backgroundColor: `${Colors.swim}11`,
+                    borderColor: Sports.swim.color,
+                    backgroundColor: `${Sports.swim.color}11`,
                   },
                 ]}
                 onPress={() => setActiveSw(i)}>
@@ -190,7 +340,7 @@ export function PoolCounter() {
                       e.stopPropagation();
                       remSw(i);
                     }}>
-                    <AppText size={10} color={Colors.textDim}>
+                    <AppText size={10} color={colors.textDim}>
                       ×
                     </AppText>
                   </Pressable>
@@ -198,10 +348,10 @@ export function PoolCounter() {
                 <AppText
                   weight="semibold"
                   size={13}
-                  color={activeSw === i ? Colors.swim : Colors.textMid}>
+                  color={activeSw === i ? Sports.swim.color : colors.textMid}>
                   {s.name}
                 </AppText>
-                <AppText condensed weight="black" size={18} color={Colors.swim}>
+                <AppText condensed weight="black" size={18} color={Sports.swim.color}>
                   {s.laps.length} laps
                 </AppText>
               </Pressable>
@@ -209,7 +359,7 @@ export function PoolCounter() {
           </View>
         </ScrollView>
         <Pressable style={styles.addSwBtn} onPress={() => setShowModal(true)}>
-          <AppText size={20} color={Colors.textDim}>
+          <AppText size={20} color={colors.textDim}>
             ＋
           </AppText>
         </Pressable>
@@ -217,16 +367,16 @@ export function PoolCounter() {
 
       {/* Live display */}
       <View style={styles.liveDisplay}>
-        <AppText condensed weight="black" size={72} color={Colors.swim}>
+        <AppText condensed weight="black" size={72} color={Sports.swim.color}>
           {lc}
         </AppText>
-        <AppText size={14} color={Colors.textMid}>
+        <AppText size={14} color={colors.textMid}>
           {dist} km
         </AppText>
-        <AppText condensed weight="bold" size={22} color={Colors.text} style={{ marginTop: 4 }}>
+        <AppText condensed weight="bold" size={22} color={colors.text} style={{ marginTop: 4 }}>
           {fmtMs(le)}
         </AppText>
-        <AppText size={12} color={Colors.textDim} style={{ marginTop: 4 }}>
+        <AppText size={12} color={colors.textDim} style={{ marginTop: 4 }}>
           {sw.running && ll !== null
             ? `Current lap: ${fmtMs(ll)}`
             : lc > 0
@@ -243,7 +393,7 @@ export function PoolCounter() {
               styles.progressFill,
               {
                 width: `${pct}%` as `${number}%`,
-                backgroundColor: lc >= tgt ? Colors.accent : Colors.swim,
+                backgroundColor: lc >= tgt ? colors.accent : Sports.swim.color,
               },
             ]}
           />
@@ -281,7 +431,7 @@ export function PoolCounter() {
                 startTime: null,
               }));
             }}>
-            <AppText condensed weight="bold" size={14} color={Colors.textMid}>
+            <AppText condensed weight="bold" size={14} color={colors.textMid}>
               ⏸ Pause
             </AppText>
           </Pressable>
@@ -292,7 +442,7 @@ export function PoolCounter() {
               const now = Date.now();
               updSw(activeSw, (s) => ({ ...s, running: true, startTime: now, lapStart: now }));
             }}>
-            <AppText condensed weight="bold" size={14} color={Colors.textMid}>
+            <AppText condensed weight="bold" size={14} color={colors.textMid}>
               ▶ Resume
             </AppText>
           </Pressable>
@@ -301,14 +451,14 @@ export function PoolCounter() {
           <Pressable
             style={styles.ctrlBtn}
             onPress={() => updSw(activeSw, (s) => ({ ...s, laps: s.laps.slice(0, -1) }))}>
-            <AppText condensed weight="bold" size={14} color={Colors.textMid}>
+            <AppText condensed weight="bold" size={14} color={colors.textMid}>
               ↩ Undo
             </AppText>
           </Pressable>
         )}
         {lc > 0 && (
           <Pressable
-            style={[styles.ctrlBtn, { borderColor: `${Colors.heart}33` }]}
+            style={[styles.ctrlBtn, { borderColor: `${colors.heart}33` }]}
             onPress={() =>
               updSw(activeSw, (s) => ({
                 ...s,
@@ -319,7 +469,7 @@ export function PoolCounter() {
                 lapStart: null,
               }))
             }>
-            <AppText condensed weight="bold" size={14} color={Colors.heart}>
+            <AppText condensed weight="bold" size={14} color={colors.heart}>
               ✕ Reset
             </AppText>
           </Pressable>
@@ -333,21 +483,21 @@ export function PoolCounter() {
             condensed
             weight="bold"
             size={11}
-            color={Colors.textDim}
+            color={colors.textDim}
             uppercase
             style={{ letterSpacing: 2, marginBottom: 8 }}>
             Lap History
           </AppText>
           <View style={styles.lapTable}>
             {/* Header */}
-            <View style={[styles.lapRow, { backgroundColor: Colors.surface }]}>
+            <View style={[styles.lapRow, { backgroundColor: colors.surface }]}>
               {['LAP', 'TIME', 'TOTAL', 'Δ AVG'].map((h) => (
                 <AppText
                   key={h}
                   condensed
                   weight="bold"
                   size={10}
-                  color={Colors.textDim}
+                  color={colors.textDim}
                   uppercase
                   style={styles.lapCell}>
                   {h}
@@ -361,11 +511,15 @@ export function PoolCounter() {
               const ds =
                 Math.abs(delta) < 500 ? '±0' : (delta < 0 ? '-' : '+') + fmtShort(Math.abs(delta));
               const deltaColor =
-                Math.abs(delta) < 500 ? Colors.textDim : delta < 0 ? Colors.run : Colors.heart;
+                Math.abs(delta) < 500
+                  ? colors.textDim
+                  : delta < 0
+                    ? Sports.run.color
+                    : colors.heart;
               return (
                 <View
                   key={i}
-                  style={[styles.lapRow, isBest && { backgroundColor: `${Colors.accent}08` }]}>
+                  style={[styles.lapRow, isBest && { backgroundColor: `${colors.accent}08` }]}>
                   <View
                     style={[
                       styles.lapCell,
@@ -375,18 +529,18 @@ export function PoolCounter() {
                       condensed
                       weight="bold"
                       size={13}
-                      color={isBest ? Colors.accent : Colors.text}>
+                      color={isBest ? colors.accent : colors.text}>
                       {i + 1}
                     </AppText>
                     {isBest && (
                       <View
                         style={{
-                          backgroundColor: `${Colors.accent}22`,
+                          backgroundColor: `${colors.accent}22`,
                           paddingHorizontal: 4,
                           paddingVertical: 1,
                           borderRadius: 4,
                         }}>
-                        <AppText size={9} color={Colors.accent}>
+                        <AppText size={9} color={colors.accent}>
                           ★
                         </AppText>
                       </View>
@@ -396,11 +550,11 @@ export function PoolCounter() {
                     condensed
                     weight="bold"
                     size={13}
-                    color={isBest ? Colors.accent : Colors.text}
+                    color={isBest ? colors.accent : colors.text}
                     style={styles.lapCell}>
                     {fmtMs(lap.time)}
                   </AppText>
-                  <AppText condensed size={12} color={Colors.textMid} style={styles.lapCell}>
+                  <AppText condensed size={12} color={colors.textMid} style={styles.lapCell}>
                     {fmtMs(lap.total)}
                   </AppText>
                   <AppText
@@ -423,13 +577,13 @@ export function PoolCounter() {
                 paddingVertical: 6,
                 paddingHorizontal: 2,
               }}>
-              <AppText size={11} color={Colors.textDim}>
+              <AppText size={11} color={colors.textDim}>
                 Best:{' '}
-                <AppText size={11} color={Colors.accent} weight="bold">
+                <AppText size={11} color={colors.accent} weight="bold">
                   {fmtMs(bestLap)}
                 </AppText>
               </AppText>
-              <AppText size={11} color={Colors.textDim}>
+              <AppText size={11} color={colors.textDim}>
                 Avg: {fmtMs(avgLap)}
               </AppText>
             </View>
@@ -453,14 +607,14 @@ export function PoolCounter() {
               value={newName}
               onChangeText={setNewName}
               placeholder="Lane 2 / Name"
-              placeholderTextColor={Colors.textDim}
+              placeholderTextColor={colors.textDim}
               style={styles.modalInput}
               autoFocus
               onSubmitEditing={addSw}
             />
             <View style={styles.modalBtns}>
               <Pressable style={styles.modalCancelBtn} onPress={() => setShowModal(false)}>
-                <AppText condensed weight="bold" size={14} color={Colors.textMid}>
+                <AppText condensed weight="bold" size={14} color={colors.textMid}>
                   Cancel
                 </AppText>
               </Pressable>
@@ -476,149 +630,3 @@ export function PoolCounter() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  configRow: { flexDirection: 'row', gap: 12, marginBottom: 14 },
-  fieldLabel: { letterSpacing: 2, marginBottom: 6 },
-  segGroup: { flexDirection: 'row', gap: 6 },
-  segBtn: {
-    flex: 1,
-    paddingVertical: 9,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.card,
-    alignItems: 'center',
-  },
-  inputRow: { flexDirection: 'row' },
-  input: {
-    flex: 1,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    padding: 12,
-    fontFamily: 'BarlowCondensedBlack',
-    fontSize: 20,
-    color: Colors.text,
-    textAlign: 'center',
-  },
-  swTabRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14 },
-  swTab: {
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.card,
-    position: 'relative',
-  },
-  swRemove: {
-    position: 'absolute',
-    top: 4,
-    right: 4,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: Colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  addSwBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: Colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  liveDisplay: { alignItems: 'center', paddingVertical: 8 },
-  progressBg: {
-    height: 5,
-    backgroundColor: Colors.surface,
-    borderRadius: 3,
-    overflow: 'hidden',
-    marginVertical: 8,
-  },
-  progressFill: { height: '100%', borderRadius: 3 },
-  tapBtn: {
-    backgroundColor: Colors.accent,
-    paddingVertical: 20,
-    borderRadius: 18,
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  ctrlRow: { flexDirection: 'row', gap: 8, marginBottom: 4 },
-  ctrlBtn: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.card,
-    alignItems: 'center',
-  },
-  lapTable: {
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 14,
-    overflow: 'hidden',
-  },
-  lapRow: {
-    flexDirection: 'row',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderSub,
-  },
-  lapCell: { flex: 1 },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.65)',
-    justifyContent: 'flex-end',
-  },
-  modalSheet: {
-    backgroundColor: Colors.surface,
-    borderRadius: 28,
-    padding: 20,
-    paddingBottom: 32,
-  },
-  modalHandle: {
-    width: 36,
-    height: 4,
-    backgroundColor: Colors.border,
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: 18,
-  },
-  modalInput: {
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 14,
-    padding: 14,
-    fontFamily: 'Barlow',
-    fontSize: 16,
-    color: Colors.text,
-    marginBottom: 16,
-  },
-  modalBtns: { flexDirection: 'row', gap: 8 },
-  modalCancelBtn: {
-    flex: 1,
-    paddingVertical: 13,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    alignItems: 'center',
-  },
-  modalConfirmBtn: {
-    flex: 2,
-    paddingVertical: 13,
-    borderRadius: 12,
-    backgroundColor: Colors.accent,
-    alignItems: 'center',
-  },
-});

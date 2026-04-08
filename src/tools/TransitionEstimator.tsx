@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
-import { Colors } from '../theme';
+import { useColors } from '../context/ThemeContext';
+import { type ColorPalette, Sports } from '../theme';
 
 type ExpLevel = 'beginner' | 'intermediate' | 'advanced' | 'elite';
 
@@ -32,7 +33,46 @@ const TIPS = [
 const fmtTime = (s: number) =>
   `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}`;
 
+const makeStyles = (c: ColorPalette) =>
+  StyleSheet.create({
+    field: { marginBottom: 14 },
+    fieldLabel: { letterSpacing: 2, marginBottom: 8 },
+    segGroup: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    segBtn: {
+      paddingVertical: 9,
+      paddingHorizontal: 14,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.card,
+    },
+    cards: { flexDirection: 'row', gap: 8, marginBottom: 16 },
+    resultCard: {
+      flex: 1,
+      borderWidth: 1,
+      borderRadius: 14,
+      padding: 12,
+      alignItems: 'center',
+    },
+    tipsCard: {
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 16,
+      overflow: 'hidden',
+    },
+    tipRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+    },
+  });
+
 export function TransitionEstimator() {
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [exp, setExp] = useState<ExpLevel>('intermediate');
 
   const b = BASE[exp];
@@ -40,9 +80,9 @@ export function TransitionEstimator() {
   const t2 = b.t2;
 
   const resultCards = [
-    { l: 'T1', v: fmtTime(t1), c: Colors.tri },
-    { l: 'T2', v: fmtTime(t2), c: Colors.tri },
-    { l: 'Total', v: fmtTime(t1 + t2), c: Colors.accent },
+    { l: 'T1', v: fmtTime(t1), c: Sports.tri.color },
+    { l: 'T2', v: fmtTime(t2), c: Sports.tri.color },
+    { l: 'Total', v: fmtTime(t1 + t2), c: colors.accent },
   ];
 
   return (
@@ -53,7 +93,7 @@ export function TransitionEstimator() {
           condensed
           weight="bold"
           size={11}
-          color={Colors.textDim}
+          color={colors.textDim}
           uppercase>
           Experience
         </AppText>
@@ -65,10 +105,16 @@ export function TransitionEstimator() {
                 key={e.id}
                 style={[
                   styles.segBtn,
-                  active && { borderColor: Colors.tri, backgroundColor: `${Colors.tri}18` },
+                  active && {
+                    borderColor: Sports.tri.color,
+                    backgroundColor: `${Sports.tri.color}18`,
+                  },
                 ]}
                 onPress={() => setExp(e.id)}>
-                <AppText size={12} weight="semibold" color={active ? Colors.tri : Colors.textMid}>
+                <AppText
+                  size={12}
+                  weight="semibold"
+                  color={active ? Sports.tri.color : colors.textMid}>
                   {e.l}
                 </AppText>
               </Pressable>
@@ -83,7 +129,7 @@ export function TransitionEstimator() {
             key={c.l}
             style={[
               styles.resultCard,
-              { backgroundColor: Colors.triBg, borderColor: `${Colors.tri}33` },
+              { backgroundColor: Sports.tri.bg, borderColor: `${Sports.tri.color}33` },
             ]}>
             <AppText
               condensed
@@ -107,7 +153,7 @@ export function TransitionEstimator() {
             key={tip.text}
             style={[
               styles.tipRow,
-              i < TIPS.length - 1 && { borderBottomWidth: 1, borderBottomColor: Colors.borderSub },
+              i < TIPS.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.borderSub },
             ]}>
             <AppText size={16} style={{ width: 24 }}>
               {i < 3 ? '🔵' : '🟢'}
@@ -115,7 +161,7 @@ export function TransitionEstimator() {
             <AppText weight="medium" size={13} style={{ flex: 1 }}>
               {tip.text}
             </AppText>
-            <AppText size={11} color={Colors.textDim}>
+            <AppText size={11} color={colors.textDim}>
               {tip.zone}
             </AppText>
           </View>
@@ -124,39 +170,3 @@ export function TransitionEstimator() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  field: { marginBottom: 14 },
-  fieldLabel: { letterSpacing: 2, marginBottom: 8 },
-  segGroup: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  segBtn: {
-    paddingVertical: 9,
-    paddingHorizontal: 14,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.card,
-  },
-  cards: { flexDirection: 'row', gap: 8, marginBottom: 16 },
-  resultCard: {
-    flex: 1,
-    borderWidth: 1,
-    borderRadius: 14,
-    padding: 12,
-    alignItems: 'center',
-  },
-  tipsCard: {
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  tipRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-  },
-});

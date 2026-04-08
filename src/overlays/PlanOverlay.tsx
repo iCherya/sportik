@@ -1,18 +1,98 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
 import { Overlay } from '../components/Overlay';
+import { useColors } from '../context/ThemeContext';
 import { PLAN_WEEKS } from '../data';
 import { useT } from '../i18n';
-import { Colors, Sports, type SportKey } from '../theme';
+import { type ColorPalette, Sports, type SportKey } from '../theme';
 
 type Props = {
   onBack: () => void;
 };
 
+const makeStyles = (c: ColorPalette) =>
+  StyleSheet.create({
+    metaRow: {
+      flexDirection: 'row',
+      gap: 8,
+      marginBottom: 20,
+    },
+    metaCard: {
+      flex: 1,
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 12,
+      paddingVertical: 10,
+      paddingHorizontal: 8,
+      alignItems: 'center',
+    },
+    weekHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 12,
+    },
+    progressBg: {
+      height: 4,
+      width: 120,
+      backgroundColor: c.surface,
+      borderRadius: 2,
+      overflow: 'hidden',
+    },
+    progressFill: {
+      height: '100%',
+      backgroundColor: c.tri,
+      borderRadius: 2,
+    },
+    sessionCard: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: 12,
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderRadius: 16,
+      paddingVertical: 14,
+      paddingRight: 16,
+      overflow: 'hidden',
+    },
+    stripe: {
+      width: 4,
+      alignSelf: 'stretch',
+      borderRadius: 2,
+    },
+    sportIcon: {
+      width: 38,
+      height: 38,
+      borderRadius: 11,
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
+    },
+    aiCard: {
+      marginTop: 20,
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: `${c.accent}22`,
+      borderRadius: 18,
+      padding: 18,
+      alignItems: 'center',
+    },
+    aiComingSoon: {
+      marginTop: 12,
+      backgroundColor: `${c.accent}22`,
+      paddingHorizontal: 14,
+      paddingVertical: 5,
+      borderRadius: 8,
+    },
+  });
+
 export function PlanOverlay({ onBack }: Props) {
   const t = useT();
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const week = PLAN_WEEKS[0];
   const totalWeeks = 16;
@@ -26,7 +106,7 @@ export function PlanOverlay({ onBack }: Props) {
         condensed
         weight="black"
         size={11}
-        color={Colors.tri}
+        color={colors.tri}
         style={{ letterSpacing: 1.5 }}
         uppercase>
         {t('tools_tab_tri')}
@@ -48,7 +128,7 @@ export function PlanOverlay({ onBack }: Props) {
               condensed
               weight="bold"
               size={10}
-              color={Colors.textDim}
+              color={colors.textDim}
               uppercase
               style={{ letterSpacing: 1.5, marginBottom: 4, textAlign: 'center' }}>
               {m.l}
@@ -71,7 +151,7 @@ export function PlanOverlay({ onBack }: Props) {
               style={[styles.progressFill, { width: `${(1 / totalWeeks) * 100}%` as `${number}%` }]}
             />
           </View>
-          <AppText size={11} color={Colors.textDim}>
+          <AppText size={11} color={colors.textDim}>
             1/{totalWeeks}
           </AppText>
         </View>
@@ -88,7 +168,7 @@ export function PlanOverlay({ onBack }: Props) {
               style={[
                 styles.sessionCard,
                 {
-                  borderColor: done ? `${Colors.accent}33` : Colors.border,
+                  borderColor: done ? `${colors.accent}33` : colors.border,
                   opacity: done ? 0.7 : 1,
                 },
               ]}
@@ -108,7 +188,7 @@ export function PlanOverlay({ onBack }: Props) {
                   style={{ textDecorationLine: done ? 'line-through' : 'none' }}>
                   {s.title}
                 </AppText>
-                <AppText size={12} color={Colors.textMid} style={{ marginTop: 2 }}>
+                <AppText size={12} color={colors.textMid} style={{ marginTop: 2 }}>
                   {s.detail}
                 </AppText>
                 <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
@@ -123,7 +203,7 @@ export function PlanOverlay({ onBack }: Props) {
                       {s.type}
                     </AppText>
                   </View>
-                  <AppText weight="semibold" size={11} color={Colors.textDim}>
+                  <AppText weight="semibold" size={11} color={colors.textDim}>
                     {s.duration}
                   </AppText>
                 </View>
@@ -147,7 +227,7 @@ export function PlanOverlay({ onBack }: Props) {
           style={{ marginBottom: 6, textAlign: 'center' }}>
           {t('plan_ai_title')}
         </AppText>
-        <AppText size={12} color={Colors.textMid} style={{ lineHeight: 18, textAlign: 'center' }}>
+        <AppText size={12} color={colors.textMid} style={{ lineHeight: 18, textAlign: 'center' }}>
           {t('plan_ai_sub')}
         </AppText>
         <View style={styles.aiComingSoon}>
@@ -155,7 +235,7 @@ export function PlanOverlay({ onBack }: Props) {
             condensed
             weight="black"
             size={12}
-            color={Colors.accent}
+            color={colors.accent}
             uppercase
             style={{ letterSpacing: 1 }}>
             {t('plan_ai_badge')}
@@ -165,79 +245,3 @@ export function PlanOverlay({ onBack }: Props) {
     </Overlay>
   );
 }
-
-const styles = StyleSheet.create({
-  metaRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 20,
-  },
-  metaCard: {
-    flex: 1,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    alignItems: 'center',
-  },
-  weekHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  progressBg: {
-    height: 4,
-    width: 120,
-    backgroundColor: Colors.surface,
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: Colors.tri,
-    borderRadius: 2,
-  },
-  sessionCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderRadius: 16,
-    paddingVertical: 14,
-    paddingRight: 16,
-    overflow: 'hidden',
-  },
-  stripe: {
-    width: 4,
-    alignSelf: 'stretch',
-    borderRadius: 2,
-  },
-  sportIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 11,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  aiCard: {
-    marginTop: 20,
-    backgroundColor: '#0f0f0a',
-    borderWidth: 1,
-    borderColor: `${Colors.accent}22`,
-    borderRadius: 18,
-    padding: 18,
-    alignItems: 'center',
-  },
-  aiComingSoon: {
-    marginTop: 12,
-    backgroundColor: `${Colors.accent}22`,
-    paddingHorizontal: 14,
-    paddingVertical: 5,
-    borderRadius: 8,
-  },
-});

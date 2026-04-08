@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
-import { Colors } from '../theme';
+import { useColors } from '../context/ThemeContext';
+import { type ColorPalette, Sports } from '../theme';
 
 const PRESETS = [
   { l: '5K', v: '5' },
@@ -11,7 +12,53 @@ const PRESETS = [
   { l: 'Mar', v: '42.2' },
 ];
 
+const makeStyles = (c: ColorPalette) =>
+  StyleSheet.create({
+    field: { marginBottom: 14 },
+    fieldLabel: { letterSpacing: 2, marginBottom: 6 },
+    inputRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
+    input: {
+      flex: 1,
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 12,
+      padding: 14,
+      fontFamily: 'BarlowCondensedBlack',
+      fontSize: 24,
+      color: c.text,
+      textAlign: 'center',
+    },
+    unit: {
+      paddingHorizontal: 10,
+      paddingVertical: 12,
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 10,
+    },
+    presets: { flexDirection: 'row', gap: 8 },
+    preset: {
+      flex: 1,
+      paddingVertical: 7,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.surface,
+      alignItems: 'center',
+    },
+    resultBox: {
+      borderWidth: 1,
+      borderRadius: 18,
+      padding: 20,
+      alignItems: 'center',
+      marginBottom: 12,
+    },
+  });
+
 export function RaceTimePredictor() {
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [kd, setKd] = useState('10');
   const [kt, setKt] = useState('42');
   const [td2, setTd2] = useState('42.2');
@@ -39,7 +86,7 @@ export function RaceTimePredictor() {
           condensed
           weight="bold"
           size={11}
-          color={Colors.textDim}
+          color={colors.textDim}
           uppercase>
           Known Result
         </AppText>
@@ -48,12 +95,12 @@ export function RaceTimePredictor() {
             value={kd}
             onChangeText={setKd}
             placeholder="10"
-            placeholderTextColor={Colors.textDim}
+            placeholderTextColor={colors.textDim}
             keyboardType="decimal-pad"
             style={[styles.input, { flex: 1 }]}
           />
           <View style={styles.unit}>
-            <AppText size={12} color={Colors.textMid}>
+            <AppText size={12} color={colors.textMid}>
               km
             </AppText>
           </View>
@@ -61,12 +108,12 @@ export function RaceTimePredictor() {
             value={kt}
             onChangeText={setKt}
             placeholder="42"
-            placeholderTextColor={Colors.textDim}
+            placeholderTextColor={colors.textDim}
             keyboardType="decimal-pad"
             style={[styles.input, { flex: 1 }]}
           />
           <View style={styles.unit}>
-            <AppText size={12} color={Colors.textMid}>
+            <AppText size={12} color={colors.textMid}>
               min
             </AppText>
           </View>
@@ -79,7 +126,7 @@ export function RaceTimePredictor() {
           condensed
           weight="bold"
           size={11}
-          color={Colors.textDim}
+          color={colors.textDim}
           uppercase>
           Target Distance
         </AppText>
@@ -88,12 +135,12 @@ export function RaceTimePredictor() {
             value={td2}
             onChangeText={setTd2}
             placeholder="42.2"
-            placeholderTextColor={Colors.textDim}
+            placeholderTextColor={colors.textDim}
             keyboardType="decimal-pad"
             style={styles.input}
           />
           <View style={styles.unit}>
-            <AppText size={12} color={Colors.textMid}>
+            <AppText size={12} color={colors.textMid}>
               km
             </AppText>
           </View>
@@ -106,14 +153,17 @@ export function RaceTimePredictor() {
                 key={p.l}
                 style={[
                   styles.preset,
-                  active && { borderColor: Colors.run, backgroundColor: `${Colors.run}22` },
+                  active && {
+                    borderColor: Sports.run.color,
+                    backgroundColor: `${Sports.run.color}22`,
+                  },
                 ]}
                 onPress={() => setTd2(p.v)}>
                 <AppText
                   condensed
                   weight="bold"
                   size={12}
-                  color={active ? Colors.run : Colors.textDim}>
+                  color={active ? Sports.run.color : colors.textDim}>
                   {p.l}
                 </AppText>
               </Pressable>
@@ -125,71 +175,28 @@ export function RaceTimePredictor() {
       <View
         style={[
           styles.resultBox,
-          { backgroundColor: Colors.runBg, borderColor: `${Colors.run}33` },
+          { backgroundColor: Sports.run.bg, borderColor: `${Sports.run.color}33` },
         ]}>
         <AppText
           condensed
           weight="bold"
           size={11}
-          color={Colors.run}
+          color={Sports.run.color}
           uppercase
           style={{ letterSpacing: 2, marginBottom: 4 }}>
           Predicted
         </AppText>
-        <AppText condensed weight="black" size={36} color={Colors.run}>
+        <AppText condensed weight="black" size={36} color={Sports.run.color}>
           {fmt(t2)}
         </AppText>
-        <AppText size={13} color={Colors.textMid} style={{ marginTop: 2 }}>
+        <AppText size={13} color={colors.textMid} style={{ marginTop: 2 }}>
           {paceStr(t2, d2)}
         </AppText>
       </View>
 
-      <AppText size={11} color={Colors.textDim} style={{ textAlign: 'center' }}>
+      <AppText size={11} color={colors.textDim} style={{ textAlign: 'center' }}>
         Riegel formula (1977)
       </AppText>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  field: { marginBottom: 14 },
-  fieldLabel: { letterSpacing: 2, marginBottom: 6 },
-  inputRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
-  input: {
-    flex: 1,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    padding: 14,
-    fontFamily: 'BarlowCondensedBlack',
-    fontSize: 24,
-    color: Colors.text,
-    textAlign: 'center',
-  },
-  unit: {
-    paddingHorizontal: 10,
-    paddingVertical: 12,
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 10,
-  },
-  presets: { flexDirection: 'row', gap: 8 },
-  preset: {
-    flex: 1,
-    paddingVertical: 7,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.surface,
-    alignItems: 'center',
-  },
-  resultBox: {
-    borderWidth: 1,
-    borderRadius: 18,
-    padding: 20,
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-});

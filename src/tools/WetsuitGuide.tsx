@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
-import { Colors } from '../theme';
+import { useColors } from '../context/ThemeContext';
+import { type ColorPalette, Sports } from '../theme';
 
 const RULES = [
   {
@@ -21,7 +22,7 @@ const RULES = [
     label: '14–16°C',
     status: 'Wetsuit mandatory',
     badge: 'REQUIRED',
-    bc: Colors.swim,
+    bc: Sports.swim.color,
   },
   {
     min: 16,
@@ -30,7 +31,7 @@ const RULES = [
     label: '16–22°C',
     status: 'Wetsuit allowed',
     badge: 'ALLOWED',
-    bc: Colors.run,
+    bc: Sports.run.color,
   },
   {
     min: 22,
@@ -39,7 +40,7 @@ const RULES = [
     label: '22–24°C',
     status: 'Wetsuit optional',
     badge: 'OPTIONAL',
-    bc: Colors.accent,
+    bc: '#E8FF47',
   },
   {
     min: 24,
@@ -48,7 +49,7 @@ const RULES = [
     label: '24–26°C',
     status: 'Wetsuit banned',
     badge: 'BANNED',
-    bc: Colors.bike,
+    bc: Sports.bike.color,
   },
   {
     min: 26,
@@ -57,11 +58,61 @@ const RULES = [
     label: 'Above 26°C',
     status: 'No wetsuit — heat risk',
     badge: 'TOO HOT',
-    bc: Colors.heart,
+    bc: '#FF4F6A',
   },
 ];
 
+const makeStyles = (c: ColorPalette) =>
+  StyleSheet.create({
+    field: { marginBottom: 14 },
+    fieldLabel: { letterSpacing: 2, marginBottom: 6 },
+    inputRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    input: {
+      flex: 1,
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 12,
+      padding: 14,
+      fontFamily: 'BarlowCondensedBlack',
+      fontSize: 24,
+      color: c.text,
+      textAlign: 'center',
+    },
+    unit: {
+      paddingHorizontal: 10,
+      paddingVertical: 12,
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 10,
+    },
+    currentCard: {
+      borderWidth: 1,
+      borderRadius: 18,
+      padding: 20,
+      alignItems: 'center',
+      marginBottom: 14,
+    },
+    rulesCard: {
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 16,
+      overflow: 'hidden',
+    },
+    ruleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
+    },
+  });
+
 export function WetsuitGuide() {
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [temp, setTemp] = useState('18');
   const t = parseFloat(temp) || 0;
   const cur = RULES.find((r) => t >= r.min && t < r.max) ?? RULES[RULES.length - 1];
@@ -74,7 +125,7 @@ export function WetsuitGuide() {
           condensed
           weight="bold"
           size={11}
-          color={Colors.textDim}
+          color={colors.textDim}
           uppercase>
           Water Temp
         </AppText>
@@ -83,12 +134,12 @@ export function WetsuitGuide() {
             value={temp}
             onChangeText={setTemp}
             placeholder="18"
-            placeholderTextColor={Colors.textDim}
+            placeholderTextColor={colors.textDim}
             keyboardType="decimal-pad"
             style={styles.input}
           />
           <View style={styles.unit}>
-            <AppText size={12} color={Colors.textMid}>
+            <AppText size={12} color={colors.textMid}>
               °C
             </AppText>
           </View>
@@ -129,7 +180,7 @@ export function WetsuitGuide() {
                 styles.ruleRow,
                 i < RULES.length - 1 && {
                   borderBottomWidth: 1,
-                  borderBottomColor: Colors.borderSub,
+                  borderBottomColor: colors.borderSub,
                 },
                 active && { backgroundColor: `${r.bc}11` },
               ]}>
@@ -163,50 +214,3 @@ export function WetsuitGuide() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  field: { marginBottom: 14 },
-  fieldLabel: { letterSpacing: 2, marginBottom: 6 },
-  inputRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  input: {
-    flex: 1,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    padding: 14,
-    fontFamily: 'BarlowCondensedBlack',
-    fontSize: 24,
-    color: Colors.text,
-    textAlign: 'center',
-  },
-  unit: {
-    paddingHorizontal: 10,
-    paddingVertical: 12,
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 10,
-  },
-  currentCard: {
-    borderWidth: 1,
-    borderRadius: 18,
-    padding: 20,
-    alignItems: 'center',
-    marginBottom: 14,
-  },
-  rulesCard: {
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  ruleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-  },
-});

@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { BottomNav } from './components/BottomNav';
 import type { Lang } from './context/LangContext';
+import { useColors } from './context/ThemeContext';
 import { EVENTS_DATA, type Event, type Tool } from './data';
 import { AboutOverlay } from './overlays/AboutOverlay';
 import { EditProfileOverlay } from './overlays/EditProfileOverlay';
@@ -15,7 +16,6 @@ import { EventsScreen } from './screens/EventsScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { ToolsScreen } from './screens/ToolsScreen';
 import { STORAGE_KEYS, Storage } from './storage';
-import { Colors } from './theme';
 import type { OverlayType, Profile, Screen } from './types';
 
 type Props = {
@@ -28,6 +28,7 @@ type Props = {
 };
 
 export function MainApp({ isDark, setIsDark, lang, setLang, profile, setProfile }: Props) {
+  const colors = useColors();
   const [screen, setScreen] = useState<Screen>('home');
   const [overlay, setOverlay] = useState<OverlayType | null>(null);
   const [favs, setFavs] = useState<number[]>([1]);
@@ -165,7 +166,7 @@ export function MainApp({ isDark, setIsDark, lang, setLang, profile, setProfile 
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.bg }]}>
       {renderScreen()}
       <BottomNav screen={screen} onNavigate={navigateTo} />
       {renderOverlay()}
@@ -176,6 +177,5 @@ export function MainApp({ isDark, setIsDark, lang, setLang, profile, setProfile 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.bg,
   },
 });

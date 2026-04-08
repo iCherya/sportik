@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
 
+import { useColors } from '../context/ThemeContext';
 import { useT } from '../i18n';
-import { Colors, Font } from '../theme';
+import { type ColorPalette, Font } from '../theme';
 import { NAV_ORDER, type Screen } from '../types';
 import { AppText } from './AppText';
 
@@ -22,8 +23,38 @@ const NAV_ITEMS: {
   { id: 'account', icon: '👤', labelKey: 'nav_account' },
 ];
 
+const makeStyles = (c: ColorPalette) =>
+  StyleSheet.create({
+    nav: {
+      flexDirection: 'row',
+      backgroundColor: c.surface,
+      borderTopWidth: 1,
+      borderTopColor: c.border,
+      paddingBottom: 20,
+      paddingHorizontal: 4,
+      position: 'relative',
+    },
+    indicator: {
+      position: 'absolute',
+      top: -1,
+      width: 28,
+      height: 2,
+      backgroundColor: c.accent,
+      borderRadius: 2,
+    },
+    item: {
+      flex: 1,
+      alignItems: 'center',
+      paddingTop: 12,
+      paddingBottom: 4,
+      gap: 4,
+    },
+  });
+
 export function BottomNav({ screen, onNavigate }: Props) {
   const t = useT();
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [navWidth, setNavWidth] = useState(0);
   const indicatorLeft = useRef(new Animated.Value(0)).current;
 
@@ -32,7 +63,6 @@ export function BottomNav({ screen, onNavigate }: Props) {
   useEffect(() => {
     if (navWidth === 0) return;
     const tabWidth = navWidth / 4;
-    // Center indicator (28px wide) under each tab
     const targetLeft = idx * tabWidth + (tabWidth - 28) / 2;
     Animated.timing(indicatorLeft, {
       toValue: targetLeft,
@@ -56,7 +86,7 @@ export function BottomNav({ screen, onNavigate }: Props) {
               weight="semibold"
               size={10}
               uppercase
-              color={active ? Colors.accent : Colors.textDim}
+              color={active ? colors.accent : colors.textDim}
               style={{ letterSpacing: 0.5, fontFamily: Font.bodySemiBold }}>
               {t(item.labelKey)}
             </AppText>
@@ -66,30 +96,3 @@ export function BottomNav({ screen, onNavigate }: Props) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  nav: {
-    flexDirection: 'row',
-    backgroundColor: Colors.surface,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    paddingBottom: 20,
-    paddingHorizontal: 4,
-    position: 'relative',
-  },
-  indicator: {
-    position: 'absolute',
-    top: -1,
-    width: 28,
-    height: 2,
-    backgroundColor: Colors.accent,
-    borderRadius: 2,
-  },
-  item: {
-    flex: 1,
-    alignItems: 'center',
-    paddingTop: 12,
-    paddingBottom: 4,
-    gap: 4,
-  },
-});

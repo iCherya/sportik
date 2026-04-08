@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
-import { Colors } from '../theme';
+import { useColors } from '../context/ThemeContext';
+import { type ColorPalette, Sports } from '../theme';
 
 type Intensity = 'low' | 'moderate' | 'high';
 
@@ -15,7 +16,54 @@ const INTENSITY_OPTIONS: { id: Intensity; l: string }[] = [
 const CARBS: Record<Intensity, number> = { low: 40, moderate: 60, high: 90 };
 const FLUID: Record<Intensity, number> = { low: 500, moderate: 700, high: 900 };
 
+const makeStyles = (c: ColorPalette) =>
+  StyleSheet.create({
+    field: { marginBottom: 14 },
+    fieldLabel: { letterSpacing: 2, marginBottom: 6 },
+    inputRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    input: {
+      flex: 1,
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 12,
+      padding: 14,
+      fontFamily: 'BarlowCondensedBlack',
+      fontSize: 24,
+      color: c.text,
+      textAlign: 'center',
+    },
+    unit: {
+      paddingHorizontal: 10,
+      paddingVertical: 12,
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 10,
+    },
+    segGroup: { flexDirection: 'row', gap: 8 },
+    segBtn: {
+      flex: 1,
+      paddingVertical: 9,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.card,
+      alignItems: 'center',
+    },
+    grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+    resultCard: {
+      width: '47%',
+      borderWidth: 1,
+      borderRadius: 16,
+      padding: 14,
+      alignItems: 'center',
+    },
+  });
+
 export function NutritionCalc() {
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [hours, setHours] = useState('4');
   const [mins, setMins] = useState('30');
   const [intensity, setIntensity] = useState<Intensity>('moderate');
@@ -27,10 +75,15 @@ export function NutritionCalc() {
   const tf = Math.round(((fr * dur) / 1000) * 10) / 10;
 
   const cards = [
-    { label: 'Carbs', val: `${tc}g`, color: Colors.accent, sub: `${cr}g/hr` },
-    { label: 'Fluid', val: `${tf}L`, color: Colors.swim, sub: `${fr}ml/hr` },
-    { label: 'Sodium', val: `${Math.round(500 * dur)}mg`, color: Colors.bike, sub: '500mg/hr' },
-    { label: 'Gels', val: `${Math.ceil(tc / 25)}`, color: Colors.run, sub: '×25g' },
+    { label: 'Carbs', val: `${tc}g`, color: colors.accent, sub: `${cr}g/hr` },
+    { label: 'Fluid', val: `${tf}L`, color: Sports.swim.color, sub: `${fr}ml/hr` },
+    {
+      label: 'Sodium',
+      val: `${Math.round(500 * dur)}mg`,
+      color: Sports.bike.color,
+      sub: '500mg/hr',
+    },
+    { label: 'Gels', val: `${Math.ceil(tc / 25)}`, color: Sports.run.color, sub: '×25g' },
   ];
 
   return (
@@ -41,7 +94,7 @@ export function NutritionCalc() {
           condensed
           weight="bold"
           size={11}
-          color={Colors.textDim}
+          color={colors.textDim}
           uppercase>
           Race Duration
         </AppText>
@@ -50,12 +103,12 @@ export function NutritionCalc() {
             value={hours}
             onChangeText={setHours}
             placeholder="4"
-            placeholderTextColor={Colors.textDim}
+            placeholderTextColor={colors.textDim}
             keyboardType="numeric"
             style={[styles.input, { flex: 1 }]}
           />
           <View style={styles.unit}>
-            <AppText size={12} color={Colors.textMid}>
+            <AppText size={12} color={colors.textMid}>
               h
             </AppText>
           </View>
@@ -63,12 +116,12 @@ export function NutritionCalc() {
             value={mins}
             onChangeText={setMins}
             placeholder="30"
-            placeholderTextColor={Colors.textDim}
+            placeholderTextColor={colors.textDim}
             keyboardType="numeric"
             style={[styles.input, { flex: 1 }]}
           />
           <View style={styles.unit}>
-            <AppText size={12} color={Colors.textMid}>
+            <AppText size={12} color={colors.textMid}>
               m
             </AppText>
           </View>
@@ -81,7 +134,7 @@ export function NutritionCalc() {
           condensed
           weight="bold"
           size={11}
-          color={Colors.textDim}
+          color={colors.textDim}
           uppercase>
           Intensity
         </AppText>
@@ -93,13 +146,13 @@ export function NutritionCalc() {
                 key={i.id}
                 style={[
                   styles.segBtn,
-                  active && { borderColor: Colors.accent, backgroundColor: `${Colors.accent}18` },
+                  active && { borderColor: colors.accent, backgroundColor: `${colors.accent}18` },
                 ]}
                 onPress={() => setIntensity(i.id)}>
                 <AppText
                   size={13}
                   weight="semibold"
-                  color={active ? Colors.accent : Colors.textMid}>
+                  color={active ? colors.accent : colors.textMid}>
                   {i.l}
                 </AppText>
               </Pressable>
@@ -128,7 +181,7 @@ export function NutritionCalc() {
             <AppText condensed weight="black" size={32} color={c.color}>
               {c.val}
             </AppText>
-            <AppText size={11} color={Colors.textMid}>
+            <AppText size={11} color={colors.textMid}>
               {c.sub}
             </AppText>
           </View>
@@ -137,47 +190,3 @@ export function NutritionCalc() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  field: { marginBottom: 14 },
-  fieldLabel: { letterSpacing: 2, marginBottom: 6 },
-  inputRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  input: {
-    flex: 1,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    padding: 14,
-    fontFamily: 'BarlowCondensedBlack',
-    fontSize: 24,
-    color: Colors.text,
-    textAlign: 'center',
-  },
-  unit: {
-    paddingHorizontal: 10,
-    paddingVertical: 12,
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 10,
-  },
-  segGroup: { flexDirection: 'row', gap: 8 },
-  segBtn: {
-    flex: 1,
-    paddingVertical: 9,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.card,
-    alignItems: 'center',
-  },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  resultCard: {
-    width: '47%',
-    borderWidth: 1,
-    borderRadius: 16,
-    padding: 14,
-    alignItems: 'center',
-  },
-});
