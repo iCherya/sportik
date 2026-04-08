@@ -38,8 +38,6 @@ npx create-expo-app@latest -t
 - `expo-av` — audio (CadenceBeeper tool)
 - `expo-haptics` — haptic feedback
 
-### Developer tools
+### AI
 
-- 🧰 TypeScript - for static type-checking
-- 🛠️ ESLint and Prettier - for linting and code formatting
-- 🐶 Husky - to lint commit messages and code upon committing or pushing
+All application code was written by [Claude Code](https://claude.ai/code) (Claude Sonnet 4.6 by Anthropic).
