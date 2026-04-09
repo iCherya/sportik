@@ -7,6 +7,7 @@ import { Card } from '../components/Card';
 import { useColors } from '../context/ThemeContext';
 import { QUOTES, TODAY_SESSIONS, TOOLS, type Event, type Tool } from '../data';
 import { useT } from '../i18n';
+import type { LangKey } from '../i18n';
 import { type ColorPalette, Font, Space, Sports, type SportKey } from '../theme';
 import type { Profile } from '../types';
 
@@ -30,27 +31,38 @@ const WL_DATA = [
   { sport: 'bike' as const, icon: '🚴', color: Sports.bike.color, val: '5.8h', pct: 88 },
   { sport: 'run' as const, icon: '🏃', color: Sports.run.color, val: '2.4h', pct: 45 },
 ];
-const PLAN_TEMPLATES = [
+
+const PLAN_TEMPLATES: {
+  icon: string;
+  nameKey: LangKey;
+  metaWeeksKey: LangKey;
+  metaLevelKey: LangKey;
+  active: boolean;
+  sport: 'tri' | 'run' | 'bike';
+}[] = [
   {
     icon: '🔱',
-    name: 'Ironman 70.3',
-    meta: '16 weeks · Intermediate',
+    nameKey: 'plan_name_703',
+    metaWeeksKey: 'plan_meta_16w',
+    metaLevelKey: 'plan_meta_inter',
     active: true,
-    sport: 'tri' as const,
+    sport: 'tri',
   },
   {
     icon: '🏃',
-    name: 'Marathon',
-    meta: '18 weeks · Beginner',
+    nameKey: 'plan_name_marathon',
+    metaWeeksKey: 'plan_meta_18w',
+    metaLevelKey: 'plan_meta_beginner',
     active: false,
-    sport: 'run' as const,
+    sport: 'run',
   },
   {
     icon: '🚴',
-    name: 'Gran Fondo',
-    meta: '12 weeks · Advanced',
+    nameKey: 'plan_name_fondo',
+    metaWeeksKey: 'plan_meta_12w',
+    metaLevelKey: 'plan_meta_advanced',
     active: false,
-    sport: 'bike' as const,
+    sport: 'bike',
   },
 ];
 
@@ -229,7 +241,7 @@ function QuoteCard({ qi, setQi }: { qi: number; setQi: Dispatch<SetStateAction<n
               <AppText
                 size={28}
                 color={colors.accent}
-                style={{ lineHeight: 28, fontFamily: Font.condensedBlack }}>
+                style={{ lineHeight: 28, fontFamily: Font.bodyBold }}>
                 "
               </AppText>
               <AppText size={15} style={{ marginTop: 4, lineHeight: 22 }}>
@@ -519,7 +531,7 @@ export function HomeScreen({
               color={colors.textMid}
               uppercase
               style={{ marginTop: 4, letterSpacing: 0.3, textAlign: 'center' }}>
-              {tool.name.split(' ')[0]}
+              {t(tool.nameKey).split(' ')[0]}
             </AppText>
           </Pressable>
         ))}
@@ -538,7 +550,7 @@ export function HomeScreen({
       <Card style={{ padding: 0, overflow: 'hidden' }}>
         {PLAN_TEMPLATES.map((p, idx) => (
           <Pressable
-            key={p.name}
+            key={p.nameKey}
             style={[styles.planRow, idx < PLAN_TEMPLATES.length - 1 && styles.planRowBorder]}
             onPress={onOpenPlan}>
             <View style={[styles.planIcon, { backgroundColor: Sports[p.sport].bg }]}>
@@ -546,10 +558,10 @@ export function HomeScreen({
             </View>
             <View style={{ flex: 1 }}>
               <AppText weight="semibold" size={14}>
-                {p.name}
+                {t(p.nameKey)}
               </AppText>
               <AppText size={12} color={colors.textMid} style={{ marginTop: 2 }}>
-                {p.meta}
+                {t(p.metaWeeksKey)} · {t(p.metaLevelKey)}
               </AppText>
             </View>
             {p.active && (
@@ -576,10 +588,10 @@ export function HomeScreen({
           </View>
           <View style={{ flex: 1 }}>
             <AppText weight="semibold" size={14} color={colors.textMid}>
-              AI Plan
+              {t('home_ai_plan')}
             </AppText>
             <AppText size={12} color={colors.textDim} style={{ marginTop: 2 }}>
-              Personalised · Coming soon
+              {t('home_ai_soon')}
             </AppText>
           </View>
           <View style={styles.soonBadge}>

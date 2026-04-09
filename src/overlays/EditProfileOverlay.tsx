@@ -46,7 +46,7 @@ const makeStyles = (c: ColorPalette) =>
       borderRadius: 12,
       paddingHorizontal: 14,
       paddingVertical: 12,
-      fontFamily: 'BarlowSemiBold',
+      fontFamily: 'InterSemiBold',
       fontSize: 16,
       color: c.text,
     },

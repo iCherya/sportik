@@ -247,7 +247,7 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
           />
           <View style={styles.unitBadge}>
             <AppText weight="semibold" size={13} color={colors.textMid}>
-              bpm
+              {t('hrz_bpm')}
             </AppText>
           </View>
         </View>
@@ -319,7 +319,7 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
             />
             <View style={styles.unitBadge}>
               <AppText weight="semibold" size={13} color={colors.textMid}>
-                bpm
+                {t('hrz_bpm')}
               </AppText>
             </View>
           </View>
@@ -339,12 +339,12 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
           color={colors.textDim}
           uppercase
           style={{ letterSpacing: 2 }}>
-          Zones
+          {t('hrzo_zones')}
         </AppText>
         {hasAnyOverride && (
           <Pressable onPress={() => setOverrides({})}>
             <AppText size={11} color={colors.textDim} style={{ textDecorationLine: 'underline' }}>
-              Reset all
+              {t('hrzo_reset_all')}
             </AppText>
           </Pressable>
         )}
@@ -390,7 +390,7 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
                           color={z.color}
                           uppercase
                           style={{ letterSpacing: 0.5 }}>
-                          CUSTOM
+                          {t('hrzo_custom')}
                         </AppText>
                       </View>
                     )}
@@ -399,7 +399,7 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
                       weight="bold"
                       size={14}
                       color={isManual ? z.color : colors.text}>
-                      {lo !== '--' ? `${lo}–${hi}` : '--'} bpm
+                      {lo !== '--' ? `${lo}–${hi}` : '--'} {t('hrz_bpm')}
                     </AppText>
                     <AppText
                       size={12}
@@ -438,7 +438,7 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
                         color={colors.textDim}
                         uppercase
                         style={{ letterSpacing: 1.5, marginBottom: 4 }}>
-                        From
+                        {t('hrzo_from')}
                       </AppText>
                       <TextInput
                         value={overrides[z.z]?.lo ?? lo}
@@ -462,7 +462,7 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
                         color={colors.textDim}
                         uppercase
                         style={{ letterSpacing: 1.5, marginBottom: 4 }}>
-                        To
+                        {t('hrzo_to')}
                       </AppText>
                       <TextInput
                         value={overrides[z.z]?.hi ?? hi}
@@ -476,7 +476,7 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
                       />
                     </View>
                     <AppText size={13} color={colors.textDim} style={{ marginTop: 14 }}>
-                      bpm
+                      {t('hrz_bpm')}
                     </AppText>
                   </View>
                   {isManual && (
@@ -485,7 +485,7 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
                         size={11}
                         color={colors.textDim}
                         style={{ textDecorationLine: 'underline' }}>
-                        Reset to auto
+                        {t('hrzo_reset_auto')}
                       </AppText>
                     </Pressable>
                   )}

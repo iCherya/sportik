@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
 import { useColors } from '../context/ThemeContext';
+import { type LangKey, useT } from '../i18n';
 import { type ColorPalette, Sports } from '../theme';
 
 type ExpLevel = 'beginner' | 'intermediate' | 'advanced' | 'elite';
@@ -14,20 +15,20 @@ const BASE: Record<ExpLevel, { t1: number; t2: number }> = {
   elite: { t1: 60, t2: 50 },
 };
 
-const EXP_OPTIONS: { id: ExpLevel; l: string }[] = [
-  { id: 'beginner', l: 'Beginner' },
-  { id: 'intermediate', l: 'Intermediate' },
-  { id: 'advanced', l: 'Advanced' },
-  { id: 'elite', l: 'Elite' },
+const EXP_OPTIONS: { id: ExpLevel; lKey: LangKey }[] = [
+  { id: 'beginner', lKey: 'trans_beginner' },
+  { id: 'intermediate', lKey: 'trans_intermediate' },
+  { id: 'advanced', lKey: 'trans_advanced' },
+  { id: 'elite', lKey: 'trans_elite' },
 ];
 
-const TIPS = [
-  { text: 'Remove wetsuit', zone: 'T1' },
-  { text: 'Helmet buckled', zone: 'T1' },
-  { text: 'Shoes on bike', zone: 'T1' },
-  { text: 'Rack bike', zone: 'T2' },
-  { text: 'Switch shoes', zone: 'T2' },
-  { text: 'Race belt', zone: 'T2' },
+const TIPS: { textKey: LangKey; zone: string }[] = [
+  { textKey: 'trans_tip_wetsuit', zone: 'T1' },
+  { textKey: 'trans_tip_helmet', zone: 'T1' },
+  { textKey: 'trans_tip_shoes_bike', zone: 'T1' },
+  { textKey: 'trans_tip_rack', zone: 'T2' },
+  { textKey: 'trans_tip_shoes_run', zone: 'T2' },
+  { textKey: 'trans_tip_belt', zone: 'T2' },
 ];
 
 const fmtTime = (s: number) =>
@@ -73,6 +74,7 @@ const makeStyles = (c: ColorPalette) =>
 export function TransitionEstimator() {
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
+  const t = useT();
   const [exp, setExp] = useState<ExpLevel>('intermediate');
 
   const b = BASE[exp];
@@ -82,7 +84,7 @@ export function TransitionEstimator() {
   const resultCards = [
     { l: 'T1', v: fmtTime(t1), c: Sports.tri.color },
     { l: 'T2', v: fmtTime(t2), c: Sports.tri.color },
-    { l: 'Total', v: fmtTime(t1 + t2), c: colors.accent },
+    { l: t('trans_total'), v: fmtTime(t1 + t2), c: colors.accent },
   ];
 
   return (
@@ -95,7 +97,7 @@ export function TransitionEstimator() {
           size={11}
           color={colors.textDim}
           uppercase>
-          Experience
+          {t('tool_experience')}
         </AppText>
         <View style={styles.segGroup}>
           {EXP_OPTIONS.map((e) => {
@@ -115,7 +117,7 @@ export function TransitionEstimator() {
                   size={12}
                   weight="semibold"
                   color={active ? Sports.tri.color : colors.textMid}>
-                  {e.l}
+                  {t(e.lKey)}
                 </AppText>
               </Pressable>
             );
@@ -150,7 +152,7 @@ export function TransitionEstimator() {
       <View style={styles.tipsCard}>
         {TIPS.map((tip, i) => (
           <View
-            key={tip.text}
+            key={tip.textKey}
             style={[
               styles.tipRow,
               i < TIPS.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.borderSub },
@@ -159,7 +161,7 @@ export function TransitionEstimator() {
               {i < 3 ? '🔵' : '🟢'}
             </AppText>
             <AppText weight="medium" size={13} style={{ flex: 1 }}>
-              {tip.text}
+              {t(tip.textKey)}
             </AppText>
             <AppText size={11} color={colors.textDim}>
               {tip.zone}

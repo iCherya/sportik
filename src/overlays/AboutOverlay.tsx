@@ -61,11 +61,11 @@ export function AboutOverlay({ onBack }: Props) {
   const styles = useMemo(() => makeStyles(colors), [colors]);
 
   const infoRows = [
-    { label: t('about_platform'), val: 'React Native' },
-    { label: t('about_target'), val: 'iOS & Android' },
-    { label: t('about_country'), val: '🇺🇦 Ukraine (v1)' },
-    { label: t('about_units_row'), val: 'Metric (km, kg, °C)' },
-    { label: t('about_data'), val: 'Stored locally, no sync' },
+    { label: t('about_platform'), val: t('about_platform_val') },
+    { label: t('about_target'), val: t('about_target_val') },
+    { label: t('about_country'), val: t('about_country_val') },
+    { label: t('about_units_row'), val: t('about_units_val') },
+    { label: t('about_data'), val: t('about_data_val') },
   ];
 
   const links = [t('about_privacy'), t('about_terms'), t('about_oss')];
@@ -81,7 +81,7 @@ export function AboutOverlay({ onBack }: Props) {
           </AppText>
         </AppText>
         <AppText size={13} color={colors.textMid} style={{ marginTop: 6 }}>
-          Version 1.0.0 · Build 2025.03
+          {t('about_version')}
         </AppText>
         <View style={styles.betaBadge}>
           <AppText

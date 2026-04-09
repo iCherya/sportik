@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
 import { useColors } from '../context/ThemeContext';
+import { useT } from '../i18n';
 import { type ColorPalette, Sports, type SportKey } from '../theme';
 
 const PRESETS: Record<SportKey, number[]> = {
@@ -63,6 +64,7 @@ const makeStyles = (c: ColorPalette) =>
 export function CadenceBeeper() {
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
+  const t = useT();
   const [bpm, setBpm] = useState(85);
   const [playing, setPlaying] = useState(false);
   const [beat, setBeat] = useState(false);
@@ -123,7 +125,7 @@ export function CadenceBeeper() {
                 size={13}
                 weight="semibold"
                 color={active ? Sports[id].color : colors.textMid}>
-                {Sports[id].icon} {Sports[id].label}
+                {Sports[id].icon} {id === 'run' ? t('sport_run') : t('sport_bike')}
               </AppText>
             </Pressable>
           );
@@ -136,7 +138,7 @@ export function CadenceBeeper() {
           {bpm}
         </AppText>
         <AppText size={14} color={colors.textMid}>
-          BPM
+          {t('hrz_bpm')}
         </AppText>
       </View>
 
@@ -188,7 +190,7 @@ export function CadenceBeeper() {
           color={playing ? '#fff' : '#000'}
           uppercase
           style={{ letterSpacing: 1 }}>
-          {playing ? '⏹  Stop Beeper' : '▶  Start Beeper'}
+          {playing ? t('cad_stop') : t('cad_start')}
         </AppText>
       </Pressable>
 

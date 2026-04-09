@@ -3,6 +3,7 @@ import { Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react
 
 import { AppText } from '../components/AppText';
 import { useColors } from '../context/ThemeContext';
+import { useT } from '../i18n';
 import { type ColorPalette, Sports } from '../theme';
 
 type Lap = { time: number; total: number };
@@ -167,7 +168,7 @@ const makeStyles = (c: ColorPalette) =>
       borderColor: c.border,
       borderRadius: 14,
       padding: 14,
-      fontFamily: 'Barlow',
+      fontFamily: 'Inter',
       fontSize: 16,
       color: c.text,
       marginBottom: 16,
@@ -193,6 +194,7 @@ const makeStyles = (c: ColorPalette) =>
 export function PoolCounter() {
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
+  const t = useT();
   const [poolLen, setPoolLen] = useState('50');
   const [targetLaps, setTargetLaps] = useState('40');
   const [activeSw, setActiveSw] = useState(0);
@@ -294,7 +296,7 @@ export function PoolCounter() {
             size={11}
             color={colors.textDim}
             uppercase>
-            Target (laps)
+            {t('pool_target')}
           </AppText>
           <View style={styles.inputRow}>
             <TextInput
@@ -317,7 +319,7 @@ export function PoolCounter() {
         size={11}
         color={colors.textDim}
         uppercase>
-        Swimmers
+        {t('pool_swimmers')}
       </AppText>
       <View style={styles.swTabRow}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flex: 1 }}>
@@ -352,7 +354,7 @@ export function PoolCounter() {
                   {s.name}
                 </AppText>
                 <AppText condensed weight="black" size={18} color={Sports.swim.color}>
-                  {s.laps.length} laps
+                  {`${s.laps.length} ${t('pool_laps')}`}
                 </AppText>
               </Pressable>
             ))}
@@ -378,9 +380,9 @@ export function PoolCounter() {
         </AppText>
         <AppText size={12} color={colors.textDim} style={{ marginTop: 4 }}>
           {sw.running && ll !== null
-            ? `Current lap: ${fmtMs(ll)}`
+            ? `${t('pool_current_lap')} ${fmtMs(ll)}`
             : lc > 0
-              ? `Last: ${fmtMs(sw.laps[lc - 1].time)}`
+              ? `${t('pool_last')} ${fmtMs(sw.laps[lc - 1].time)}`
               : 'Tap to start'}
         </AppText>
       </View>
@@ -410,10 +412,10 @@ export function PoolCounter() {
           uppercase
           style={{ letterSpacing: 2 }}>
           {!sw.running && lc === 0
-            ? '▶  TAP TO START'
+            ? t('pool_tap_start')
             : sw.running
-              ? `LAP ${lc + 1}  ▸  TAP`
-              : '▶  RESUME'}
+              ? `${t('pool_col_lap')} ${lc + 1}  ▸  ${t('pool_tap_label')}`
+              : t('pool_resume')}
         </AppText>
       </Pressable>
 
@@ -432,7 +434,7 @@ export function PoolCounter() {
               }));
             }}>
             <AppText condensed weight="bold" size={14} color={colors.textMid}>
-              ⏸ Pause
+              {t('pool_pause')}
             </AppText>
           </Pressable>
         ) : lc > 0 ? (
@@ -443,7 +445,7 @@ export function PoolCounter() {
               updSw(activeSw, (s) => ({ ...s, running: true, startTime: now, lapStart: now }));
             }}>
             <AppText condensed weight="bold" size={14} color={colors.textMid}>
-              ▶ Resume
+              {t('pool_unpause')}
             </AppText>
           </Pressable>
         ) : null}
@@ -452,7 +454,7 @@ export function PoolCounter() {
             style={styles.ctrlBtn}
             onPress={() => updSw(activeSw, (s) => ({ ...s, laps: s.laps.slice(0, -1) }))}>
             <AppText condensed weight="bold" size={14} color={colors.textMid}>
-              ↩ Undo
+              {t('pool_undo')}
             </AppText>
           </Pressable>
         )}
@@ -470,7 +472,7 @@ export function PoolCounter() {
               }))
             }>
             <AppText condensed weight="bold" size={14} color={colors.heart}>
-              ✕ Reset
+              {t('pool_reset')}
             </AppText>
           </Pressable>
         )}
@@ -486,12 +488,17 @@ export function PoolCounter() {
             color={colors.textDim}
             uppercase
             style={{ letterSpacing: 2, marginBottom: 8 }}>
-            Lap History
+            {t('pool_history')}
           </AppText>
           <View style={styles.lapTable}>
             {/* Header */}
             <View style={[styles.lapRow, { backgroundColor: colors.surface }]}>
-              {['LAP', 'TIME', 'TOTAL', 'Δ AVG'].map((h) => (
+              {[
+                t('pool_col_lap'),
+                t('pool_col_time'),
+                t('pool_col_total'),
+                t('pool_col_delta'),
+              ].map((h) => (
                 <AppText
                   key={h}
                   condensed
@@ -578,13 +585,13 @@ export function PoolCounter() {
                 paddingHorizontal: 2,
               }}>
               <AppText size={11} color={colors.textDim}>
-                Best:{' '}
+                {t('pool_best')}{' '}
                 <AppText size={11} color={colors.accent} weight="bold">
                   {fmtMs(bestLap)}
                 </AppText>
               </AppText>
               <AppText size={11} color={colors.textDim}>
-                Avg: {fmtMs(avgLap)}
+                {t('pool_avg')} {fmtMs(avgLap)}
               </AppText>
             </View>
           )}
@@ -601,12 +608,12 @@ export function PoolCounter() {
           <Pressable style={styles.modalSheet} onPress={(e) => e.stopPropagation()}>
             <View style={styles.modalHandle} />
             <AppText condensed weight="black" size={22} style={{ marginBottom: 16 }}>
-              Add Swimmer
+              {t('pool_add_swimmer')}
             </AppText>
             <TextInput
               value={newName}
               onChangeText={setNewName}
-              placeholder="Lane 2 / Name"
+              placeholder={t('pool_lane_ph')}
               placeholderTextColor={colors.textDim}
               style={styles.modalInput}
               autoFocus
@@ -615,12 +622,12 @@ export function PoolCounter() {
             <View style={styles.modalBtns}>
               <Pressable style={styles.modalCancelBtn} onPress={() => setShowModal(false)}>
                 <AppText condensed weight="bold" size={14} color={colors.textMid}>
-                  Cancel
+                  {t('cancel')}
                 </AppText>
               </Pressable>
               <Pressable style={styles.modalConfirmBtn} onPress={addSw}>
                 <AppText condensed weight="black" size={14} color="#000">
-                  Add Swimmer
+                  {t('pool_add_swimmer')}
                 </AppText>
               </Pressable>
             </View>

@@ -80,7 +80,7 @@ const makeStyles = (c: ColorPalette) =>
       borderColor: c.border,
       borderRadius: 12,
       padding: 12,
-      fontFamily: 'Barlow',
+      fontFamily: 'Inter',
       fontWeight: '500',
       fontSize: 14,
       color: c.text,

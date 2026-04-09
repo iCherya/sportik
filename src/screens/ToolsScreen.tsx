@@ -147,7 +147,7 @@ export function ToolsScreen({ onSelect }: Props) {
               <View style={styles.toolInfo}>
                 <View style={styles.toolNameRow}>
                   <AppText condensed weight="bold" size={16} style={{ flex: 1 }}>
-                    {tool.name}
+                    {t(tool.nameKey)}
                   </AppText>
                   <View style={[styles.tagBadge, { backgroundColor: `${sport.color}22` }]}>
                     <AppText
@@ -157,12 +157,22 @@ export function ToolsScreen({ onSelect }: Props) {
                       color={sport.color}
                       uppercase
                       style={{ letterSpacing: 0.5 }}>
-                      {tool.tag}
+                      {
+                        (
+                          {
+                            Run: t('sport_run'),
+                            Bike: t('sport_bike'),
+                            Swim: t('sport_swim'),
+                            Tri: t('sport_tri'),
+                            All: t('sport_all'),
+                          } as Record<string, string>
+                        )[tool.tag]
+                      }
                     </AppText>
                   </View>
                 </View>
                 <AppText size={12} color={colors.textMid} style={{ marginTop: 3, lineHeight: 17 }}>
-                  {tool.desc}
+                  {t(tool.descKey)}
                 </AppText>
               </View>
               <AppText size={18} color={colors.textDim}>

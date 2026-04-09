@@ -5,6 +5,7 @@ import { BottomNav } from './components/BottomNav';
 import type { Lang } from './context/LangContext';
 import { useColors } from './context/ThemeContext';
 import { EVENTS_DATA, type Event, type Tool } from './data';
+import { useT } from './i18n';
 import { AboutOverlay } from './overlays/AboutOverlay';
 import { EditProfileOverlay } from './overlays/EditProfileOverlay';
 import { HRZonesOverlay } from './overlays/HRZonesOverlay';
@@ -29,6 +30,7 @@ type Props = {
 
 export function MainApp({ isDark, setIsDark, lang, setLang, profile, setProfile }: Props) {
   const colors = useColors();
+  const t = useT();
   const [screen, setScreen] = useState<Screen>('home');
   const [overlay, setOverlay] = useState<OverlayType | null>(null);
   const [favs, setFavs] = useState<number[]>([1]);
@@ -73,8 +75,8 @@ export function MainApp({ isDark, setIsDark, lang, setLang, profile, setProfile 
     allEvents.filter((e) => favs.includes(e.id) && e.days > 0).sort((a, b) => a.days - b.days)[0] ??
     null;
 
-  // Derived: live date string
-  const dateStr = new Date().toLocaleDateString('en-GB', {
+  // Derived: live date string — locale follows language setting
+  const dateStr = new Date().toLocaleDateString(lang === 'uk' ? 'uk-UA' : 'en-GB', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -82,7 +84,12 @@ export function MainApp({ isDark, setIsDark, lang, setLang, profile, setProfile 
 
   // Derived: greeting
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Morning' : hour < 17 ? 'Afternoon' : 'Evening';
+  const greeting =
+    hour < 12
+      ? t('home_greeting_morning')
+      : hour < 17
+        ? t('home_greeting_afternoon')
+        : t('home_greeting_evening');
 
   const navigateTo = (id: Screen) => {
     setScreen(id);

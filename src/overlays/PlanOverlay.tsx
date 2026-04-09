@@ -115,12 +115,12 @@ export function PlanOverlay({ onBack }: Props) {
   );
 
   return (
-    <Overlay onBack={onBack} title="Ironman 70.3 Plan" backLabel={t('nav_home')} badge={badge}>
+    <Overlay onBack={onBack} title={t('plan_name_703')} backLabel={t('nav_home')} badge={badge}>
       {/* Plan meta */}
       <View style={styles.metaRow}>
         {[
-          { l: t('plan_duration'), v: '16 weeks' },
-          { l: t('plan_level'), v: 'Intermediate' },
+          { l: t('plan_duration'), v: t('plan_meta_16w') },
+          { l: t('plan_level'), v: t('plan_meta_inter') },
           { l: t('plan_race'), v: 'June 15' },
         ].map((m) => (
           <View key={m.l} style={styles.metaCard}>
@@ -143,7 +143,7 @@ export function PlanOverlay({ onBack }: Props) {
       {/* Week header + progress */}
       <View style={styles.weekHeader}>
         <AppText condensed weight="black" size={20}>
-          Week 1 of {totalWeeks}
+          {t('po_week_of').replace('{n}', '1').replace('{total}', String(totalWeeks))}
         </AppText>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <View style={styles.progressBg}>

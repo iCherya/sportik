@@ -3,6 +3,7 @@ import { StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
 import { useColors } from '../context/ThemeContext';
+import { useT } from '../i18n';
 import { type ColorPalette } from '../theme';
 
 const makeStyles = (c: ColorPalette) =>
@@ -51,6 +52,7 @@ const makeStyles = (c: ColorPalette) =>
 export function SpeedPace() {
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
+  const t = useT();
   const [speed, setSpeed] = useState('35');
   const [pace, setPace] = useState('1:42');
 
@@ -85,7 +87,7 @@ export function SpeedPace() {
           size={11}
           color={colors.textDim}
           uppercase>
-          Speed
+          {t('tool_speed_label')}
         </AppText>
         <View style={styles.inputRow}>
           <TextInput
@@ -119,7 +121,7 @@ export function SpeedPace() {
           size={11}
           color={colors.textDim}
           uppercase>
-          Pace
+          {t('tool_pace_label')}
         </AppText>
         <View style={styles.inputRow}>
           <TextInput
@@ -139,8 +141,8 @@ export function SpeedPace() {
 
       <View style={styles.infoBox}>
         {[
-          ['40km bike', spd > 0 ? `${(40 / spd).toFixed(2)}h` : '--'],
-          ['90km bike', spd > 0 ? `${(90 / spd).toFixed(2)}h` : '--'],
+          [t('sp_bike_40'), spd > 0 ? `${(40 / spd).toFixed(2)}h` : '--'],
+          [t('sp_bike_90'), spd > 0 ? `${(90 / spd).toFixed(2)}h` : '--'],
         ].map(([l, v]) => (
           <View key={l} style={styles.infoRow}>
             <AppText size={13} color={colors.textMid}>

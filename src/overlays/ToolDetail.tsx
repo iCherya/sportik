@@ -71,7 +71,7 @@ export function ToolDetail({ tool, onBack }: Props) {
         {tool.icon}
       </AppText>
       <AppText condensed weight="black" size={18} color={colors.textMid}>
-        {tool.name}
+        {t(tool.nameKey)}
       </AppText>
       <AppText size={13} color={colors.textDim} style={{ marginTop: 6 }}>
         Tool not found
@@ -80,7 +80,7 @@ export function ToolDetail({ tool, onBack }: Props) {
   );
 
   return (
-    <Overlay onBack={onBack} title={tool.name} backLabel={t('nav_tools')} badge={badge}>
+    <Overlay onBack={onBack} title={t(tool.nameKey)} backLabel={t('nav_tools')} badge={badge}>
       {body}
     </Overlay>
   );

@@ -140,7 +140,7 @@ const makeStyles = (c: ColorPalette) =>
       padding: 14,
       color: c.text,
       fontSize: 14,
-      fontFamily: 'Barlow',
+      fontFamily: 'Inter',
       marginBottom: 10,
     },
     inputError: { borderColor: c.heart },
@@ -172,6 +172,7 @@ function EventCard({
   onPress: () => void;
   archived?: boolean;
 }) {
+  const t = useT();
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const sport = Sports[ev.sport];
@@ -196,7 +197,7 @@ function EventCard({
           {!ev.global && (
             <View style={styles.myBadge}>
               <AppText condensed weight="bold" size={9} color={colors.accent} uppercase>
-                MY
+                {t('events_my_event')}
               </AppText>
             </View>
           )}
@@ -222,13 +223,13 @@ function EventCard({
               {ev.days}
             </AppText>
             <AppText weight="semibold" size={9} color={colors.textDim} uppercase>
-              days
+              {t('events_days')}
             </AppText>
           </View>
         ) : (
           <View style={styles.daysWrap}>
             <AppText weight="semibold" size={10} color={colors.textDim}>
-              PAST
+              {t('events_past')}
             </AppText>
           </View>
         )}
@@ -253,12 +254,12 @@ function EventDetail({
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const sport = Sports[ev.sport];
   const infoRows = [
-    { icon: '📅', label: 'Date', value: ev.date },
-    { icon: '📍', label: 'Location', value: ev.location },
-    { icon: '📏', label: 'Distance', value: ev.dist },
-    { icon: '🏅', label: 'Sport', value: sport.label },
+    { icon: '📅', label: t('ev_date_label'), value: ev.date },
+    { icon: '📍', label: t('ev_location_label'), value: ev.location },
+    { icon: '📏', label: t('ev_distance_label'), value: ev.dist },
+    { icon: '🏅', label: t('ev_sport_label'), value: sport.label },
   ];
-  if (ev.notes) infoRows.push({ icon: '📝', label: 'Notes', value: ev.notes });
+  if (ev.notes) infoRows.push({ icon: '📝', label: t('ev_notes_label'), value: ev.notes });
 
   return (
     <Overlay onBack={onBack} title={ev.name}>
@@ -294,7 +295,7 @@ function EventDetail({
             color={colors.textMid}
             uppercase
             style={{ textAlign: 'center', letterSpacing: 2 }}>
-            PAST EVENT
+            {t('ev_past_event')}
           </AppText>
         )}
       </View>
@@ -315,7 +316,7 @@ function EventDetail({
       </View>
       <View style={{ marginTop: 20 }}>
         <Button
-          label={isFav ? 'Unsave' : t('save')}
+          label={isFav ? t('ev_unsave') : t('save')}
           onPress={onToggleFav}
           variant={isFav ? 'ghost' : 'accent'}
         />
@@ -323,7 +324,7 @@ function EventDetail({
       {!ev.global && (
         <View style={styles.communityNote}>
           <AppText size={12} color={colors.textDim} style={{ lineHeight: 18, textAlign: 'center' }}>
-            ℹ️ This is a community-sourced event. Verify details with the official source.
+            {t('ev_community_note')}
           </AppText>
         </View>
       )}
@@ -356,9 +357,9 @@ function AddEventSheet({ onClose, onAdd }: { onClose: () => void; onAdd: (ev: Ev
 
   const validate = () => {
     const errs: Partial<Record<keyof EventForm, string>> = {};
-    if (!form.name.trim()) errs.name = 'Required';
-    if (!form.date) errs.date = 'Required';
-    if (!form.location.trim()) errs.location = 'Required';
+    if (!form.name.trim()) errs.name = t('required');
+    if (!form.date) errs.date = t('required');
+    if (!form.location.trim()) errs.location = t('required');
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -370,7 +371,7 @@ function AddEventSheet({ onClose, onAdd }: { onClose: () => void; onAdd: (ev: Ev
       id: Date.now(),
       name: form.name.trim(),
       sport: form.sport,
-      dist: form.dist || 'Custom',
+      dist: form.dist || t('ev_custom'),
       location: form.location.trim(),
       date: form.date,
       notes: form.notes.trim(),
@@ -390,7 +391,7 @@ function AddEventSheet({ onClose, onAdd }: { onClose: () => void; onAdd: (ev: Ev
       <TextInput
         value={form.name}
         onChangeText={(v) => setForm((f) => ({ ...f, name: v }))}
-        placeholder="Event name..."
+        placeholder={t('ev_name_ph')}
         placeholderTextColor={colors.textDim}
         style={[styles.textInput, errors.name ? styles.inputError : null]}
       />
@@ -414,7 +415,17 @@ function AddEventSheet({ onClose, onAdd }: { onClose: () => void; onAdd: (ev: Ev
               weight="semibold"
               size={11}
               color={form.sport === s ? Sports[s].color : colors.textMid}>
-              {Sports[s].label}
+              {
+                (
+                  {
+                    tri: t('sport_tri'),
+                    run: t('sport_run'),
+                    bike: t('sport_bike'),
+                    swim: t('sport_swim'),
+                    all: t('sport_all'),
+                  } as Record<string, string>
+                )[s]
+              }
             </AppText>
           </Pressable>
         ))}
@@ -427,7 +438,7 @@ function AddEventSheet({ onClose, onAdd }: { onClose: () => void; onAdd: (ev: Ev
           <TextInput
             value={form.dist}
             onChangeText={(v) => setForm((f) => ({ ...f, dist: v }))}
-            placeholder="e.g. 70.3km"
+            placeholder={t('ev_dist_ph')}
             placeholderTextColor={colors.textDim}
             style={styles.textInput}
           />
@@ -439,7 +450,7 @@ function AddEventSheet({ onClose, onAdd }: { onClose: () => void; onAdd: (ev: Ev
           <TextInput
             value={form.date}
             onChangeText={(v) => setForm((f) => ({ ...f, date: v }))}
-            placeholder="YYYY-MM-DD"
+            placeholder={t('ev_date_ph')}
             placeholderTextColor={colors.textDim}
             style={[styles.textInput, errors.date ? styles.inputError : null]}
           />
@@ -451,7 +462,7 @@ function AddEventSheet({ onClose, onAdd }: { onClose: () => void; onAdd: (ev: Ev
       <TextInput
         value={form.location}
         onChangeText={(v) => setForm((f) => ({ ...f, location: v }))}
-        placeholder="City, Country"
+        placeholder={t('ev_loc_ph')}
         placeholderTextColor={colors.textDim}
         style={[styles.textInput, errors.location ? styles.inputError : null]}
       />
@@ -500,9 +511,9 @@ function SuggestSheet({ onClose }: { onClose: () => void }) {
 
   const validate = () => {
     const errs: Partial<Record<keyof SuggestForm, string>> = {};
-    if (!form.name.trim()) errs.name = 'Required';
-    if (!form.location.trim()) errs.location = 'Required';
-    if (!form.date) errs.date = 'Required';
+    if (!form.name.trim()) errs.name = t('required');
+    if (!form.location.trim()) errs.location = t('required');
+    if (!form.date) errs.date = t('required');
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -541,7 +552,7 @@ function SuggestSheet({ onClose }: { onClose: () => void }) {
       <TextInput
         value={form.name}
         onChangeText={(v) => setForm((f) => ({ ...f, name: v }))}
-        placeholder="Event name..."
+        placeholder={t('ev_name_ph')}
         placeholderTextColor={colors.textDim}
         style={[styles.textInput, errors.name ? styles.inputError : null]}
       />
@@ -550,7 +561,7 @@ function SuggestSheet({ onClose }: { onClose: () => void }) {
           <TextInput
             value={form.location}
             onChangeText={(v) => setForm((f) => ({ ...f, location: v }))}
-            placeholder="City, Country"
+            placeholder={t('ev_loc_ph')}
             placeholderTextColor={colors.textDim}
             style={[styles.textInput, errors.location ? styles.inputError : null]}
           />
@@ -559,7 +570,7 @@ function SuggestSheet({ onClose }: { onClose: () => void }) {
           <TextInput
             value={form.date}
             onChangeText={(v) => setForm((f) => ({ ...f, date: v }))}
-            placeholder="YYYY-MM-DD"
+            placeholder={t('ev_date_ph')}
             placeholderTextColor={colors.textDim}
             style={[styles.textInput, errors.date ? styles.inputError : null]}
           />
@@ -568,7 +579,7 @@ function SuggestSheet({ onClose }: { onClose: () => void }) {
       <TextInput
         value={form.desc}
         onChangeText={(v) => setForm((f) => ({ ...f, desc: v }))}
-        placeholder="Tell us about the event..."
+        placeholder={t('ev_suggest_note_ph')}
         placeholderTextColor={colors.textDim}
         multiline
         numberOfLines={3}
@@ -605,11 +616,11 @@ export function EventsScreen({ favs, setFavs, personalEvents, setPersonalEvents 
   const archived = myEvents.filter((e) => e.days <= 0);
 
   const filterTabs: { id: FilterId; label: string; icon: string }[] = [
-    { id: 'all', label: 'All', icon: '⚡' },
-    { id: 'tri', label: Sports['tri'].label, icon: Sports['tri'].icon },
-    { id: 'run', label: Sports['run'].label, icon: Sports['run'].icon },
-    { id: 'bike', label: Sports['bike'].label, icon: Sports['bike'].icon },
-    { id: 'swim', label: Sports['swim'].label, icon: Sports['swim'].icon },
+    { id: 'all', label: t('sport_all'), icon: '⚡' },
+    { id: 'tri', label: t('sport_tri'), icon: Sports['tri'].icon },
+    { id: 'run', label: t('sport_run'), icon: Sports['run'].icon },
+    { id: 'bike', label: t('sport_bike'), icon: Sports['bike'].icon },
+    { id: 'swim', label: t('sport_swim'), icon: Sports['swim'].icon },
   ];
 
   return (

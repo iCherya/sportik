@@ -63,7 +63,7 @@ export function Button({ label, onPress, variant = 'accent', disabled = false, s
         size={18}
         uppercase
         color={variant === 'accent' ? '#000' : variant === 'danger' ? '#fff' : colors.textMid}
-        style={{ letterSpacing: 2, fontFamily: Font.condensedBlack }}>
+        style={{ letterSpacing: 2, fontFamily: Font.bodyBold }}>
         {label}
       </AppText>
     </Pressable>

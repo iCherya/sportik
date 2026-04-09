@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
 import { useColors } from '../context/ThemeContext';
+import { useT } from '../i18n';
 import { type ColorPalette, Sports, type SportKey } from '../theme';
 
 const SPORTS: SportKey[] = ['run', 'bike', 'swim'];
@@ -70,6 +71,7 @@ const makeStyles = (c: ColorPalette) =>
 export function PaceCalc() {
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
+  const t = useT();
   const [h, setH] = useState('0');
   const [m, setM] = useState('45');
   const [s, setS] = useState('00');
@@ -115,7 +117,15 @@ export function PaceCalc() {
                 size={13}
                 weight="semibold"
                 color={active ? Sports[id].color : colors.textMid}>
-                {Sports[id].icon} {Sports[id].label}
+                {Sports[id].icon}{' '}
+                {
+                  (
+                    { run: t('sport_run'), bike: t('sport_bike'), swim: t('sport_swim') } as Record<
+                      string,
+                      string
+                    >
+                  )[id]
+                }
               </AppText>
             </Pressable>
           );
@@ -131,7 +141,7 @@ export function PaceCalc() {
           size={11}
           color={colors.textDim}
           uppercase>
-          Target Time
+          {t('tool_target_time')}
         </AppText>
         <View style={styles.inputRow}>
           <TextInput
@@ -185,7 +195,7 @@ export function PaceCalc() {
           size={11}
           color={colors.textDim}
           uppercase>
-          Distance
+          {t('tool_distance')}
         </AppText>
         <View style={styles.inputRow}>
           <TextInput
@@ -213,7 +223,7 @@ export function PaceCalc() {
           color={sp.color}
           uppercase
           style={{ letterSpacing: 2, marginBottom: 4 }}>
-          Your Pace
+          {t('pc_your_pace')}
         </AppText>
         <AppText condensed weight="black" size={52} color={sp.color}>
           {pace}
@@ -226,8 +236,8 @@ export function PaceCalc() {
       {/* Info rows */}
       <View style={styles.infoBox}>
         {[
-          ['Speed', `${speedKph} km/h`],
-          ['Marathon equiv', marathonEquiv],
+          [t('tool_speed_label'), `${speedKph} km/h`],
+          [t('pc_marathon'), marathonEquiv],
         ].map(([l, v]) => (
           <View key={l} style={styles.infoRow}>
             <AppText size={13} color={colors.textMid}>

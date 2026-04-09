@@ -1,7 +1,6 @@
 import { Text, type TextStyle } from 'react-native';
 
 import { useColors } from '../context/ThemeContext';
-import { Font } from '../theme';
 
 type Weight = 'regular' | 'medium' | 'semibold' | 'bold' | 'extrabold' | 'black';
 
@@ -16,22 +15,18 @@ type Props = {
   uppercase?: boolean;
 };
 
-function resolveFont(condensed: boolean, weight: Weight): string {
-  if (condensed) {
-    if (weight === 'black') return Font.condensedBlack;
-    if (weight === 'extrabold') return Font.condensedBold;
-    return Font.condensed; // bold, semibold, medium, regular → 700
-  }
-  if (weight === 'semibold' || weight === 'bold') return Font.bodySemiBold;
-  if (weight === 'medium') return Font.bodyMedium;
-  return Font.body;
+function resolveFont(weight: Weight): string {
+  if (weight === 'semibold' || weight === 'bold' || weight === 'extrabold' || weight === 'black')
+    return 'InterBold';
+  if (weight === 'medium') return 'InterMedium';
+  return 'Inter';
 }
 
 export function AppText({
   children,
   size = 14,
   weight = 'regular',
-  condensed = false,
+  condensed: _condensed,
   color,
   style,
   numberOfLines,
@@ -43,7 +38,7 @@ export function AppText({
       numberOfLines={numberOfLines}
       style={[
         {
-          fontFamily: resolveFont(condensed, weight),
+          fontFamily: resolveFont(weight),
           fontSize: size,
           color: color ?? colors.text,
           textTransform: uppercase ? 'uppercase' : undefined,

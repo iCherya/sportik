@@ -3,16 +3,25 @@ import { StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
 import { useColors } from '../context/ThemeContext';
+import { type LangKey, useT } from '../i18n';
 import { type ColorPalette, Sports } from '../theme';
 
-const RULES = [
+const RULES: {
+  min: number;
+  max: number;
+  icon: string;
+  label: string;
+  statusKey: LangKey;
+  badgeKey: LangKey;
+  bc: string;
+}[] = [
   {
     min: 0,
     max: 14,
     icon: '🧊',
     label: 'Below 14°C',
-    status: 'Cold — extra thermal gear needed',
-    badge: 'DANGER',
+    statusKey: 'ws_rule_danger',
+    badgeKey: 'ws_badge_danger',
     bc: '#3B9EFF',
   },
   {
@@ -20,8 +29,8 @@ const RULES = [
     max: 16,
     icon: '🌊',
     label: '14–16°C',
-    status: 'Wetsuit mandatory',
-    badge: 'REQUIRED',
+    statusKey: 'ws_rule_required',
+    badgeKey: 'ws_badge_required',
     bc: Sports.swim.color,
   },
   {
@@ -29,8 +38,8 @@ const RULES = [
     max: 22,
     icon: '✅',
     label: '16–22°C',
-    status: 'Wetsuit allowed',
-    badge: 'ALLOWED',
+    statusKey: 'ws_rule_allowed',
+    badgeKey: 'ws_badge_allowed',
     bc: Sports.run.color,
   },
   {
@@ -38,8 +47,8 @@ const RULES = [
     max: 24,
     icon: '⚠️',
     label: '22–24°C',
-    status: 'Wetsuit optional',
-    badge: 'OPTIONAL',
+    statusKey: 'ws_rule_optional',
+    badgeKey: 'ws_badge_optional',
     bc: '#E8FF47',
   },
   {
@@ -47,8 +56,8 @@ const RULES = [
     max: 26,
     icon: '🚫',
     label: '24–26°C',
-    status: 'Wetsuit banned',
-    badge: 'BANNED',
+    statusKey: 'ws_rule_banned',
+    badgeKey: 'ws_badge_banned',
     bc: Sports.bike.color,
   },
   {
@@ -56,8 +65,8 @@ const RULES = [
     max: 99,
     icon: '🔥',
     label: 'Above 26°C',
-    status: 'No wetsuit — heat risk',
-    badge: 'TOO HOT',
+    statusKey: 'ws_rule_hot',
+    badgeKey: 'ws_badge_hot',
     bc: '#FF4F6A',
   },
 ];
@@ -113,9 +122,10 @@ const makeStyles = (c: ColorPalette) =>
 export function WetsuitGuide() {
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
+  const t = useT();
   const [temp, setTemp] = useState('18');
-  const t = parseFloat(temp) || 0;
-  const cur = RULES.find((r) => t >= r.min && t < r.max) ?? RULES[RULES.length - 1];
+  const tempVal = parseFloat(temp) || 0;
+  const cur = RULES.find((r) => tempVal >= r.min && tempVal < r.max) ?? RULES[RULES.length - 1];
 
   return (
     <View>
@@ -127,7 +137,7 @@ export function WetsuitGuide() {
           size={11}
           color={colors.textDim}
           uppercase>
-          Water Temp
+          {t('ws_water_temp')}
         </AppText>
         <View style={styles.inputRow}>
           <TextInput
@@ -146,7 +156,7 @@ export function WetsuitGuide() {
         </View>
       </View>
 
-      {t > 0 && (
+      {tempVal > 0 && (
         <View
           style={[
             styles.currentCard,
@@ -162,17 +172,17 @@ export function WetsuitGuide() {
             color={cur.bc}
             uppercase
             style={{ letterSpacing: 1.5, marginBottom: 6 }}>
-            {cur.badge}
+            {t(cur.badgeKey)}
           </AppText>
           <AppText weight="medium" size={14}>
-            {cur.status}
+            {t(cur.statusKey)}
           </AppText>
         </View>
       )}
 
       <View style={styles.rulesCard}>
         {RULES.map((r, i) => {
-          const active = t >= r.min && t < r.max;
+          const active = tempVal >= r.min && tempVal < r.max;
           return (
             <View
               key={r.label}
@@ -204,7 +214,7 @@ export function WetsuitGuide() {
                   color={r.bc}
                   uppercase
                   style={{ letterSpacing: 0.5 }}>
-                  {r.badge}
+                  {t(r.badgeKey)}
                 </AppText>
               </View>
             </View>

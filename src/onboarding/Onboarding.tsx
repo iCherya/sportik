@@ -182,7 +182,7 @@ const makeStyles = (c: ColorPalette) =>
       borderColor: c.border,
       borderRadius: 12,
       padding: 14,
-      fontFamily: 'BarlowCondensedBold',
+      fontFamily: 'InterBold',
       fontSize: 16,
       color: c.text,
     },
@@ -297,7 +297,7 @@ const makeStyles = (c: ColorPalette) =>
       borderWidth: 1,
       borderRadius: 14,
       padding: 16,
-      fontFamily: 'BarlowCondensedBold',
+      fontFamily: 'InterBold',
       fontSize: 22,
       color: c.text,
       marginBottom: 20,
@@ -451,7 +451,13 @@ function OBWelcome({ onNext, onSkipAll }: { onNext: () => void; onSkipAll: () =>
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
-  const features = [t('tool_pace'), t('nav_events'), t('home_plans'), t('tool_hr'), 'Multi-sport'];
+  const features = [
+    t('tool_pace'),
+    t('nav_events'),
+    t('home_plans'),
+    t('tool_hr'),
+    t('ob_multi_sport'),
+  ];
   const sportIcons = [
     { icon: '🏊', color: Sports.swim.color },
     { icon: '🚴', color: Sports.bike.color },
@@ -679,13 +685,38 @@ function OBGoalRace({
   const [hasRace, setHasRace] = useState<boolean | null>(data.raceType ? true : null);
 
   const raceTypes = [
-    { id: 'sprint', label: 'Sprint Tri', detail: '750m · 20km · 5km', color: Sports.tri.color },
-    { id: 'olympic', label: 'Olympic Tri', detail: '1.5km · 40km · 10km', color: Sports.tri.color },
-    { id: '703', label: 'Ironman 70.3', detail: '1.9km · 90km · 21km', color: Sports.tri.color },
-    { id: 'ironman', label: 'Ironman', detail: '3.8km · 180km · 42km', color: Sports.tri.color },
-    { id: 'marathon', label: 'Marathon', detail: '42.2km', color: Sports.run.color },
-    { id: 'hm', label: 'Half Marathon', detail: '21.1km', color: Sports.run.color },
-    { id: 'fondo', label: 'Gran Fondo', detail: '80–200km', color: Sports.bike.color },
+    {
+      id: 'sprint',
+      label: t('ob_race_sprint'),
+      detail: t('ob_race_sprint_dist'),
+      color: Sports.tri.color,
+    },
+    {
+      id: 'olympic',
+      label: t('ob_race_olympic'),
+      detail: t('ob_race_olympic_dist'),
+      color: Sports.tri.color,
+    },
+    { id: '703', label: t('ob_race_703'), detail: t('ob_race_703_dist'), color: Sports.tri.color },
+    {
+      id: 'ironman',
+      label: t('ob_race_im'),
+      detail: t('ob_race_im_dist'),
+      color: Sports.tri.color,
+    },
+    {
+      id: 'marathon',
+      label: t('ob_race_marathon'),
+      detail: t('ob_race_marathon_dist'),
+      color: Sports.run.color,
+    },
+    { id: 'hm', label: t('ob_race_hm'), detail: t('ob_race_hm_dist'), color: Sports.run.color },
+    {
+      id: 'fondo',
+      label: t('ob_race_fondo'),
+      detail: t('ob_race_fondo_dist'),
+      color: Sports.bike.color,
+    },
   ];
 
   return (
@@ -895,7 +926,7 @@ function OBBaseline({
             />
             <View style={styles.unitBadge}>
               <AppText size={13} weight="bold" color={colors.textMid}>
-                bpm
+                {t('unit_bpm')}
               </AppText>
             </View>
           </View>
@@ -917,7 +948,7 @@ function OBBaseline({
                   size={11}
                   color={data.maxHR === p.v ? colors.accent : colors.textDim}
                   style={{ textAlign: 'center', lineHeight: 14 }}>
-                  {`age\n${p.l}`}
+                  {`${t('unit_age')}\n${p.l}`}
                 </AppText>
               </Pressable>
             ))}
@@ -936,7 +967,7 @@ function OBBaseline({
                   {t('ftp_title')}
                 </AppText>
                 <AppText size={11} color={colors.textDim} style={{ marginTop: 1 }}>
-                  20-min test ÷ 0.95
+                  {t('ob_ftp_test')}
                 </AppText>
               </View>
             </View>
@@ -1145,13 +1176,13 @@ function OBReady({
     tbd: t('ob_sport_tbd'),
   };
   const raceLabels: Record<string, string> = {
-    sprint: 'Sprint Tri',
-    olympic: 'Olympic Tri',
-    '703': 'Ironman 70.3',
-    ironman: 'Ironman',
-    marathon: 'Marathon',
-    hm: 'Half Marathon',
-    fondo: 'Gran Fondo',
+    sprint: t('ob_race_sprint'),
+    olympic: t('ob_race_olympic'),
+    '703': t('ob_race_703'),
+    ironman: t('ob_race_im'),
+    marathon: t('ob_race_marathon'),
+    hm: t('ob_race_hm'),
+    fondo: t('ob_race_fondo'),
   };
 
   const summaryItems = [
@@ -1168,7 +1199,7 @@ function OBReady({
         : null,
     },
     { icon: '❤️', label: t('hr_max'), val: data.maxHR ? `${data.maxHR} bpm` : null },
-    { icon: '⚡', label: 'FTP', val: data.ftp ? `${data.ftp} W` : null },
+    { icon: '⚡', label: t('pz_ftp_label'), val: data.ftp ? `${data.ftp} W` : null },
     {
       icon: '⏱',
       label: t('ob_weekly_hours'),

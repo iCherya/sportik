@@ -3,23 +3,27 @@ import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
 import { useColors } from '../context/ThemeContext';
+import { type LangKey, useT } from '../i18n';
 import { type ColorPalette, Sports } from '../theme';
 
 type DistKey = 'sprint' | 'olympic' | '70.3' | 'ironman';
 
-const DISTS: Record<DistKey, { swim: number; bike: number; run: number; label: string }> = {
-  sprint: { swim: 0.75, bike: 20, run: 5, label: 'Sprint' },
-  olympic: { swim: 1.5, bike: 40, run: 10, label: 'Olympic' },
-  '70.3': { swim: 1.9, bike: 90, run: 21.1, label: '70.3' },
-  ironman: { swim: 3.8, bike: 180, run: 42.2, label: 'Ironman' },
+const DISTS: Record<
+  DistKey,
+  { swim: number; bike: number; run: number; label: string; labelKey: LangKey }
+> = {
+  sprint: { swim: 0.75, bike: 20, run: 5, label: 'Sprint', labelKey: 'dist_sprint' },
+  olympic: { swim: 1.5, bike: 40, run: 10, label: 'Olympic', labelKey: 'dist_olympic' },
+  '70.3': { swim: 1.9, bike: 90, run: 21.1, label: '70.3', labelKey: 'dist_703' },
+  ironman: { swim: 3.8, bike: 180, run: 42.2, label: 'Ironman', labelKey: 'dist_ironman' },
 };
 
-const SPLITS = [
-  { leg: 'Swim', icon: '🏊', color: Sports.swim.color, pct: 0.13 },
-  { leg: 'T1', icon: '🔄', color: '#6E6E7A', pct: 0.02 },
-  { leg: 'Bike', icon: '🚴', color: Sports.bike.color, pct: 0.51 },
-  { leg: 'T2', icon: '🔄', color: '#6E6E7A', pct: 0.015 },
-  { leg: 'Run', icon: '🏃', color: Sports.run.color, pct: 0.335 },
+const SPLITS: { legKey: LangKey; icon: string; color: string; pct: number }[] = [
+  { legKey: 'rsp_swim', icon: '🏊', color: Sports.swim.color, pct: 0.13 },
+  { legKey: 'rsp_t1', icon: '🔄', color: '#6E6E7A', pct: 0.02 },
+  { legKey: 'rsp_bike', icon: '🚴', color: Sports.bike.color, pct: 0.51 },
+  { legKey: 'rsp_t2', icon: '🔄', color: '#6E6E7A', pct: 0.015 },
+  { legKey: 'rsp_run', icon: '🏃', color: Sports.run.color, pct: 0.335 },
 ];
 
 const fmt = (s: number) =>
@@ -81,6 +85,7 @@ const makeStyles = (c: ColorPalette) =>
 export function RaceSplitPlanner() {
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
+  const t = useT();
   const [total, setTotal] = useState('4');
   const [totM, setTotM] = useState('38');
   const [dist, setDist] = useState<DistKey>('olympic');
@@ -88,12 +93,12 @@ export function RaceSplitPlanner() {
   const d = DISTS[dist];
   const totalSec = (parseInt(total) || 0) * 3600 + (parseInt(totM) || 0) * 60;
 
-  const distLabels: Record<string, string> = {
-    Swim: `${d.swim}km`,
-    Bike: `${d.bike}km`,
-    Run: `${d.run}km`,
-    T1: 'T1',
-    T2: 'T2',
+  const distLabels: Partial<Record<LangKey, string>> = {
+    rsp_swim: `${d.swim}km`,
+    rsp_bike: `${d.bike}km`,
+    rsp_run: `${d.run}km`,
+    rsp_t1: 'T1',
+    rsp_t2: 'T2',
   };
 
   return (
@@ -116,7 +121,7 @@ export function RaceSplitPlanner() {
                 size={12}
                 weight="semibold"
                 color={active ? Sports.tri.color : colors.textMid}>
-                {DISTS[k].label}
+                {t(DISTS[k].labelKey)}
               </AppText>
             </Pressable>
           );
@@ -131,7 +136,7 @@ export function RaceSplitPlanner() {
           size={11}
           color={colors.textDim}
           uppercase>
-          Target Time
+          {t('tool_target_time')}
         </AppText>
         <View style={styles.inputRow}>
           <TextInput
@@ -168,7 +173,7 @@ export function RaceSplitPlanner() {
           const ls = totalSec * sp.pct;
           return (
             <View
-              key={sp.leg}
+              key={sp.legKey}
               style={[
                 styles.splitRow,
                 i < SPLITS.length - 1 && {
@@ -181,10 +186,10 @@ export function RaceSplitPlanner() {
               </AppText>
               <View style={{ flex: 1 }}>
                 <AppText weight="semibold" size={14}>
-                  {sp.leg}
+                  {t(sp.legKey)}
                 </AppText>
                 <AppText size={11} color={colors.textDim}>
-                  {distLabels[sp.leg]}
+                  {distLabels[sp.legKey]}
                 </AppText>
               </View>
               <AppText condensed weight="black" size={18} color={sp.color}>

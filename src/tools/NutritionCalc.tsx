@@ -3,14 +3,15 @@ import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
 import { useColors } from '../context/ThemeContext';
+import { type LangKey, useT } from '../i18n';
 import { type ColorPalette, Sports } from '../theme';
 
 type Intensity = 'low' | 'moderate' | 'high';
 
-const INTENSITY_OPTIONS: { id: Intensity; l: string }[] = [
-  { id: 'low', l: 'Low' },
-  { id: 'moderate', l: 'Moderate' },
-  { id: 'high', l: 'High' },
+const INTENSITY_OPTIONS: { id: Intensity; lKey: LangKey }[] = [
+  { id: 'low', lKey: 'int_low' },
+  { id: 'moderate', lKey: 'int_moderate' },
+  { id: 'high', lKey: 'int_high' },
 ];
 
 const CARBS: Record<Intensity, number> = { low: 40, moderate: 60, high: 90 };
@@ -64,6 +65,7 @@ const makeStyles = (c: ColorPalette) =>
 export function NutritionCalc() {
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
+  const t = useT();
   const [hours, setHours] = useState('4');
   const [mins, setMins] = useState('30');
   const [intensity, setIntensity] = useState<Intensity>('moderate');
@@ -75,15 +77,15 @@ export function NutritionCalc() {
   const tf = Math.round(((fr * dur) / 1000) * 10) / 10;
 
   const cards = [
-    { label: 'Carbs', val: `${tc}g`, color: colors.accent, sub: `${cr}g/hr` },
-    { label: 'Fluid', val: `${tf}L`, color: Sports.swim.color, sub: `${fr}ml/hr` },
+    { label: t('nut_carbs'), val: `${tc}g`, color: colors.accent, sub: `${cr}g/hr` },
+    { label: t('nut_fluid'), val: `${tf}L`, color: Sports.swim.color, sub: `${fr}ml/hr` },
     {
-      label: 'Sodium',
+      label: t('nut_sodium'),
       val: `${Math.round(500 * dur)}mg`,
       color: Sports.bike.color,
       sub: '500mg/hr',
     },
-    { label: 'Gels', val: `${Math.ceil(tc / 25)}`, color: Sports.run.color, sub: '×25g' },
+    { label: t('nut_gels'), val: `${Math.ceil(tc / 25)}`, color: Sports.run.color, sub: '×25g' },
   ];
 
   return (
@@ -96,7 +98,7 @@ export function NutritionCalc() {
           size={11}
           color={colors.textDim}
           uppercase>
-          Race Duration
+          {t('nut_race_duration')}
         </AppText>
         <View style={styles.inputRow}>
           <TextInput
@@ -136,7 +138,7 @@ export function NutritionCalc() {
           size={11}
           color={colors.textDim}
           uppercase>
-          Intensity
+          {t('tool_intensity')}
         </AppText>
         <View style={styles.segGroup}>
           {INTENSITY_OPTIONS.map((i) => {
@@ -153,7 +155,7 @@ export function NutritionCalc() {
                   size={13}
                   weight="semibold"
                   color={active ? colors.accent : colors.textMid}>
-                  {i.l}
+                  {t(i.lKey)}
                 </AppText>
               </Pressable>
             );

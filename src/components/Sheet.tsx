@@ -80,7 +80,7 @@ export function Sheet({ onClose, title, children }: Props) {
               condensed
               weight="black"
               size={22}
-              style={{ marginBottom: 18, fontFamily: Font.condensedBlack }}>
+              style={{ marginBottom: 18, fontFamily: Font.bodyBold }}>
               {title}
             </AppText>
           )}

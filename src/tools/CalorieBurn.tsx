@@ -3,15 +3,16 @@ import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
 import { useColors } from '../context/ThemeContext';
+import { type LangKey, useT } from '../i18n';
 import { type ColorPalette, Sports, type SportKey } from '../theme';
 
 type Intensity = 'low' | 'moderate' | 'high';
 
 const SPORTS: SportKey[] = ['swim', 'bike', 'run', 'tri'];
-const INTENSITY_OPTIONS: { id: Intensity; l: string }[] = [
-  { id: 'low', l: 'Easy' },
-  { id: 'moderate', l: 'Moderate' },
-  { id: 'high', l: 'Hard' },
+const INTENSITY_OPTIONS: { id: Intensity; lKey: LangKey }[] = [
+  { id: 'low', lKey: 'int_easy' },
+  { id: 'moderate', lKey: 'int_moderate' },
+  { id: 'high', lKey: 'int_hard' },
 ];
 const METS: Record<SportKey, Record<Intensity, number>> = {
   swim: { low: 5.8, moderate: 8.3, high: 10 },
@@ -70,6 +71,7 @@ const makeStyles = (c: ColorPalette) =>
 export function CalorieBurn() {
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
+  const t = useT();
   const [weight, setWeight] = useState('72');
   const [hours, setHours] = useState('1');
   const [mins, setMins] = useState('30');
@@ -118,7 +120,7 @@ export function CalorieBurn() {
             size={11}
             color={colors.textDim}
             uppercase>
-            Weight
+            {t('tool_weight')}
           </AppText>
           <View style={styles.inputRow}>
             <TextInput
@@ -144,7 +146,7 @@ export function CalorieBurn() {
             size={11}
             color={colors.textDim}
             uppercase>
-            Duration
+            {t('tool_duration')}
           </AppText>
           <View style={styles.inputRow}>
             <TextInput
@@ -185,7 +187,7 @@ export function CalorieBurn() {
           size={11}
           color={colors.textDim}
           uppercase>
-          Intensity
+          {t('tool_intensity')}
         </AppText>
         <View style={styles.segGroup}>
           {INTENSITY_OPTIONS.map((i) => {
@@ -199,7 +201,7 @@ export function CalorieBurn() {
                 ]}
                 onPress={() => setIntensity(i.id)}>
                 <AppText size={13} weight="semibold" color={active ? sp.color : colors.textMid}>
-                  {i.l}
+                  {t(i.lKey)}
                 </AppText>
               </Pressable>
             );
@@ -215,13 +217,13 @@ export function CalorieBurn() {
           color={sp.color}
           uppercase
           style={{ letterSpacing: 2, marginBottom: 4 }}>
-          Calories Burned
+          {t('cb_result_label')}
         </AppText>
         <AppText condensed weight="black" size={52} color={sp.color}>
           {w > 0 && dur > 0 ? kcal : '--'}
         </AppText>
         <AppText size={13} color={colors.textMid} style={{ marginTop: 2 }}>
-          kcal · MET {met}
+          {`${t('cb_result_sub')} ${met}`}
         </AppText>
       </View>
     </View>

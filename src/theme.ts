@@ -60,12 +60,11 @@ export const Sports = {
 export type SportKey = keyof typeof Sports;
 
 export const Font = {
-  condensed: 'BarlowCondensed',
-  condensedBold: 'BarlowCondensedBold',
-  condensedBlack: 'BarlowCondensedBlack',
-  body: 'Barlow',
-  bodyMedium: 'BarlowMedium',
-  bodySemiBold: 'BarlowSemiBold',
+  numericInput: 'BarlowCondensedBlack',
+  body: 'Inter',
+  bodyMedium: 'InterMedium',
+  bodySemiBold: 'InterSemiBold',
+  bodyBold: 'InterBold',
 } as const;
 
 export const Space = {

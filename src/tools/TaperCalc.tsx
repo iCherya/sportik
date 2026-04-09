@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
 import { useColors } from '../context/ThemeContext';
+import { type LangKey, useT } from '../i18n';
 import { type ColorPalette, Sports } from '../theme';
 
 type RaceType = 'sprint' | 'olympic' | '70.3' | 'ironman';
@@ -50,17 +51,17 @@ const TAPER_DATA: Record<RaceType, { weeks: number; base: WeekPlan[] }> = {
   },
 };
 
-const RACE_OPTIONS: { id: RaceType; l: string }[] = [
-  { id: 'sprint', l: 'Sprint' },
-  { id: 'olympic', l: 'Olympic' },
-  { id: '70.3', l: '70.3' },
-  { id: 'ironman', l: 'Ironman' },
+const RACE_OPTIONS: { id: RaceType; l: string; labelKey: LangKey }[] = [
+  { id: 'sprint', l: 'Sprint', labelKey: 'dist_sprint' },
+  { id: 'olympic', l: 'Olympic', labelKey: 'dist_olympic' },
+  { id: '70.3', l: '70.3', labelKey: 'dist_703' },
+  { id: 'ironman', l: 'Ironman', labelKey: 'dist_ironman' },
 ];
 
-const BARS: { k: 'swim' | 'bike' | 'run'; c: string; l: string; key: keyof WeekPlan }[] = [
-  { k: 'swim', c: Sports.swim.color, l: 'Swim', key: 's' },
-  { k: 'bike', c: Sports.bike.color, l: 'Bike', key: 'b' },
-  { k: 'run', c: Sports.run.color, l: 'Run', key: 'r' },
+const BARS: { k: 'swim' | 'bike' | 'run'; c: string; labelKey: LangKey; key: keyof WeekPlan }[] = [
+  { k: 'swim', c: Sports.swim.color, labelKey: 'rsp_swim', key: 's' },
+  { k: 'bike', c: Sports.bike.color, labelKey: 'rsp_bike', key: 'b' },
+  { k: 'run', c: Sports.run.color, labelKey: 'rsp_run', key: 'r' },
 ];
 
 const makeStyles = (c: ColorPalette) =>
@@ -127,6 +128,7 @@ const makeStyles = (c: ColorPalette) =>
 export function TaperCalc() {
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
+  const t = useT();
   const [raceType, setRaceType] = useState<RaceType>('olympic');
   const [weeksOut, setWeeksOut] = useState('8');
 
@@ -136,7 +138,10 @@ export function TaperCalc() {
   const phases = d.base
     .map((p, i) => ({
       ...p,
-      label: i === d.base.length - 1 ? '🏁 Race Week' : `Week ${wo - (d.base.length - 1 - i)}`,
+      label:
+        i === d.base.length - 1
+          ? t('tap_race_week')
+          : `${t('tap_week')} ${wo - (d.base.length - 1 - i)}`,
       isTaper: i >= d.base.length - d.weeks - 1 && i < d.base.length - 1,
       isRace: i === d.base.length - 1,
     }))
@@ -162,7 +167,7 @@ export function TaperCalc() {
                 size={12}
                 weight="semibold"
                 color={active ? Sports.tri.color : colors.textMid}>
-                {r.l}
+                {t(r.labelKey)}
               </AppText>
             </Pressable>
           );
@@ -177,7 +182,7 @@ export function TaperCalc() {
           size={11}
           color={colors.textDim}
           uppercase>
-          Weeks to Race
+          {t('tap_weeks')}
         </AppText>
         <View style={styles.inputRow}>
           <TextInput
@@ -190,7 +195,7 @@ export function TaperCalc() {
           />
           <View style={styles.unit}>
             <AppText size={12} color={colors.textMid}>
-              weeks
+              {t('unit_weeks')}
             </AppText>
           </View>
         </View>
@@ -220,7 +225,7 @@ export function TaperCalc() {
                 size={13}
                 weight="semibold"
                 color={p.isRace ? colors.accent : p.isTaper ? Sports.tri.color : colors.textMid}>
-                {p.isRace ? '🏁 Race Day' : `${p.s}% volume`}
+                {p.isRace ? t('tap_race_day') : `${p.s}${t('tap_volume')}`}
               </AppText>
             </View>
             {!p.isRace && (
@@ -241,7 +246,7 @@ export function TaperCalc() {
                       />
                     </View>
                     <AppText size={9} color={bar.c} style={{ textAlign: 'center', marginTop: 2 }}>
-                      {bar.l}
+                      {t(bar.labelKey)}
                     </AppText>
                   </View>
                 ))}
@@ -252,7 +257,7 @@ export function TaperCalc() {
       </View>
 
       <AppText size={11} color={colors.textDim} style={{ textAlign: 'center', marginTop: 12 }}>
-        Reduce volume, not intensity.
+        {t('tap_tip')}
       </AppText>
     </View>
   );

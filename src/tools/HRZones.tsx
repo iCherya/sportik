@@ -3,14 +3,15 @@ import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
 import { useColors } from '../context/ThemeContext';
+import { type LangKey, useT } from '../i18n';
 import { type ColorPalette } from '../theme';
 
-const ZONES = [
-  { z: 1, name: 'Recovery', pct: [50, 60] as [number, number], color: '#4BEBA4' },
-  { z: 2, name: 'Aerobic', pct: [60, 70] as [number, number], color: '#3B9EFF' },
-  { z: 3, name: 'Tempo', pct: [70, 80] as [number, number], color: '#E8FF47' },
-  { z: 4, name: 'Threshold', pct: [80, 90] as [number, number], color: '#FF8B3B' },
-  { z: 5, name: 'VO₂ Max', pct: [90, 100] as [number, number], color: '#FF4F6A' },
+const ZONES: { z: number; nameKey: LangKey; pct: [number, number]; color: string }[] = [
+  { z: 1, nameKey: 'hr_z1', pct: [50, 60], color: '#4BEBA4' },
+  { z: 2, nameKey: 'hr_z2', pct: [60, 70], color: '#3B9EFF' },
+  { z: 3, nameKey: 'hr_z3', pct: [70, 80], color: '#E8FF47' },
+  { z: 4, nameKey: 'hr_z4', pct: [80, 90], color: '#FF8B3B' },
+  { z: 5, nameKey: 'hr_z5', pct: [90, 100], color: '#FF4F6A' },
 ];
 
 type Method = 'maxhr' | 'hrr';
@@ -72,6 +73,7 @@ const makeStyles = (c: ColorPalette) =>
 export function HRZones() {
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
+  const t = useT();
   const [maxHR, setMaxHR] = useState('185');
   const [method, setMethod] = useState<Method>('maxhr');
   const [rhr, setRhr] = useState('52');
@@ -86,8 +88,8 @@ export function HRZones() {
       {/* Method selector */}
       <View style={styles.segGroup}>
         {[
-          { id: 'maxhr' as Method, l: 'Max HR %' },
-          { id: 'hrr' as Method, l: 'HR Reserve' },
+          { id: 'maxhr' as Method, lKey: 'hrz_maxhr_method' as LangKey },
+          { id: 'hrr' as Method, lKey: 'hrz_hrr_method' as LangKey },
         ].map((m) => {
           const active = method === m.id;
           return (
@@ -99,7 +101,7 @@ export function HRZones() {
               ]}
               onPress={() => setMethod(m.id)}>
               <AppText size={13} weight="semibold" color={active ? colors.heart : colors.textMid}>
-                {m.l}
+                {t(m.lKey)}
               </AppText>
             </Pressable>
           );
@@ -115,7 +117,7 @@ export function HRZones() {
           size={11}
           color={colors.textDim}
           uppercase>
-          Max HR
+          {t('tool_max_hr')}
         </AppText>
         <View style={styles.inputRow}>
           <TextInput
@@ -128,7 +130,7 @@ export function HRZones() {
           />
           <View style={styles.unit}>
             <AppText size={12} color={colors.textMid}>
-              bpm
+              {t('hrz_bpm')}
             </AppText>
           </View>
         </View>
@@ -144,7 +146,7 @@ export function HRZones() {
             size={11}
             color={colors.textDim}
             uppercase>
-            Resting HR
+            {t('tool_resting_hr')}
           </AppText>
           <View style={styles.inputRow}>
             <TextInput
@@ -157,7 +159,7 @@ export function HRZones() {
             />
             <View style={styles.unit}>
               <AppText size={12} color={colors.textMid}>
-                bpm
+                {t('hrz_bpm')}
               </AppText>
             </View>
           </View>
@@ -185,10 +187,10 @@ export function HRZones() {
                     Z{z.z}
                   </AppText>
                   <AppText weight="semibold" size={13} style={{ flex: 1 }}>
-                    {z.name}
+                    {t(z.nameKey)}
                   </AppText>
                   <AppText condensed weight="bold" size={14} color={z.color}>
-                    {hr > 0 ? `${lo}–${hi}` : '--'} bpm
+                    {hr > 0 ? `${lo}–${hi}` : '--'} {t('hrz_bpm')}
                   </AppText>
                 </View>
                 <View style={styles.miniBarBg}>

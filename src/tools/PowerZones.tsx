@@ -3,16 +3,17 @@ import { StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
 import { useColors } from '../context/ThemeContext';
+import { type LangKey, useT } from '../i18n';
 import { type ColorPalette } from '../theme';
 
-const ZONES = [
-  { z: 1, name: 'Active Recovery', pct: [0, 55] as [number, number], color: '#4BEBA4' },
-  { z: 2, name: 'Endurance', pct: [55, 75] as [number, number], color: '#3B9EFF' },
-  { z: 3, name: 'Tempo', pct: [75, 90] as [number, number], color: '#E8FF47' },
-  { z: 4, name: 'Threshold', pct: [90, 105] as [number, number], color: '#FF8B3B' },
-  { z: 5, name: 'VO₂ Max', pct: [105, 120] as [number, number], color: '#FF4F6A' },
-  { z: 6, name: 'Anaerobic', pct: [120, 150] as [number, number], color: '#B57BFF' },
-  { z: 7, name: 'Neuromuscular', pct: [150, 999] as [number, number], color: '#FF2255' },
+const ZONES: { z: number; nameKey: LangKey; pct: [number, number]; color: string }[] = [
+  { z: 1, nameKey: 'pz_z1', pct: [0, 55], color: '#4BEBA4' },
+  { z: 2, nameKey: 'pz_z2', pct: [55, 75], color: '#3B9EFF' },
+  { z: 3, nameKey: 'pz_z3', pct: [75, 90], color: '#E8FF47' },
+  { z: 4, nameKey: 'pz_z4', pct: [90, 105], color: '#FF8B3B' },
+  { z: 5, nameKey: 'pz_z5', pct: [105, 120], color: '#FF4F6A' },
+  { z: 6, nameKey: 'pz_z6', pct: [120, 150], color: '#B57BFF' },
+  { z: 7, nameKey: 'pz_z7', pct: [150, 999], color: '#FF2255' },
 ];
 
 const makeStyles = (c: ColorPalette) =>
@@ -61,6 +62,7 @@ const makeStyles = (c: ColorPalette) =>
 export function PowerZones() {
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
+  const t = useT();
   const [ftp, setFtp] = useState('245');
   const f = parseInt(ftp) || 0;
 
@@ -74,7 +76,7 @@ export function PowerZones() {
           size={11}
           color={colors.textDim}
           uppercase>
-          FTP
+          {t('pz_ftp_label')}
         </AppText>
         <View style={styles.inputRow}>
           <TextInput
@@ -96,7 +98,7 @@ export function PowerZones() {
       <View style={styles.zonesCard}>
         {ZONES.map((z, i) => {
           const lo = z.pct[0] === 0 ? 0 : Math.round((f * z.pct[0]) / 100);
-          const hi = z.pct[1] === 999 ? 'Max' : Math.round((f * z.pct[1]) / 100);
+          const hi = z.pct[1] === 999 ? t('pz_max') : Math.round((f * z.pct[1]) / 100);
           return (
             <View
               key={z.z}
@@ -111,7 +113,7 @@ export function PowerZones() {
                 Z{z.z}
               </AppText>
               <AppText weight="semibold" size={13} style={{ flex: 1 }}>
-                {z.name}
+                {t(z.nameKey)}
               </AppText>
               <AppText condensed weight="bold" size={14} color={z.color}>
                 {f > 0 ? `${lo}–${hi}` : '--'} W
@@ -122,7 +124,7 @@ export function PowerZones() {
       </View>
 
       <AppText size={11} color={colors.textDim} style={styles.footnote}>
-        FTP = power sustainable for ~60 min. Test: 20-min all-out × 0.95.
+        {t('pz_hint')}
       </AppText>
     </View>
   );

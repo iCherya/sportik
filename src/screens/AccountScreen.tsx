@@ -37,10 +37,10 @@ type SheetId =
   | null;
 
 const PR_DATA = [
-  { sport: 'swim' as const, icon: '🏊', val: '28:42', label: '1.5km Swim' },
-  { sport: 'bike' as const, icon: '🚴', val: '1:02h', label: '40km Bike' },
-  { sport: 'run' as const, icon: '🏃', val: '42:10', label: '10km Run' },
-  { sport: 'tri' as const, icon: '🔱', val: '4:38h', label: 'Olympic Tri' },
+  { sport: 'swim' as const, icon: '🏊', val: '28:42', labelKey: 'pr_label_swim' as const },
+  { sport: 'bike' as const, icon: '🚴', val: '1:02h', labelKey: 'pr_label_bike' as const },
+  { sport: 'run' as const, icon: '🏃', val: '42:10', labelKey: 'pr_label_run' as const },
+  { sport: 'tri' as const, icon: '🔱', val: '4:38h', labelKey: 'pr_label_tri' as const },
 ];
 
 const makeStyles = (c: ColorPalette) =>
@@ -165,7 +165,7 @@ const makeStyles = (c: ColorPalette) =>
       borderColor: c.border,
       borderRadius: 14,
       padding: 14,
-      fontFamily: 'Barlow',
+      fontFamily: 'Inter',
       fontSize: 14,
       color: c.text,
       height: 120,
@@ -353,10 +353,10 @@ export function AccountScreen({
         <View style={styles.prRow}>
           {PR_DATA.map((p) => (
             <Pressable
-              key={p.label}
+              key={p.labelKey}
               style={styles.prBox}
               onPress={() =>
-                setOverlay({ type: 'pr', pr: { sport: p.sport, label: p.label, val: p.val } })
+                setOverlay({ type: 'pr', pr: { sport: p.sport, label: t(p.labelKey), val: p.val } })
               }>
               <AppText size={18}>{p.icon}</AppText>
               <AppText
@@ -371,7 +371,7 @@ export function AccountScreen({
                 size={9}
                 color={colors.textDim}
                 style={{ textAlign: 'center', marginTop: 2 }}>
-                {p.label}
+                {t(p.labelKey)}
               </AppText>
             </Pressable>
           ))}
@@ -412,7 +412,7 @@ export function AccountScreen({
             right={
               <View style={styles.rowRight}>
                 <AppText weight="semibold" size={13} color={colors.textMid}>
-                  {maxHR} bpm
+                  {maxHR} {t('unit_bpm')}
                 </AppText>
                 <AppText size={14} color={colors.textDim}>
                   ›
@@ -487,7 +487,7 @@ export function AccountScreen({
             right={
               <View style={styles.rowRight}>
                 <AppText weight="semibold" size={13} color={colors.textMid}>
-                  {units === 'km' ? 'km · kg · °C' : 'mi · lb · °F'}
+                  {units === 'km' ? t('ac_km_kg') : t('ac_mi_lb')}
                 </AppText>
                 <AppText size={14} color={colors.textDim}>
                   ›
@@ -497,7 +497,7 @@ export function AccountScreen({
             onPress={() => setSheet('units')}
           />
           <Row
-            icon="HR"
+            icon={t('ac_hr_abbr')}
             iconBg="#0a0a1a"
             label={t('account_hr_method')}
             right={
@@ -508,7 +508,7 @@ export function AccountScreen({
                   color={colors.textMid}
                   numberOfLines={1}
                   style={{ maxWidth: 120 }}>
-                  {hrMethod}
+                  {hrMethod === 'Max HR %' ? t('ac_max_hr_pct') : hrMethod}
                 </AppText>
                 <AppText size={14} color={colors.textDim}>
                   ›
@@ -610,10 +610,10 @@ export function AccountScreen({
           <NumberInput
             value={ftp}
             onChange={setFtp}
-            unit="Watts"
+            unit={t('ac_watts')}
             min={50}
             max={500}
-            errorMsg="FTP is typically between 50W and 500W"
+            errorMsg={t('ac_ftp_hint')}
             hint={t('ftp_hint')}
           />
           <Button
@@ -628,8 +628,8 @@ export function AccountScreen({
       {sheet === 'lang' && (
         <Sheet onClose={closeSheet} title={t('lang_title')}>
           {[
-            { id: 'en' as Lang, flag: '🇬🇧', label: 'English' },
-            { id: 'uk' as Lang, flag: '🇺🇦', label: 'Українська' },
+            { id: 'en' as Lang, flag: '🇬🇧', label: t('lang_en') },
+            { id: 'uk' as Lang, flag: '🇺🇦', label: t('lang_ua') },
           ].map((l) => (
             <Pressable
               key={l.id}
@@ -649,13 +649,13 @@ export function AccountScreen({
                     size={11}
                     color={colors.accent}
                     style={{ marginTop: 2 }}>
-                    ✓ Active
+                    {t('ac_active_check')}
                   </AppText>
                 )}
               </View>
               <View style={[styles.radioCircle, lang === l.id && styles.radioCircleActive]}>
                 {lang === l.id && (
-                  <AppText size={12} color={colors.bg} style={{ fontFamily: Font.condensedBlack }}>
+                  <AppText size={12} color={colors.bg} style={{ fontFamily: Font.bodyBold }}>
                     ✓
                   </AppText>
                 )}
@@ -672,7 +672,7 @@ export function AccountScreen({
               borderTopColor: colors.borderSub,
               paddingTop: 12,
             }}>
-            🌐 {'Changing language updates all screens instantly.'}
+            🌐 {t('ac_lang_changing')}
           </AppText>
         </Sheet>
       )}
@@ -681,21 +681,21 @@ export function AccountScreen({
       {sheet === 'goal' && (
         <Sheet onClose={closeSheet} title={t('goal_title')}>
           {[
-            'Sprint Triathlon',
-            'Olympic Triathlon',
-            'Ironman 70.3',
-            'Ironman',
-            'Marathon',
-            'Half Marathon',
-            'Gran Fondo',
-            'Custom',
+            { id: 'Sprint Triathlon', label: t('ac_goal_sprint') },
+            { id: 'Olympic Triathlon', label: t('ac_goal_olympic') },
+            { id: 'Ironman 70.3', label: t('ac_goal_703') },
+            { id: 'Ironman', label: t('ac_goal_im') },
+            { id: 'Marathon', label: t('ac_goal_marathon') },
+            { id: 'Half Marathon', label: t('ac_goal_hm') },
+            { id: 'Gran Fondo', label: t('ac_goal_fondo') },
+            { id: 'Custom', label: t('ac_goal_custom') },
           ].map((g) => (
             <PickerRow
-              key={g}
-              label={g}
-              selected={goal === g}
+              key={g.id}
+              label={g.label}
+              selected={goal === g.id}
               onSelect={() => {
-                setGoal(g);
+                setGoal(g.id);
                 closeSheet();
               }}
             />

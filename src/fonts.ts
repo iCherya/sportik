@@ -1,18 +1,20 @@
-import { Barlow_400Regular, Barlow_500Medium, Barlow_600SemiBold } from '@expo-google-fonts/barlow';
+import { BarlowCondensed_900Black } from '@expo-google-fonts/barlow-condensed';
 import {
-  BarlowCondensed_700Bold,
-  BarlowCondensed_800ExtraBold,
-  BarlowCondensed_900Black,
-} from '@expo-google-fonts/barlow-condensed';
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+} from '@expo-google-fonts/inter';
 import { useFonts } from 'expo-font';
 
 export function useSportikFonts() {
   return useFonts({
-    BarlowCondensed: BarlowCondensed_700Bold,
-    BarlowCondensedBold: BarlowCondensed_800ExtraBold,
+    // Numeric inputs only
     BarlowCondensedBlack: BarlowCondensed_900Black,
-    Barlow: Barlow_400Regular,
-    BarlowMedium: Barlow_500Medium,
-    BarlowSemiBold: Barlow_600SemiBold,
+    // All other text
+    Inter: Inter_400Regular,
+    InterMedium: Inter_500Medium,
+    InterSemiBold: Inter_600SemiBold,
+    InterBold: Inter_700Bold,
   });
 }

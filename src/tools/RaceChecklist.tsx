@@ -3,35 +3,36 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
 import { useColors } from '../context/ThemeContext';
+import { type LangKey, useT } from '../i18n';
 import { type ColorPalette } from '../theme';
 
 type RaceType = 'tri' | 'run' | 'bike';
 
-type CheckItem = { id: string; cat: string; text: string };
+type CheckItem = { id: string; catKey: LangKey; textKey: LangKey };
 
 const ALL_ITEMS: Record<RaceType, CheckItem[]> = {
   tri: [
-    { id: 'wetsuit', cat: 'Swim', text: 'Wetsuit' },
-    { id: 'goggles', cat: 'Swim', text: 'Goggles + spare' },
-    { id: 'cap', cat: 'Swim', text: 'Swim cap' },
-    { id: 'helmet', cat: 'Bike', text: 'Helmet — buckled' },
-    { id: 'bike', cat: 'Bike', text: 'Bike race-ready' },
-    { id: 'bottles', cat: 'Bike', text: 'Bottles filled' },
-    { id: 'shoes-r', cat: 'Run', text: 'Running shoes' },
-    { id: 'belt', cat: 'Run', text: 'Number belt' },
-    { id: 'gels', cat: 'Nutrition', text: 'Gels / chews' },
-    { id: 'timing', cat: 'General', text: 'Timing chip' },
+    { id: 'wetsuit', catKey: 'rsp_swim', textKey: 'cl_wetsuit' },
+    { id: 'goggles', catKey: 'rsp_swim', textKey: 'cl_goggles' },
+    { id: 'cap', catKey: 'rsp_swim', textKey: 'cl_cap' },
+    { id: 'helmet', catKey: 'rsp_bike', textKey: 'cl_helmet_rack' },
+    { id: 'bike', catKey: 'rsp_bike', textKey: 'cl_bike_ready' },
+    { id: 'bottles', catKey: 'rsp_bike', textKey: 'cl_bottles' },
+    { id: 'shoes-r', catKey: 'rsp_run', textKey: 'cl_shoes_run' },
+    { id: 'belt', catKey: 'rsp_run', textKey: 'cl_belt_num' },
+    { id: 'gels', catKey: 'cl_cat_nutrition', textKey: 'cl_gels_chews' },
+    { id: 'timing', catKey: 'cl_cat_general', textKey: 'cl_timing' },
   ],
   run: [
-    { id: 'shoes', cat: 'Gear', text: 'Running shoes' },
-    { id: 'bib', cat: 'Gear', text: 'Race bib' },
-    { id: 'watch', cat: 'Gear', text: 'GPS watch charged' },
-    { id: 'gels-r', cat: 'Nutrition', text: 'Gels' },
+    { id: 'shoes', catKey: 'cl_cat_gear', textKey: 'cl_shoes_run' },
+    { id: 'bib', catKey: 'cl_cat_gear', textKey: 'cl_bib' },
+    { id: 'watch', catKey: 'cl_cat_gear', textKey: 'cl_watch' },
+    { id: 'gels-r', catKey: 'cl_cat_nutrition', textKey: 'cl_gels' },
   ],
   bike: [
-    { id: 'helmet-b', cat: 'Safety', text: 'Helmet buckled' },
-    { id: 'tires', cat: 'Gear', text: 'Tires pumped' },
-    { id: 'bottles-b', cat: 'Nutrition', text: 'Bottles filled' },
+    { id: 'helmet-b', catKey: 'cl_cat_safety', textKey: 'cl_helmet_b' },
+    { id: 'tires', catKey: 'cl_cat_gear', textKey: 'cl_tires' },
+    { id: 'bottles-b', catKey: 'cl_cat_nutrition', textKey: 'cl_bottles' },
   ],
 };
 
@@ -107,6 +108,7 @@ const makeStyles = (c: ColorPalette) =>
 export function RaceChecklist() {
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
+  const t = useT();
   const [raceType, setRaceType] = useState<RaceType>('tri');
   const [checked, setChecked] = useState<Record<string, boolean>>({});
 
@@ -115,9 +117,9 @@ export function RaceChecklist() {
   const doneCount = items.filter((i) => checked[i.id]).length;
 
   // Group items by category
-  const categories: string[] = [];
+  const categories: LangKey[] = [];
   items.forEach((item) => {
-    if (!categories.includes(item.cat)) categories.push(item.cat);
+    if (!categories.includes(item.catKey)) categories.push(item.catKey);
   });
 
   return (
@@ -159,7 +161,7 @@ export function RaceChecklist() {
         </View>
         <Pressable onPress={() => setChecked({})}>
           <AppText size={11} color={colors.textDim}>
-            Reset
+            {t('reset')}
           </AppText>
         </Pressable>
       </View>
@@ -176,11 +178,11 @@ export function RaceChecklist() {
                 color={colors.textDim}
                 uppercase
                 style={{ letterSpacing: 1.5 }}>
-                {cat}
+                {t(cat)}
               </AppText>
             </View>
             {items
-              .filter((item) => item.cat === cat)
+              .filter((item) => item.catKey === cat)
               .map((item) => {
                 const done = !!checked[item.id];
                 return (
@@ -201,7 +203,7 @@ export function RaceChecklist() {
                       size={14}
                       color={done ? colors.textDim : colors.text}
                       style={{ textDecorationLine: done ? 'line-through' : 'none' }}>
-                      {item.text}
+                      {t(item.textKey)}
                     </AppText>
                   </Pressable>
                 );

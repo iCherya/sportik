@@ -87,7 +87,7 @@ export function Overlay({ onBack, title, backLabel = 'Back', badge, children }: 
           condensed
           weight="black"
           size={26}
-          style={{ letterSpacing: 0.5, fontFamily: Font.condensedBlack }}>
+          style={{ letterSpacing: 0.5, fontFamily: Font.bodyBold }}>
           {title}
         </AppText>
       </View>

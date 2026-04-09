@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
 import { useColors } from '../context/ThemeContext';
+import { type LangKey, useT } from '../i18n';
 import { type ColorPalette, Sports } from '../theme';
 
 const makeStyles = (c: ColorPalette) =>
@@ -51,6 +52,7 @@ const makeStyles = (c: ColorPalette) =>
 export function SwolfCalc() {
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
+  const t = useT();
   const [strokes, setStrokes] = useState('18');
   const [secs, setSecs] = useState('45');
   const [pool, setPool] = useState('50');
@@ -66,16 +68,16 @@ export function SwolfCalc() {
           : sw < 40
             ? Sports.bike.color
             : colors.heart;
-  const rating =
+  const ratingKey: LangKey | null =
     sw === 0
       ? null
       : sw < 30
-        ? 'Elite'
+        ? 'swolf_elite'
         : sw < 35
-          ? 'Advanced'
+          ? 'swolf_advanced'
           : sw < 40
-            ? 'Intermediate'
-            : 'Developing';
+            ? 'swolf_intermediate'
+            : 'swolf_developing';
 
   return (
     <View>
@@ -112,7 +114,7 @@ export function SwolfCalc() {
           size={11}
           color={colors.textDim}
           uppercase>
-          Strokes / Length
+          {t('swolf_strokes')}
         </AppText>
         <View style={styles.inputRow}>
           <TextInput
@@ -139,7 +141,7 @@ export function SwolfCalc() {
           size={11}
           color={colors.textDim}
           uppercase>
-          Time / Length
+          {t('swolf_time')}
         </AppText>
         <View style={styles.inputRow}>
           <TextInput
@@ -170,13 +172,13 @@ export function SwolfCalc() {
           color={Sports.swim.color}
           uppercase
           style={{ letterSpacing: 2, marginBottom: 4 }}>
-          SWOLF Score
+          {t('swolf_score')}
         </AppText>
         <AppText condensed weight="black" size={52} color={resultColor}>
           {sw || '--'}
         </AppText>
         <AppText size={13} color={colors.textMid} style={{ marginTop: 2 }}>
-          {rating || 'enter values'}
+          {ratingKey ? t(ratingKey) : t('tool_enter_values')}
         </AppText>
       </View>
     </View>

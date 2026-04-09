@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
 import { useColors } from '../context/ThemeContext';
+import { useT } from '../i18n';
 import { type ColorPalette, Sports } from '../theme';
 
 const PRESETS = [
@@ -59,6 +60,7 @@ const makeStyles = (c: ColorPalette) =>
 export function RaceTimePredictor() {
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
+  const t = useT();
   const [kd, setKd] = useState('10');
   const [kt, setKt] = useState('42');
   const [td2, setTd2] = useState('42.2');
@@ -88,7 +90,7 @@ export function RaceTimePredictor() {
           size={11}
           color={colors.textDim}
           uppercase>
-          Known Result
+          {t('rtp_known')}
         </AppText>
         <View style={styles.inputRow}>
           <TextInput
@@ -128,7 +130,7 @@ export function RaceTimePredictor() {
           size={11}
           color={colors.textDim}
           uppercase>
-          Target Distance
+          {t('rtp_target')}
         </AppText>
         <View style={styles.inputRow}>
           <TextInput
@@ -184,7 +186,7 @@ export function RaceTimePredictor() {
           color={Sports.run.color}
           uppercase
           style={{ letterSpacing: 2, marginBottom: 4 }}>
-          Predicted
+          {t('rtp_predicted')}
         </AppText>
         <AppText condensed weight="black" size={36} color={Sports.run.color}>
           {fmt(t2)}
@@ -195,7 +197,7 @@ export function RaceTimePredictor() {
       </View>
 
       <AppText size={11} color={colors.textDim} style={{ textAlign: 'center' }}>
-        Riegel formula (1977)
+        {t('rtp_formula')}
       </AppText>
     </View>
   );
