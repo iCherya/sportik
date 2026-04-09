@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
 import { useColors } from '../context/ThemeContext';
-import { TOOLS, type Tool } from '../data';
+import { isAllSports, toolPrimarySport, TOOLS, type Tool } from '../data';
 import { useT } from '../i18n';
 import { type ColorPalette, Font, Space, Sports, type SportKey } from '../theme';
 
@@ -80,7 +80,7 @@ export function ToolsScreen({ onSelect }: Props) {
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [activeTab, setActiveTab] = useState<TabId>('all');
 
-  const filtered = activeTab === 'all' ? TOOLS : TOOLS.filter((tool) => tool.sport === activeTab);
+  const filtered = activeTab === 'all' ? TOOLS : TOOLS.filter((tool) => tool.sports.includes(activeTab as SportKey));
 
   return (
     <View style={styles.container}>
@@ -102,7 +102,7 @@ export function ToolsScreen({ onSelect }: Props) {
           const sport =
             tab.id === 'all' ? { icon: '⚡', color: colors.accent } : Sports[tab.id as SportKey];
           const count =
-            tab.id === 'all' ? TOOLS.length : TOOLS.filter((tool) => tool.sport === tab.id).length;
+            tab.id === 'all' ? TOOLS.length : TOOLS.filter((tool) => tool.sports.includes(tab.id as SportKey)).length;
           const active = activeTab === tab.id;
           return (
             <Pressable
@@ -134,14 +134,19 @@ export function ToolsScreen({ onSelect }: Props) {
 
       <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
         {filtered.map((tool) => {
-          const sport =
-            tool.sport === 'all'
-              ? { icon: '⚡', color: colors.accent, bg: '#1a1a0a' }
-              : Sports[tool.sport as SportKey];
+          const isAll = isAllSports(tool);
+          const primarySport = toolPrimarySport(tool);
+          const accentColor = primarySport ? primarySport.color : colors.accent;
+          const sportLabels: Record<string, string> = {
+            run: t('sport_run'), bike: t('sport_bike'), swim: t('sport_swim'), tri: t('sport_tri'),
+          };
+          const badgeLabel = isAll
+            ? t('sport_all')
+            : tool.sports.map((s) => `${Sports[s].icon} ${sportLabels[s]}`).join(' · ');
           return (
             <Pressable key={tool.id} style={styles.toolCard} onPress={() => onSelect(tool)}>
-              <View style={[styles.stripe, { backgroundColor: sport.color }]} />
-              <View style={[styles.toolIcon, { backgroundColor: `${sport.color}22` }]}>
+              <View style={[styles.stripe, { backgroundColor: accentColor }]} />
+              <View style={[styles.toolIcon, { backgroundColor: `${accentColor}22` }]}>
                 <AppText size={20}>{tool.icon}</AppText>
               </View>
               <View style={styles.toolInfo}>
@@ -149,25 +154,15 @@ export function ToolsScreen({ onSelect }: Props) {
                   <AppText condensed weight="bold" size={16} style={{ flex: 1 }}>
                     {t(tool.nameKey)}
                   </AppText>
-                  <View style={[styles.tagBadge, { backgroundColor: `${sport.color}22` }]}>
+                  <View style={[styles.tagBadge, { backgroundColor: `${accentColor}22` }]}>
                     <AppText
                       condensed
                       weight="bold"
                       size={10}
-                      color={sport.color}
+                      color={accentColor}
                       uppercase
                       style={{ letterSpacing: 0.5 }}>
-                      {
-                        (
-                          {
-                            Run: t('sport_run'),
-                            Bike: t('sport_bike'),
-                            Swim: t('sport_swim'),
-                            Tri: t('sport_tri'),
-                            All: t('sport_all'),
-                          } as Record<string, string>
-                        )[tool.tag]
-                      }
+                      {badgeLabel}
                     </AppText>
                   </View>
                 </View>

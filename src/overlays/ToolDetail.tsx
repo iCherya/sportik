@@ -3,9 +3,9 @@ import { View } from 'react-native';
 import { AppText } from '../components/AppText';
 import { Overlay } from '../components/Overlay';
 import { useColors } from '../context/ThemeContext';
-import type { Tool } from '../data';
+import { isAllSports, toolPrimarySport, type Tool } from '../data';
 import { useT } from '../i18n';
-import { Sports, type SportKey } from '../theme';
+import { Sports } from '../theme';
 import { CadenceBeeper } from '../tools/CadenceBeeper';
 import { CalorieBurn } from '../tools/CalorieBurn';
 import { HRZones } from '../tools/HRZones';
@@ -48,28 +48,32 @@ const TOOL_BODIES: Record<string, React.ReactNode> = {
 export function ToolDetail({ tool, onBack }: Props) {
   const t = useT();
   const colors = useColors();
-  const sport = Sports[tool.sport as SportKey];
+  const isAll = isAllSports(tool);
+  const primarySport = toolPrimarySport(tool);
+  const accentColor = primarySport?.color ?? colors.accent;
+  const sportLabels: Record<string, string> = {
+    run: t('sport_run'), bike: t('sport_bike'), swim: t('sport_swim'), tri: t('sport_tri'),
+  };
 
   const badge = (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-      <AppText size={15}>{sport.icon}</AppText>
-      <AppText
-        condensed
-        weight="black"
-        size={11}
-        color={sport.color}
-        style={{ letterSpacing: 1.5 }}
-        uppercase>
-        {(
-          {
-            all: t('sport_all'),
-            swim: t('sport_swim'),
-            bike: t('sport_bike'),
-            run: t('sport_run'),
-            tri: t('sport_tri'),
-          } as Record<string, string>
-        )[tool.sport]}
-      </AppText>
+      {isAll ? (
+        <>
+          <AppText size={15}>⚡</AppText>
+          <AppText condensed weight="black" size={11} color={accentColor} style={{ letterSpacing: 1.5 }} uppercase>
+            {t('sport_all')}
+          </AppText>
+        </>
+      ) : (
+        tool.sports.map((s) => (
+          <View key={s} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <AppText size={13}>{Sports[s].icon}</AppText>
+            <AppText condensed weight="black" size={11} color={Sports[s].color} style={{ letterSpacing: 1.5 }} uppercase>
+              {sportLabels[s]}
+            </AppText>
+          </View>
+        ))
+      )}
     </View>
   );
 
