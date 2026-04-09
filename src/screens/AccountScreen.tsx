@@ -293,6 +293,7 @@ export function AccountScreen({
   }
 
   return (
+    <View style={{ flex: 1 }}>
     <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
       {/* Hero */}
       <View style={styles.hero}>
@@ -603,6 +604,7 @@ export function AccountScreen({
         </AppText>
       </Pressable>
       <View style={{ height: 8 }} />
+    </ScrollView>
 
       {/* FTP Sheet */}
       {sheet === 'ftp' && (
@@ -922,6 +924,6 @@ export function AccountScreen({
           </View>
         </Sheet>
       )}
-    </ScrollView>
+    </View>
   );
 }
