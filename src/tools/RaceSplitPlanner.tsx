@@ -1,24 +1,29 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
-import { Colors } from '../theme';
+import { useColors } from '../context/ThemeContext';
+import { type LangKey, useT } from '../i18n';
+import { type ColorPalette, Sports } from '../theme';
 
 type DistKey = 'sprint' | 'olympic' | '70.3' | 'ironman';
 
-const DISTS: Record<DistKey, { swim: number; bike: number; run: number; label: string }> = {
-  sprint: { swim: 0.75, bike: 20, run: 5, label: 'Sprint' },
-  olympic: { swim: 1.5, bike: 40, run: 10, label: 'Olympic' },
-  '70.3': { swim: 1.9, bike: 90, run: 21.1, label: '70.3' },
-  ironman: { swim: 3.8, bike: 180, run: 42.2, label: 'Ironman' },
+const DISTS: Record<
+  DistKey,
+  { swim: number; bike: number; run: number; label: string; labelKey: LangKey }
+> = {
+  sprint: { swim: 0.75, bike: 20, run: 5, label: 'Sprint', labelKey: 'dist_sprint' },
+  olympic: { swim: 1.5, bike: 40, run: 10, label: 'Olympic', labelKey: 'dist_olympic' },
+  '70.3': { swim: 1.9, bike: 90, run: 21.1, label: '70.3', labelKey: 'dist_703' },
+  ironman: { swim: 3.8, bike: 180, run: 42.2, label: 'Ironman', labelKey: 'dist_ironman' },
 };
 
-const SPLITS = [
-  { leg: 'Swim', icon: '🏊', color: Colors.swim, pct: 0.13 },
-  { leg: 'T1', icon: '🔄', color: Colors.textMid, pct: 0.02 },
-  { leg: 'Bike', icon: '🚴', color: Colors.bike, pct: 0.51 },
-  { leg: 'T2', icon: '🔄', color: Colors.textMid, pct: 0.015 },
-  { leg: 'Run', icon: '🏃', color: Colors.run, pct: 0.335 },
+const SPLITS: { legKey: LangKey; icon: string; color: string; pct: number }[] = [
+  { legKey: 'rsp_swim', icon: '🏊', color: Sports.swim.color, pct: 0.13 },
+  { legKey: 'rsp_t1', icon: '🔄', color: '#6E6E7A', pct: 0.02 },
+  { legKey: 'rsp_bike', icon: '🚴', color: Sports.bike.color, pct: 0.51 },
+  { legKey: 'rsp_t2', icon: '🔄', color: '#6E6E7A', pct: 0.015 },
+  { legKey: 'rsp_run', icon: '🏃', color: Sports.run.color, pct: 0.335 },
 ];
 
 const fmt = (s: number) =>
@@ -26,7 +31,61 @@ const fmt = (s: number) =>
     ? `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}`
     : `${Math.floor(s / 3600)}h ${Math.floor((s % 3600) / 60)}m`;
 
+const makeStyles = (c: ColorPalette) =>
+  StyleSheet.create({
+    segGroup: { flexDirection: 'row', gap: 6, marginBottom: 16 },
+    segBtn: {
+      flex: 1,
+      paddingVertical: 8,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.card,
+      alignItems: 'center',
+    },
+    field: { marginBottom: 14 },
+    fieldLabel: { letterSpacing: 2, marginBottom: 6 },
+    inputRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    input: {
+      flex: 1,
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 12,
+      padding: 14,
+      fontFamily: 'BarlowCondensedBlack',
+      fontSize: 24,
+      color: c.text,
+      textAlign: 'center',
+    },
+    unit: {
+      paddingHorizontal: 10,
+      paddingVertical: 12,
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 10,
+    },
+    splitsCard: {
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 16,
+      overflow: 'hidden',
+    },
+    splitRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      paddingVertical: 13,
+      paddingHorizontal: 16,
+    },
+  });
+
 export function RaceSplitPlanner() {
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const t = useT();
   const [total, setTotal] = useState('4');
   const [totM, setTotM] = useState('38');
   const [dist, setDist] = useState<DistKey>('olympic');
@@ -34,12 +93,12 @@ export function RaceSplitPlanner() {
   const d = DISTS[dist];
   const totalSec = (parseInt(total) || 0) * 3600 + (parseInt(totM) || 0) * 60;
 
-  const distLabels: Record<string, string> = {
-    Swim: `${d.swim}km`,
-    Bike: `${d.bike}km`,
-    Run: `${d.run}km`,
-    T1: 'T1',
-    T2: 'T2',
+  const distLabels: Partial<Record<LangKey, string>> = {
+    rsp_swim: `${d.swim}km`,
+    rsp_bike: `${d.bike}km`,
+    rsp_run: `${d.run}km`,
+    rsp_t1: 'T1',
+    rsp_t2: 'T2',
   };
 
   return (
@@ -52,11 +111,17 @@ export function RaceSplitPlanner() {
               key={k}
               style={[
                 styles.segBtn,
-                active && { borderColor: Colors.tri, backgroundColor: `${Colors.tri}18` },
+                active && {
+                  borderColor: Sports.tri.color,
+                  backgroundColor: `${Sports.tri.color}18`,
+                },
               ]}
               onPress={() => setDist(k)}>
-              <AppText size={12} weight="semibold" color={active ? Colors.tri : Colors.textMid}>
-                {DISTS[k].label}
+              <AppText
+                size={12}
+                weight="semibold"
+                color={active ? Sports.tri.color : colors.textMid}>
+                {t(DISTS[k].labelKey)}
               </AppText>
             </Pressable>
           );
@@ -69,21 +134,21 @@ export function RaceSplitPlanner() {
           condensed
           weight="bold"
           size={11}
-          color={Colors.textDim}
+          color={colors.textDim}
           uppercase>
-          Target Time
+          {t('tool_target_time')}
         </AppText>
         <View style={styles.inputRow}>
           <TextInput
             value={total}
             onChangeText={setTotal}
             placeholder="4"
-            placeholderTextColor={Colors.textDim}
+            placeholderTextColor={colors.textDim}
             keyboardType="numeric"
             style={[styles.input, { flex: 1 }]}
           />
           <View style={styles.unit}>
-            <AppText size={12} color={Colors.textMid}>
+            <AppText size={12} color={colors.textMid}>
               h
             </AppText>
           </View>
@@ -91,12 +156,12 @@ export function RaceSplitPlanner() {
             value={totM}
             onChangeText={setTotM}
             placeholder="38"
-            placeholderTextColor={Colors.textDim}
+            placeholderTextColor={colors.textDim}
             keyboardType="numeric"
             style={[styles.input, { flex: 1 }]}
           />
           <View style={styles.unit}>
-            <AppText size={12} color={Colors.textMid}>
+            <AppText size={12} color={colors.textMid}>
               m
             </AppText>
           </View>
@@ -108,12 +173,12 @@ export function RaceSplitPlanner() {
           const ls = totalSec * sp.pct;
           return (
             <View
-              key={sp.leg}
+              key={sp.legKey}
               style={[
                 styles.splitRow,
                 i < SPLITS.length - 1 && {
                   borderBottomWidth: 1,
-                  borderBottomColor: Colors.borderSub,
+                  borderBottomColor: colors.borderSub,
                 },
               ]}>
               <AppText size={18} style={{ width: 28 }}>
@@ -121,10 +186,10 @@ export function RaceSplitPlanner() {
               </AppText>
               <View style={{ flex: 1 }}>
                 <AppText weight="semibold" size={14}>
-                  {sp.leg}
+                  {t(sp.legKey)}
                 </AppText>
-                <AppText size={11} color={Colors.textDim}>
-                  {distLabels[sp.leg]}
+                <AppText size={11} color={colors.textDim}>
+                  {distLabels[sp.legKey]}
                 </AppText>
               </View>
               <AppText condensed weight="black" size={18} color={sp.color}>
@@ -137,53 +202,3 @@ export function RaceSplitPlanner() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  segGroup: { flexDirection: 'row', gap: 6, marginBottom: 16 },
-  segBtn: {
-    flex: 1,
-    paddingVertical: 8,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.card,
-    alignItems: 'center',
-  },
-  field: { marginBottom: 14 },
-  fieldLabel: { letterSpacing: 2, marginBottom: 6 },
-  inputRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  input: {
-    flex: 1,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    padding: 14,
-    fontFamily: 'BarlowCondensedBlack',
-    fontSize: 24,
-    color: Colors.text,
-    textAlign: 'center',
-  },
-  unit: {
-    paddingHorizontal: 10,
-    paddingVertical: 12,
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 10,
-  },
-  splitsCard: {
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  splitRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 13,
-    paddingHorizontal: 16,
-  },
-});

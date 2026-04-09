@@ -2,9 +2,10 @@ import { View } from 'react-native';
 
 import { AppText } from '../components/AppText';
 import { Overlay } from '../components/Overlay';
+import { useColors } from '../context/ThemeContext';
 import type { Tool } from '../data';
 import { useT } from '../i18n';
-import { Colors, Sports, type SportKey } from '../theme';
+import { Sports, type SportKey } from '../theme';
 import { CadenceBeeper } from '../tools/CadenceBeeper';
 import { CalorieBurn } from '../tools/CalorieBurn';
 import { HRZones } from '../tools/HRZones';
@@ -46,6 +47,7 @@ const TOOL_BODIES: Record<string, React.ReactNode> = {
 
 export function ToolDetail({ tool, onBack }: Props) {
   const t = useT();
+  const colors = useColors();
   const sport = Sports[tool.sport as SportKey];
 
   const badge = (
@@ -58,7 +60,15 @@ export function ToolDetail({ tool, onBack }: Props) {
         color={sport.color}
         style={{ letterSpacing: 1.5 }}
         uppercase>
-        {sport.label}
+        {(
+          {
+            all: t('sport_all'),
+            swim: t('sport_swim'),
+            bike: t('sport_bike'),
+            run: t('sport_run'),
+            tri: t('sport_tri'),
+          } as Record<string, string>
+        )[tool.sport]}
       </AppText>
     </View>
   );
@@ -68,17 +78,17 @@ export function ToolDetail({ tool, onBack }: Props) {
       <AppText size={48} style={{ marginBottom: 16 }}>
         {tool.icon}
       </AppText>
-      <AppText condensed weight="black" size={18} color={Colors.textMid}>
-        {tool.name}
+      <AppText condensed weight="black" size={18} color={colors.textMid}>
+        {t(tool.nameKey)}
       </AppText>
-      <AppText size={13} color={Colors.textDim} style={{ marginTop: 6 }}>
+      <AppText size={13} color={colors.textDim} style={{ marginTop: 6 }}>
         Tool not found
       </AppText>
     </View>
   );
 
   return (
-    <Overlay onBack={onBack} title={tool.name} backLabel={t('nav_tools')} badge={badge}>
+    <Overlay onBack={onBack} title={t(tool.nameKey)} backLabel={t('nav_tools')} badge={badge}>
       {body}
     </Overlay>
   );

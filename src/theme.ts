@@ -1,4 +1,4 @@
-export const Colors = {
+const DARK = {
   bg: '#0D0D0F',
   surface: '#141416',
   card: '#1C1C1F',
@@ -20,23 +20,51 @@ export const Colors = {
   accent: '#E8FF47',
 } as const;
 
+const LIGHT = {
+  bg: '#F2F2F0',
+  surface: '#E8E8E6',
+  card: '#FFFFFF',
+  cardHi: '#F5F5F3',
+  border: '#E0E0DC',
+  borderSub: '#EBEBEA',
+  text: '#0F0F10',
+  textMid: '#6E6E7A',
+  textDim: '#ADADB8',
+  swim: '#3B9EFF',
+  swimBg: '#E8F4FF',
+  bike: '#FF8B3B',
+  bikeBg: '#FFF3E8',
+  run: '#3BCC7A',
+  runBg: '#E8FFF0',
+  tri: '#B57BFF',
+  triBg: '#F5EEFF',
+  heart: '#FF4F6A',
+  accent: '#E8FF47',
+} as const;
+
+export type ColorPalette = typeof DARK;
+
+export const getColors = (isDark: boolean): ColorPalette => (isDark ? DARK : LIGHT) as ColorPalette;
+
+// Static fallback (dark) — used in StyleSheet outside component context (makeStyles pattern)
+export const Colors: ColorPalette = DARK;
+
 export const Sports = {
-  all: { color: Colors.accent, bg: '#1a1a0a', icon: '⚡', label: 'All' },
-  swim: { color: Colors.swim, bg: Colors.swimBg, icon: '🏊', label: 'Swim' },
-  bike: { color: Colors.bike, bg: Colors.bikeBg, icon: '🚴', label: 'Bike' },
-  run: { color: Colors.run, bg: Colors.runBg, icon: '🏃', label: 'Run' },
-  tri: { color: Colors.tri, bg: Colors.triBg, icon: '🔱', label: 'Tri' },
+  all: { color: DARK.accent, bg: '#1a1a0a', icon: '⚡', label: 'All' },
+  swim: { color: DARK.swim, bg: DARK.swimBg, icon: '🏊', label: 'Swim' },
+  bike: { color: DARK.bike, bg: DARK.bikeBg, icon: '🚴', label: 'Bike' },
+  run: { color: DARK.run, bg: DARK.runBg, icon: '🏃', label: 'Run' },
+  tri: { color: DARK.tri, bg: DARK.triBg, icon: '🔱', label: 'Tri' },
 } as const;
 
 export type SportKey = keyof typeof Sports;
 
 export const Font = {
-  condensed: 'BarlowCondensed',
-  condensedBold: 'BarlowCondensedBold',
-  condensedBlack: 'BarlowCondensedBlack',
-  body: 'Barlow',
-  bodyMedium: 'BarlowMedium',
-  bodySemiBold: 'BarlowSemiBold',
+  numericInput: 'BarlowCondensedBlack',
+  body: 'Inter',
+  bodyMedium: 'InterMedium',
+  bodySemiBold: 'InterSemiBold',
+  bodyBold: 'InterBold',
 } as const;
 
 export const Space = {

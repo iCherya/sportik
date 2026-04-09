@@ -6,7 +6,14 @@
       "Bash(npx tsc:*)",
       "Bash(npx eslint:*)",
       "Bash(echo \"EXIT:$?\")",
-      "Bash(npx prettier:*)"
+      "Bash(npx prettier:*)",
+      "Bash(python3)",
+      "Bash(grep -v \"^$\")",
+      "Bash(node -e \"const m = require\\('@expo-google-fonts/inter'\\); console.log\\(Object.keys\\(m\\).filter\\(k => k.includes\\('400'\\) || k.includes\\('500'\\) || k.includes\\('600'\\) || k.includes\\('700'\\)\\).slice\\(0,10\\)\\)\")",
+      "Bash(ls node_modules/@expo-google-fonts/inter/*.js)",
+      "Bash(sed -i '' 's/fontFamily: '\\\\''BarlowCondensedBold'\\\\''/fontFamily: '\\\\''InterBold'\\\\''/g' /Users/iCherya/Front-end/Projects/sportik/src/onboarding/Onboarding.tsx)",
+      "Bash(sed -i '' 's/fontFamily: '\\\\''BarlowSemiBold'\\\\''/fontFamily: '\\\\''InterSemiBold'\\\\''/g' /Users/iCherya/Front-end/Projects/sportik/src/overlays/EditProfileOverlay.tsx)",
+      "Bash(sed -i '' 's/fontFamily: '\\\\''Barlow'\\\\''/fontFamily: '\\\\''Inter'\\\\''/g' /Users/iCherya/Front-end/Projects/sportik/src/tools/PoolCounter.tsx /Users/iCherya/Front-end/Projects/sportik/src/overlays/PRDetail.tsx /Users/iCherya/Front-end/Projects/sportik/src/screens/AccountScreen.tsx /Users/iCherya/Front-end/Projects/sportik/src/screens/EventsScreen.tsx)"
     ]
   }
 }

@@ -1,3 +1,4 @@
+import type { LangKey } from '../i18n';
 import type { SportKey } from '../theme';
 
 export type Event = {
@@ -15,8 +16,8 @@ export type Event = {
 
 export type Tool = {
   id: string;
-  name: string;
-  desc: string;
+  nameKey: LangKey;
+  descKey: LangKey;
   sport: SportKey | 'all';
   icon: string;
   tag: string;
@@ -211,120 +212,113 @@ export const EVENTS_DATA: Event[] = [
 export const TOOLS: Tool[] = [
   {
     id: 'pace',
-    name: 'Pace Calculator',
-    desc: 'Time · Distance · Pace',
+    nameKey: 'tool_pace',
+    descKey: 'tool_pace_desc',
     sport: 'run',
     icon: '⏱',
     tag: 'Run',
   },
   {
     id: 'predict',
-    name: 'Race Time Predictor',
-    desc: 'Predict from shorter race',
+    nameKey: 'tool_predict',
+    descKey: 'tool_predict_desc',
     sport: 'run',
     icon: '📈',
     tag: 'Run',
   },
   {
     id: 'cadence',
-    name: 'Cadence Beeper',
-    desc: 'Metronome for run & bike',
-    sport: 'bike',
+    nameKey: 'tool_cadence',
+    descKey: 'tool_cadence_desc',
+    sport: 'all',
     icon: '🎵',
-    tag: 'Bike',
+    tag: 'All',
   },
   {
     id: 'power',
-    name: 'Power Zone Calculator',
-    desc: 'FTP-based cycling zones',
+    nameKey: 'tool_power',
+    descKey: 'tool_power_desc',
     sport: 'bike',
     icon: '⚡',
     tag: 'Bike',
   },
   {
     id: 'speed',
-    name: 'Speed ↔ Pace',
-    desc: 'km/h ↔ min/km converter',
+    nameKey: 'tool_speed',
+    descKey: 'tool_speed_desc',
     sport: 'bike',
     icon: '🚴',
     tag: 'Bike',
   },
-  {
-    id: 'hr',
-    name: 'HR Zone Calculator',
-    desc: '5 zones from max HR or HRR',
-    sport: 'all',
-    icon: '❤️',
-    tag: 'All',
-  },
+  { id: 'hr', nameKey: 'tool_hr', descKey: 'tool_hr_desc', sport: 'all', icon: '❤️', tag: 'All' },
   {
     id: 'calorie',
-    name: 'Calorie Burn Estimator',
-    desc: 'Weight + duration → kcal',
+    nameKey: 'tool_calorie',
+    descKey: 'tool_calorie_desc',
     sport: 'all',
     icon: '🔥',
     tag: 'All',
   },
   {
     id: 'swolf',
-    name: 'SWOLF Calculator',
-    desc: 'Swim efficiency score',
+    nameKey: 'tool_swolf',
+    descKey: 'tool_swolf_desc',
     sport: 'swim',
     icon: '🏊',
     tag: 'Swim',
   },
   {
     id: 'pool',
-    name: 'Pool Lap Counter',
-    desc: 'Multi-swimmer, lap timers',
+    nameKey: 'tool_pool',
+    descKey: 'tool_pool_desc',
     sport: 'swim',
     icon: '🏁',
     tag: 'Swim',
   },
   {
     id: 'wetsuit',
-    name: 'Wetsuit Temp Guide',
-    desc: 'Water temp → wetsuit rules',
+    nameKey: 'tool_wetsuit',
+    descKey: 'tool_wetsuit_desc',
     sport: 'swim',
     icon: '🌡️',
     tag: 'Swim',
   },
   {
     id: 'split',
-    name: 'Race Split Planner',
-    desc: 'Target time → leg splits',
+    nameKey: 'tool_split',
+    descKey: 'tool_split_desc',
     sport: 'tri',
     icon: '🔱',
     tag: 'Tri',
   },
   {
     id: 'nutrition',
-    name: 'Nutrition Calculator',
-    desc: 'Carbs & fluid by duration',
+    nameKey: 'tool_nutrition',
+    descKey: 'tool_nutrition_desc',
     sport: 'tri',
     icon: '🍌',
     tag: 'Tri',
   },
   {
     id: 'transition',
-    name: 'Transition Estimator',
-    desc: 'T1 + T2 race day planning',
+    nameKey: 'tool_transition',
+    descKey: 'tool_transition_desc',
     sport: 'tri',
     icon: '🔄',
     tag: 'Tri',
   },
   {
     id: 'checklist',
-    name: 'Race Day Checklist',
-    desc: 'Gear checklist by race type',
+    nameKey: 'tool_checklist',
+    descKey: 'tool_checklist_desc',
     sport: 'tri',
     icon: '✅',
     tag: 'Tri',
   },
   {
     id: 'taper',
-    name: 'Taper Calculator',
-    desc: 'Volume reduction before race',
+    nameKey: 'tool_taper',
+    descKey: 'tool_taper_desc',
     sport: 'tri',
     icon: '📉',
     tag: 'Tri',

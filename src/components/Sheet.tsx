@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
@@ -8,7 +8,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { Colors, Font, Space } from '../theme';
+import { useColors } from '../context/ThemeContext';
+import { type ColorPalette, Font, Space } from '../theme';
 import { AppText } from './AppText';
 
 type Props = {
@@ -17,7 +18,36 @@ type Props = {
   children: React.ReactNode;
 };
 
+const makeStyles = (c: ColorPalette) =>
+  StyleSheet.create({
+    backdrop: {
+      backgroundColor: 'rgba(0,0,0,0.65)',
+    },
+    anchor: {
+      flex: 1,
+      justifyContent: 'flex-end',
+    },
+    sheet: {
+      backgroundColor: c.surface,
+      borderTopLeftRadius: Space.radius.overlay,
+      borderTopRightRadius: Space.radius.overlay,
+      padding: 20,
+      paddingBottom: 32,
+      maxHeight: '80%',
+    },
+    handle: {
+      width: 36,
+      height: 4,
+      backgroundColor: c.border,
+      borderRadius: 2,
+      alignSelf: 'center',
+      marginBottom: 18,
+    },
+  });
+
 export function Sheet({ onClose, title, children }: Props) {
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const translateY = useSharedValue(600);
 
   useEffect(() => {
@@ -50,7 +80,7 @@ export function Sheet({ onClose, title, children }: Props) {
               condensed
               weight="black"
               size={22}
-              style={{ marginBottom: 18, fontFamily: Font.condensedBlack }}>
+              style={{ marginBottom: 18, fontFamily: Font.bodyBold }}>
               {title}
             </AppText>
           )}
@@ -62,29 +92,3 @@ export function Sheet({ onClose, title, children }: Props) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  backdrop: {
-    backgroundColor: 'rgba(0,0,0,0.65)',
-  },
-  anchor: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  sheet: {
-    backgroundColor: Colors.surface,
-    borderTopLeftRadius: Space.radius.overlay,
-    borderTopRightRadius: Space.radius.overlay,
-    padding: 20,
-    paddingBottom: 32,
-    maxHeight: '80%',
-  },
-  handle: {
-    width: 36,
-    height: 4,
-    backgroundColor: Colors.border,
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: 18,
-  },
-});

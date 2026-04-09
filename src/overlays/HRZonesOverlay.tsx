@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
 import { Button } from '../components/Button';
 import { Overlay } from '../components/Overlay';
+import { useColors } from '../context/ThemeContext';
 import { useT } from '../i18n';
-import { Colors, Space } from '../theme';
+import { type ColorPalette, Space } from '../theme';
 
 type Props = {
   maxHR: string;
@@ -25,15 +26,106 @@ type ZoneDef = {
 const ZONES: ZoneDef[] = [
   { z: 1, nameKey: 'hr_z1', noteKey: 'hr_z1_note', pct: [50, 60], color: '#4BEBA4' },
   { z: 2, nameKey: 'hr_z2', noteKey: 'hr_z2_note', pct: [60, 70], color: '#3B9EFF' },
-  { z: 3, nameKey: 'hr_z3', noteKey: 'hr_z3_note', pct: [70, 80], color: Colors.accent },
+  { z: 3, nameKey: 'hr_z3', noteKey: 'hr_z3_note', pct: [70, 80], color: '#E8FF47' },
   { z: 4, nameKey: 'hr_z4', noteKey: 'hr_z4_note', pct: [80, 90], color: '#FF8B3B' },
   { z: 5, nameKey: 'hr_z5', noteKey: 'hr_z5_note', pct: [90, 100], color: '#FF4F6A' },
 ];
 
 type Override = { lo?: string; hi?: string };
 
+const makeStyles = (c: ColorPalette) =>
+  StyleSheet.create({
+    section: {
+      marginBottom: 16,
+    },
+    sectionLabel: {
+      letterSpacing: 2,
+      marginBottom: 8,
+    },
+    methodBtn: {
+      flex: 1,
+      paddingVertical: 10,
+      paddingHorizontal: 8,
+      borderRadius: 12,
+      borderWidth: 1.5,
+      alignItems: 'center',
+    },
+    bigInput: {
+      flex: 1,
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 12,
+      padding: 12,
+      fontFamily: 'BarlowCondensedBlack',
+      fontSize: 28,
+      color: c.text,
+      textAlign: 'center',
+    },
+    unitBadge: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 14,
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 12,
+    },
+    ageBtn: {
+      flex: 1,
+      paddingVertical: 6,
+      paddingHorizontal: 2,
+      borderRadius: 8,
+      borderWidth: 1,
+      alignItems: 'center',
+    },
+    zonesCard: {
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 18,
+      overflow: 'hidden',
+      marginBottom: 16,
+    },
+    zoneRow: {},
+    zoneHeader: {
+      padding: Space.screen - 4,
+      paddingHorizontal: 16,
+    },
+    miniBarBg: {
+      marginLeft: 34,
+      height: 4,
+      backgroundColor: c.surface,
+      borderRadius: 2,
+      overflow: 'hidden',
+      marginTop: 6,
+    },
+    miniBarFill: {
+      height: '100%',
+      borderRadius: 2,
+    },
+    expandedPanel: {
+      paddingHorizontal: 16,
+      paddingBottom: 14,
+    },
+    zoneInput: {
+      width: '100%',
+      backgroundColor: c.surface,
+      borderWidth: 1.5,
+      borderRadius: 10,
+      paddingVertical: 10,
+      paddingHorizontal: 8,
+      fontFamily: 'BarlowCondensedBlack',
+      fontSize: 20,
+      color: c.text,
+      textAlign: 'center',
+    },
+  });
+
 export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, onBack }: Props) {
   const t = useT();
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [maxHR, setMaxHR] = useState(initHR || '185');
   const [method, setMethod] = useState(initMethod || 'Max HR %');
   const [rhr, setRhr] = useState('52');
@@ -78,7 +170,7 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
         condensed
         weight="black"
         size={11}
-        color={Colors.heart}
+        color={colors.heart}
         style={{ letterSpacing: 1.5 }}
         uppercase>
         {t('hr_title')}
@@ -94,7 +186,7 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
           condensed
           weight="bold"
           size={11}
-          color={Colors.textDim}
+          color={colors.textDim}
           uppercase
           style={styles.sectionLabel}>
           {t('hr_method')}
@@ -110,8 +202,8 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
                 key={m.id}
                 style={[
                   styles.methodBtn,
-                  { borderColor: active ? Colors.heart : Colors.border },
-                  { backgroundColor: active ? `${Colors.heart}18` : Colors.card },
+                  { borderColor: active ? colors.heart : colors.border },
+                  { backgroundColor: active ? `${colors.heart}18` : colors.card },
                 ]}
                 onPress={() => {
                   setMethod(m.id);
@@ -120,7 +212,7 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
                 <AppText
                   weight="semibold"
                   size={13}
-                  color={active ? Colors.heart : Colors.textMid}
+                  color={active ? colors.heart : colors.textMid}
                   style={{ textAlign: 'center' }}>
                   {m.label}
                 </AppText>
@@ -136,7 +228,7 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
           condensed
           weight="bold"
           size={11}
-          color={Colors.textDim}
+          color={colors.textDim}
           uppercase
           style={styles.sectionLabel}>
           {t('hr_max')}
@@ -150,16 +242,16 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
             }}
             keyboardType="numeric"
             placeholder="185"
-            placeholderTextColor={Colors.textDim}
+            placeholderTextColor={colors.textDim}
             style={styles.bigInput}
           />
           <View style={styles.unitBadge}>
-            <AppText weight="semibold" size={13} color={Colors.textMid}>
-              bpm
+            <AppText weight="semibold" size={13} color={colors.textMid}>
+              {t('hrz_bpm')}
             </AppText>
           </View>
         </View>
-        <AppText size={11} color={Colors.textDim} style={{ marginBottom: 8 }}>
+        <AppText size={11} color={colors.textDim} style={{ marginBottom: 8 }}>
           {t('hr_estimate')}
         </AppText>
         <View style={{ flexDirection: 'row', gap: 6 }}>
@@ -177,22 +269,22 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
                 style={[
                   styles.ageBtn,
                   {
-                    borderColor: active ? Colors.heart : Colors.border,
-                    backgroundColor: active ? `${Colors.heart}22` : Colors.surface,
+                    borderColor: active ? colors.heart : colors.border,
+                    backgroundColor: active ? `${colors.heart}22` : colors.surface,
                   },
                 ]}
                 onPress={() => {
                   setMaxHR(p.v);
                   setOverrides({});
                 }}>
-                <AppText size={10} color={active ? Colors.heart : Colors.textDim}>
+                <AppText size={10} color={active ? colors.heart : colors.textDim}>
                   {p.l}
                 </AppText>
                 <AppText
                   condensed
                   weight="bold"
                   size={14}
-                  color={active ? Colors.heart : Colors.textDim}>
+                  color={active ? colors.heart : colors.textDim}>
                   {p.v}
                 </AppText>
               </Pressable>
@@ -208,7 +300,7 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
             condensed
             weight="bold"
             size={11}
-            color={Colors.textDim}
+            color={colors.textDim}
             uppercase
             style={styles.sectionLabel}>
             {t('hr_resting')}
@@ -222,12 +314,12 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
               }}
               keyboardType="numeric"
               placeholder="52"
-              placeholderTextColor={Colors.textDim}
+              placeholderTextColor={colors.textDim}
               style={styles.bigInput}
             />
             <View style={styles.unitBadge}>
-              <AppText weight="semibold" size={13} color={Colors.textMid}>
-                bpm
+              <AppText weight="semibold" size={13} color={colors.textMid}>
+                {t('hrz_bpm')}
               </AppText>
             </View>
           </View>
@@ -244,15 +336,15 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
           condensed
           weight="bold"
           size={11}
-          color={Colors.textDim}
+          color={colors.textDim}
           uppercase
           style={{ letterSpacing: 2 }}>
-          Zones
+          {t('hrzo_zones')}
         </AppText>
         {hasAnyOverride && (
           <Pressable onPress={() => setOverrides({})}>
-            <AppText size={11} color={Colors.textDim} style={{ textDecorationLine: 'underline' }}>
-              Reset all
+            <AppText size={11} color={colors.textDim} style={{ textDecorationLine: 'underline' }}>
+              {t('hrzo_reset_all')}
             </AppText>
           </Pressable>
         )}
@@ -269,7 +361,7 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
               key={z.z}
               style={[
                 styles.zoneRow,
-                z.z < 5 && { borderBottomWidth: 1, borderBottomColor: Colors.borderSub },
+                z.z < 5 && { borderBottomWidth: 1, borderBottomColor: colors.borderSub },
               ]}>
               {/* Tappable header row */}
               <Pressable
@@ -298,7 +390,7 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
                           color={z.color}
                           uppercase
                           style={{ letterSpacing: 0.5 }}>
-                          CUSTOM
+                          {t('hrzo_custom')}
                         </AppText>
                       </View>
                     )}
@@ -306,12 +398,12 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
                       condensed
                       weight="bold"
                       size={14}
-                      color={isManual ? z.color : Colors.text}>
-                      {lo !== '--' ? `${lo}–${hi}` : '--'} bpm
+                      color={isManual ? z.color : colors.text}>
+                      {lo !== '--' ? `${lo}–${hi}` : '--'} {t('hrz_bpm')}
                     </AppText>
                     <AppText
                       size={12}
-                      color={Colors.textDim}
+                      color={colors.textDim}
                       style={{ transform: [{ rotate: isOpen ? '180deg' : '0deg' }] }}>
                       ▼
                     </AppText>
@@ -333,7 +425,7 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
                 <View style={[styles.expandedPanel, { backgroundColor: `${z.color}06` }]}>
                   <AppText
                     size={11}
-                    color={Colors.textDim}
+                    color={colors.textDim}
                     style={{ lineHeight: 18, marginBottom: 10 }}>
                     {t(z.noteKey)}
                   </AppText>
@@ -343,23 +435,23 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
                         condensed
                         weight="bold"
                         size={10}
-                        color={Colors.textDim}
+                        color={colors.textDim}
                         uppercase
                         style={{ letterSpacing: 1.5, marginBottom: 4 }}>
-                        From
+                        {t('hrzo_from')}
                       </AppText>
                       <TextInput
                         value={overrides[z.z]?.lo ?? lo}
                         onChangeText={(v) => setOverride(z.z, 'lo', v)}
                         keyboardType="numeric"
-                        placeholderTextColor={Colors.textDim}
+                        placeholderTextColor={colors.textDim}
                         style={[
                           styles.zoneInput,
-                          { borderColor: isManual ? z.color : Colors.border },
+                          { borderColor: isManual ? z.color : colors.border },
                         ]}
                       />
                     </View>
-                    <AppText size={18} color={Colors.textDim} style={{ marginTop: 14 }}>
+                    <AppText size={18} color={colors.textDim} style={{ marginTop: 14 }}>
                       –
                     </AppText>
                     <View style={{ flex: 1 }}>
@@ -367,33 +459,33 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
                         condensed
                         weight="bold"
                         size={10}
-                        color={Colors.textDim}
+                        color={colors.textDim}
                         uppercase
                         style={{ letterSpacing: 1.5, marginBottom: 4 }}>
-                        To
+                        {t('hrzo_to')}
                       </AppText>
                       <TextInput
                         value={overrides[z.z]?.hi ?? hi}
                         onChangeText={(v) => setOverride(z.z, 'hi', v)}
                         keyboardType="numeric"
-                        placeholderTextColor={Colors.textDim}
+                        placeholderTextColor={colors.textDim}
                         style={[
                           styles.zoneInput,
-                          { borderColor: isManual ? z.color : Colors.border },
+                          { borderColor: isManual ? z.color : colors.border },
                         ]}
                       />
                     </View>
-                    <AppText size={13} color={Colors.textDim} style={{ marginTop: 14 }}>
-                      bpm
+                    <AppText size={13} color={colors.textDim} style={{ marginTop: 14 }}>
+                      {t('hrz_bpm')}
                     </AppText>
                   </View>
                   {isManual && (
                     <Pressable onPress={() => resetZone(z.z)} style={{ marginTop: 8 }}>
                       <AppText
                         size={11}
-                        color={Colors.textDim}
+                        color={colors.textDim}
                         style={{ textDecorationLine: 'underline' }}>
-                        Reset to auto
+                        {t('hrzo_reset_auto')}
                       </AppText>
                     </Pressable>
                   )}
@@ -413,91 +505,3 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
     </Overlay>
   );
 }
-
-const styles = StyleSheet.create({
-  section: {
-    marginBottom: 16,
-  },
-  sectionLabel: {
-    letterSpacing: 2,
-    marginBottom: 8,
-  },
-  methodBtn: {
-    flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    alignItems: 'center',
-  },
-  bigInput: {
-    flex: 1,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    padding: 12,
-    fontFamily: 'BarlowCondensedBlack',
-    fontSize: 28,
-    color: Colors.text,
-    textAlign: 'center',
-  },
-  unitBadge: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 14,
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-  },
-  ageBtn: {
-    flex: 1,
-    paddingVertical: 6,
-    paddingHorizontal: 2,
-    borderRadius: 8,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  zonesCard: {
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 18,
-    overflow: 'hidden',
-    marginBottom: 16,
-  },
-  zoneRow: {},
-  zoneHeader: {
-    padding: Space.screen - 4,
-    paddingHorizontal: 16,
-  },
-  miniBarBg: {
-    marginLeft: 34,
-    height: 4,
-    backgroundColor: Colors.surface,
-    borderRadius: 2,
-    overflow: 'hidden',
-    marginTop: 6,
-  },
-  miniBarFill: {
-    height: '100%',
-    borderRadius: 2,
-  },
-  expandedPanel: {
-    paddingHorizontal: 16,
-    paddingBottom: 14,
-  },
-  zoneInput: {
-    width: '100%',
-    backgroundColor: Colors.surface,
-    borderWidth: 1.5,
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    fontFamily: 'BarlowCondensedBlack',
-    fontSize: 20,
-    color: Colors.text,
-    textAlign: 'center',
-  },
-});

@@ -1,10 +1,58 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
-import { Colors } from '../theme';
+import { useColors } from '../context/ThemeContext';
+import { type LangKey, useT } from '../i18n';
+import { type ColorPalette, Sports } from '../theme';
+
+const makeStyles = (c: ColorPalette) =>
+  StyleSheet.create({
+    segGroup: { flexDirection: 'row', gap: 8, marginBottom: 16 },
+    segBtn: {
+      flex: 1,
+      paddingVertical: 9,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.card,
+      alignItems: 'center',
+    },
+    field: { marginBottom: 14 },
+    fieldLabel: { letterSpacing: 2, marginBottom: 6 },
+    inputRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    input: {
+      flex: 1,
+      backgroundColor: c.card,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 12,
+      padding: 14,
+      fontFamily: 'BarlowCondensedBlack',
+      fontSize: 24,
+      color: c.text,
+      textAlign: 'center',
+    },
+    unit: {
+      paddingHorizontal: 10,
+      paddingVertical: 12,
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 10,
+    },
+    resultBox: {
+      borderWidth: 1,
+      borderRadius: 18,
+      padding: 20,
+      alignItems: 'center',
+    },
+  });
 
 export function SwolfCalc() {
+  const colors = useColors();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const t = useT();
   const [strokes, setStrokes] = useState('18');
   const [secs, setSecs] = useState('45');
   const [pool, setPool] = useState('50');
@@ -12,24 +60,24 @@ export function SwolfCalc() {
   const sw = (parseInt(strokes) || 0) + (parseInt(secs) || 0);
   const resultColor =
     sw === 0
-      ? Colors.textDim
+      ? colors.textDim
       : sw < 30
-        ? Colors.accent
+        ? colors.accent
         : sw < 35
-          ? Colors.run
+          ? Sports.run.color
           : sw < 40
-            ? Colors.bike
-            : Colors.heart;
-  const rating =
+            ? Sports.bike.color
+            : colors.heart;
+  const ratingKey: LangKey | null =
     sw === 0
       ? null
       : sw < 30
-        ? 'Elite'
+        ? 'swolf_elite'
         : sw < 35
-          ? 'Advanced'
+          ? 'swolf_advanced'
           : sw < 40
-            ? 'Intermediate'
-            : 'Developing';
+            ? 'swolf_intermediate'
+            : 'swolf_developing';
 
   return (
     <View>
@@ -41,10 +89,16 @@ export function SwolfCalc() {
               key={v}
               style={[
                 styles.segBtn,
-                active && { borderColor: Colors.swim, backgroundColor: `${Colors.swim}18` },
+                active && {
+                  borderColor: Sports.swim.color,
+                  backgroundColor: `${Sports.swim.color}18`,
+                },
               ]}
               onPress={() => setPool(v)}>
-              <AppText size={13} weight="semibold" color={active ? Colors.swim : Colors.textMid}>
+              <AppText
+                size={13}
+                weight="semibold"
+                color={active ? Sports.swim.color : colors.textMid}>
                 {v}m
               </AppText>
             </Pressable>
@@ -58,21 +112,21 @@ export function SwolfCalc() {
           condensed
           weight="bold"
           size={11}
-          color={Colors.textDim}
+          color={colors.textDim}
           uppercase>
-          Strokes / Length
+          {t('swolf_strokes')}
         </AppText>
         <View style={styles.inputRow}>
           <TextInput
             value={strokes}
             onChangeText={setStrokes}
             placeholder="18"
-            placeholderTextColor={Colors.textDim}
+            placeholderTextColor={colors.textDim}
             keyboardType="numeric"
             style={styles.input}
           />
           <View style={styles.unit}>
-            <AppText size={12} color={Colors.textMid}>
+            <AppText size={12} color={colors.textMid}>
               strokes
             </AppText>
           </View>
@@ -85,21 +139,21 @@ export function SwolfCalc() {
           condensed
           weight="bold"
           size={11}
-          color={Colors.textDim}
+          color={colors.textDim}
           uppercase>
-          Time / Length
+          {t('swolf_time')}
         </AppText>
         <View style={styles.inputRow}>
           <TextInput
             value={secs}
             onChangeText={setSecs}
             placeholder="45"
-            placeholderTextColor={Colors.textDim}
+            placeholderTextColor={colors.textDim}
             keyboardType="numeric"
             style={styles.input}
           />
           <View style={styles.unit}>
-            <AppText size={12} color={Colors.textMid}>
+            <AppText size={12} color={colors.textMid}>
               sec
             </AppText>
           </View>
@@ -109,66 +163,24 @@ export function SwolfCalc() {
       <View
         style={[
           styles.resultBox,
-          { backgroundColor: Colors.swimBg, borderColor: `${Colors.swim}33` },
+          { backgroundColor: Sports.swim.bg, borderColor: `${Sports.swim.color}33` },
         ]}>
         <AppText
           condensed
           weight="bold"
           size={11}
-          color={Colors.swim}
+          color={Sports.swim.color}
           uppercase
           style={{ letterSpacing: 2, marginBottom: 4 }}>
-          SWOLF Score
+          {t('swolf_score')}
         </AppText>
         <AppText condensed weight="black" size={52} color={resultColor}>
           {sw || '--'}
         </AppText>
-        <AppText size={13} color={Colors.textMid} style={{ marginTop: 2 }}>
-          {rating || 'enter values'}
+        <AppText size={13} color={colors.textMid} style={{ marginTop: 2 }}>
+          {ratingKey ? t(ratingKey) : t('tool_enter_values')}
         </AppText>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  segGroup: { flexDirection: 'row', gap: 8, marginBottom: 16 },
-  segBtn: {
-    flex: 1,
-    paddingVertical: 9,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    backgroundColor: Colors.card,
-    alignItems: 'center',
-  },
-  field: { marginBottom: 14 },
-  fieldLabel: { letterSpacing: 2, marginBottom: 6 },
-  inputRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  input: {
-    flex: 1,
-    backgroundColor: Colors.card,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    padding: 14,
-    fontFamily: 'BarlowCondensedBlack',
-    fontSize: 24,
-    color: Colors.text,
-    textAlign: 'center',
-  },
-  unit: {
-    paddingHorizontal: 10,
-    paddingVertical: 12,
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 10,
-  },
-  resultBox: {
-    borderWidth: 1,
-    borderRadius: 18,
-    padding: 20,
-    alignItems: 'center',
-  },
-});

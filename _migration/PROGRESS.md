@@ -259,3 +259,33 @@ This file tracks all completed migration work. Update it after every phase or si
 
 - `npx tsc --noEmit` — clean
 - `npx eslint src/overlays/PRDetail.tsx app/index.tsx --max-warnings=0` — clean
+
+---
+
+## Phase 9 — Light/Dark theme wiring
+
+**Date:** 2026-04-08 | **Status:** ✅ Complete
+
+### Phase 9 — Files modified
+
+| File | Change |
+| --- | --- |
+| `src/theme.ts` | Added `LIGHT` palette + `getColors(isDark)` helper; `ColorPalette` type derived from `DARK` |
+| `src/context/ThemeContext.tsx` | Added `useColors()` hook — reads `isDark` from context, returns `getColors(isDark)` |
+| All 15 `src/tools/*.tsx` | Replaced static `Colors.*` + top-level `StyleSheet.create` with `makeStyles(c: ColorPalette)` + `useMemo(() => makeStyles(colors), [colors])` |
+| All 6 `src/overlays/*.tsx` | Same `makeStyles` pattern |
+| All 4 `src/screens/*.tsx` | Same `makeStyles` pattern |
+| `src/MainApp.tsx` | Same `makeStyles` pattern |
+| `src/onboarding/Onboarding.tsx` | Same `makeStyles` pattern |
+| All 8 `src/components/*.tsx` | Same `makeStyles` pattern (Button, Card, Row, Sheet, etc.) |
+
+### Phase 9 — Architecture notes
+
+- `ColorPalette` is typed as `typeof DARK` — `getColors` casts to `ColorPalette` so both palettes unify under one type
+- `useColors()` is the single source of truth for current palette; consuming components call it directly
+- `makeStyles` is always a module-level function (not inside a component) for stable reference; `useMemo` keyed on `colors` makes styles reactive to theme changes
+
+### Phase 9 — Verification
+
+- `npx tsc --noEmit --skipLibCheck` — clean
+- `npx eslint src/ --max-warnings=0` — clean (after auto-fix)
