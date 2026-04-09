@@ -94,9 +94,9 @@ export function RaceSplitPlanner() {
   const totalSec = (parseInt(total) || 0) * 3600 + (parseInt(totM) || 0) * 60;
 
   const distLabels: Partial<Record<LangKey, string>> = {
-    rsp_swim: `${d.swim}km`,
-    rsp_bike: `${d.bike}km`,
-    rsp_run: `${d.run}km`,
+    rsp_swim: `${d.swim}${t('unit_km')}`,
+    rsp_bike: `${d.bike}${t('unit_km')}`,
+    rsp_run: `${d.run}${t('unit_km')}`,
     rsp_t1: 'T1',
     rsp_t2: 'T2',
   };
@@ -138,32 +138,28 @@ export function RaceSplitPlanner() {
           uppercase>
           {t('tool_target_time')}
         </AppText>
-        <View style={styles.inputRow}>
-          <TextInput
-            value={total}
-            onChangeText={setTotal}
-            placeholder="4"
-            placeholderTextColor={colors.textDim}
-            keyboardType="numeric"
-            style={[styles.input, { flex: 1 }]}
-          />
-          <View style={styles.unit}>
-            <AppText size={12} color={colors.textMid}>
-              h
-            </AppText>
+        <View style={{ flexDirection: 'row', gap: 12 }}>
+          <View style={{ flex: 1 }}>
+            <TextInput
+              value={total}
+              onChangeText={setTotal}
+              placeholder="4"
+              placeholderTextColor={colors.textDim}
+              keyboardType="numeric"
+              style={styles.input}
+            />
+            <AppText size={11} color={colors.textDim} style={{ textAlign: 'center', marginTop: 4 }}>{t('unit_h')}</AppText>
           </View>
-          <TextInput
-            value={totM}
-            onChangeText={setTotM}
-            placeholder="38"
-            placeholderTextColor={colors.textDim}
-            keyboardType="numeric"
-            style={[styles.input, { flex: 1 }]}
-          />
-          <View style={styles.unit}>
-            <AppText size={12} color={colors.textMid}>
-              m
-            </AppText>
+          <View style={{ flex: 1 }}>
+            <TextInput
+              value={totM}
+              onChangeText={setTotM}
+              placeholder="38"
+              placeholderTextColor={colors.textDim}
+              keyboardType="numeric"
+              style={styles.input}
+            />
+            <AppText size={11} color={colors.textDim} style={{ textAlign: 'center', marginTop: 4 }}>{t('unit_min')}</AppText>
           </View>
         </View>
       </View>

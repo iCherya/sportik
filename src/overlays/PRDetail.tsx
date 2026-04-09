@@ -111,7 +111,7 @@ export function PRDetail({ pr, onBack }: Props) {
   const [logTime, setLogTime] = useState('');
   const [logEvent, setLogEvent] = useState('');
   const defaultHistory: HistoryEntry[] = [
-    { date: '2025-02-10', event: 'Training', time: pr.val, best: true },
+    { date: '2025-02-10', event: t('account_pr_training'), time: pr.val, best: true },
   ];
   const [history, setHistory] = useState<HistoryEntry[]>(defaultHistory);
 
@@ -132,7 +132,7 @@ export function PRDetail({ pr, onBack }: Props) {
     if (!logTime.trim()) return;
     const newEntry: HistoryEntry = {
       date: new Date().toISOString().split('T')[0],
-      event: logEvent.trim() || 'Training',
+      event: logEvent.trim() || t('account_pr_training'),
       time: logTime.trim(),
       best: false,
     };
@@ -154,13 +154,13 @@ export function PRDetail({ pr, onBack }: Props) {
         color={sport.color}
         style={{ letterSpacing: 1.5 }}
         uppercase>
-        {sport.label}
+        {({ run: t('sport_run'), bike: t('sport_bike'), swim: t('sport_swim'), tri: t('sport_tri') } as Record<string, string>)[pr.sport]}
       </AppText>
     </View>
   );
 
   return (
-    <Overlay onBack={onBack} title={`${pr.label} PR`} backLabel={t('nav_account')} badge={badge}>
+    <Overlay onBack={onBack} title={`${pr.label} ${t('account_pr_title')}`} backLabel={t('nav_account')} badge={badge}>
       {/* Hero */}
       <View
         style={[
@@ -183,7 +183,7 @@ export function PRDetail({ pr, onBack }: Props) {
           {pr.val}
         </AppText>
         <AppText size={12} color={colors.textMid} style={{ marginTop: 4 }}>
-          Set on Feb 10, 2025 · Training
+          {defaultHistory[0].date} · {t('account_pr_training')}
         </AppText>
       </View>
 
@@ -254,7 +254,7 @@ export function PRDetail({ pr, onBack }: Props) {
                       borderRadius: 5,
                     }}>
                     <AppText condensed weight="black" size={10} color={sport.color} uppercase>
-                      BEST
+                      {t('account_pr_best_badge')}
                     </AppText>
                   </View>
                 )}

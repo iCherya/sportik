@@ -102,9 +102,7 @@ export function SpeedPace() {
             style={styles.input}
           />
           <View style={styles.unit}>
-            <AppText size={12} color={colors.textMid}>
-              km/h
-            </AppText>
+            <AppText size={12} color={colors.textMid}>{t('unit_kmh')}</AppText>
           </View>
         </View>
       </View>
@@ -132,17 +130,15 @@ export function SpeedPace() {
             style={styles.input}
           />
           <View style={styles.unit}>
-            <AppText size={12} color={colors.textMid}>
-              min/km
-            </AppText>
+            <AppText size={12} color={colors.textMid}>{t('unit_per_km')}</AppText>
           </View>
         </View>
       </View>
 
       <View style={styles.infoBox}>
         {[
-          [t('sp_bike_40'), spd > 0 ? `${(40 / spd).toFixed(2)}h` : '--'],
-          [t('sp_bike_90'), spd > 0 ? `${(90 / spd).toFixed(2)}h` : '--'],
+          [t('sp_bike_40'), spd > 0 ? `${(40 / spd).toFixed(2)}${t('unit_h')}` : '--'],
+          [t('sp_bike_90'), spd > 0 ? `${(90 / spd).toFixed(2)}${t('unit_h')}` : '--'],
         ].map(([l, v]) => (
           <View key={l} style={styles.infoRow}>
             <AppText size={13} color={colors.textMid}>

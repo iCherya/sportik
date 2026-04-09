@@ -99,7 +99,7 @@ export function SwolfCalc() {
                 size={13}
                 weight="semibold"
                 color={active ? Sports.swim.color : colors.textMid}>
-                {v}m
+                {v}{t('unit_m_pool')}
               </AppText>
             </Pressable>
           );
@@ -126,9 +126,7 @@ export function SwolfCalc() {
             style={styles.input}
           />
           <View style={styles.unit}>
-            <AppText size={12} color={colors.textMid}>
-              strokes
-            </AppText>
+            <AppText size={12} color={colors.textMid}>{t('unit_strokes')}</AppText>
           </View>
         </View>
       </View>
@@ -153,9 +151,7 @@ export function SwolfCalc() {
             style={styles.input}
           />
           <View style={styles.unit}>
-            <AppText size={12} color={colors.textMid}>
-              sec
-            </AppText>
+            <AppText size={12} color={colors.textMid}>{t('unit_sec')}</AppText>
           </View>
         </View>
       </View>

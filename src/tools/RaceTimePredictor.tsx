@@ -3,21 +3,21 @@ import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
 import { useColors } from '../context/ThemeContext';
-import { useT } from '../i18n';
+import { type LangKey, useT } from '../i18n';
 import { type ColorPalette, Sports } from '../theme';
 
-const PRESETS = [
-  { l: '5K', v: '5' },
-  { l: '10K', v: '10' },
-  { l: 'HM', v: '21.1' },
-  { l: 'Mar', v: '42.2' },
+const PRESETS: { lKey: LangKey; v: string }[] = [
+  { lKey: 'rtp_preset_5k', v: '5' },
+  { lKey: 'rtp_preset_10k', v: '10' },
+  { lKey: 'ac_goal_hm', v: '21.1' },
+  { lKey: 'ac_goal_marathon', v: '42.2' },
 ];
 
 const makeStyles = (c: ColorPalette) =>
   StyleSheet.create({
     field: { marginBottom: 14 },
     fieldLabel: { letterSpacing: 2, marginBottom: 6 },
-    inputRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
+    inputRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
     input: {
       flex: 1,
       backgroundColor: c.card,
@@ -72,52 +72,44 @@ export function RaceTimePredictor() {
 
   const fmt = (secs: number) =>
     secs > 0
-      ? `${Math.floor(secs / 3600)}h ${Math.floor((secs % 3600) / 60)}m ${Math.round(secs % 60)}s`
+      ? `${Math.floor(secs / 3600)}${t('unit_h')} ${Math.floor((secs % 3600) / 60)}${t('unit_min')} ${Math.round(secs % 60)}${t('unit_sec')}`
       : '--';
 
   const paceStr = (secs: number, d: number) =>
     d > 0 && secs > 0
-      ? `${Math.floor(secs / d / 60)}:${String(Math.round((secs / d) % 60)).padStart(2, '0')}/km`
+      ? `${Math.floor(secs / d / 60)}:${String(Math.round((secs / d) % 60)).padStart(2, '0')} ${t('unit_per_km')}`
       : '--';
 
   return (
     <View>
       <View style={styles.field}>
-        <AppText
-          style={styles.fieldLabel}
-          condensed
-          weight="bold"
-          size={11}
-          color={colors.textDim}
-          uppercase>
+        <AppText style={styles.fieldLabel} condensed weight="bold" size={11} color={colors.textDim} uppercase>
           {t('rtp_known')}
         </AppText>
-        <View style={styles.inputRow}>
-          <TextInput
-            value={kd}
-            onChangeText={setKd}
-            placeholder="10"
-            placeholderTextColor={colors.textDim}
-            keyboardType="decimal-pad"
-            style={[styles.input, { flex: 1 }]}
-          />
-          <View style={styles.unit}>
-            <AppText size={12} color={colors.textMid}>
-              km
-            </AppText>
+        <View style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-start' }}>
+          <View style={{ flex: 1 }}>
+            <AppText size={11} color={colors.textDim} style={{ marginBottom: 4 }}>{t('tool_distance')}</AppText>
+            <TextInput
+              value={kd}
+              onChangeText={setKd}
+              placeholder="10"
+              placeholderTextColor={colors.textDim}
+              keyboardType="decimal-pad"
+              style={styles.input}
+            />
+            <AppText size={11} color={colors.textDim} style={{ textAlign: 'center', marginTop: 4 }}>{t('unit_km')}</AppText>
           </View>
-          <TextInput
-            value={kt}
-            onChangeText={setKt}
-            placeholder="42"
-            placeholderTextColor={colors.textDim}
-            keyboardType="decimal-pad"
-            style={[styles.input, { flex: 1 }]}
-          />
-          <View style={styles.unit}>
-            <AppText size={12} color={colors.textMid}>
-              min
-            </AppText>
+          <View style={{ flex: 1 }}>
+            <AppText size={11} color={colors.textDim} style={{ marginBottom: 4 }}>{t('tool_target_time')}</AppText>
+            <TextInput
+              value={kt}
+              onChangeText={setKt}
+              placeholder="42"
+              placeholderTextColor={colors.textDim}
+              keyboardType="decimal-pad"
+              style={styles.input}
+            />
+            <AppText size={11} color={colors.textDim} style={{ textAlign: 'center', marginTop: 4 }}>{t('unit_min')}</AppText>
           </View>
         </View>
       </View>
@@ -142,9 +134,7 @@ export function RaceTimePredictor() {
             style={styles.input}
           />
           <View style={styles.unit}>
-            <AppText size={12} color={colors.textMid}>
-              km
-            </AppText>
+            <AppText size={12} color={colors.textMid}>{t('unit_km')}</AppText>
           </View>
         </View>
         <View style={styles.presets}>
@@ -152,7 +142,7 @@ export function RaceTimePredictor() {
             const active = td2 === p.v;
             return (
               <Pressable
-                key={p.l}
+                key={p.lKey}
                 style={[
                   styles.preset,
                   active && {
@@ -166,7 +156,7 @@ export function RaceTimePredictor() {
                   weight="bold"
                   size={12}
                   color={active ? Sports.run.color : colors.textDim}>
-                  {p.l}
+                  {t(p.lKey)}
                 </AppText>
               </Pressable>
             );

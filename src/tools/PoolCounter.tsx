@@ -200,7 +200,7 @@ export function PoolCounter() {
   const [activeSw, setActiveSw] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [newName, setNewName] = useState('');
-  const [swimmers, setSwimmers] = useState<Swimmer[]>([makeSw(1, 'Lane 1')]);
+  const [swimmers, setSwimmers] = useState<Swimmer[]>(() => [makeSw(1, `${t('pool_lane_default')} 1`)]);
   const [_tick, setTick] = useState(0);
 
   // 100ms ticker for live display
@@ -373,7 +373,7 @@ export function PoolCounter() {
           {lc}
         </AppText>
         <AppText size={14} color={colors.textMid}>
-          {dist} km
+          {dist} {t('unit_km')}
         </AppText>
         <AppText condensed weight="bold" size={22} color={colors.text} style={{ marginTop: 4 }}>
           {fmtMs(le)}
@@ -383,7 +383,7 @@ export function PoolCounter() {
             ? `${t('pool_current_lap')} ${fmtMs(ll)}`
             : lc > 0
               ? `${t('pool_last')} ${fmtMs(sw.laps[lc - 1].time)}`
-              : 'Tap to start'}
+              : t('pool_tap_start')}
         </AppText>
       </View>
 
