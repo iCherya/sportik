@@ -1,5 +1,18 @@
 import type { LangKey } from '../i18n';
-import type { SportKey } from '../theme';
+import { Sports, type SportKey } from '../theme';
+
+/** Every concrete sport key (excludes synthetic 'all'). Derive from Sports so additions are automatic. */
+export const ALL_SPORT_KEYS = Object.keys(Sports).filter((k) => k !== 'all') as SportKey[];
+
+/** True when a tool covers every sport (shown as "All" badge). */
+export function isAllSports(tool: { sports: SportKey[] }): boolean {
+  return ALL_SPORT_KEYS.every((s) => tool.sports.includes(s));
+}
+
+/** Primary accent color for a tool: first sport's color, or undefined when covering all sports. */
+export function toolPrimarySport(tool: { sports: [SportKey, ...SportKey[]] }) {
+  return isAllSports(tool) ? null : Sports[tool.sports[0]];
+}
 
 export type Event = {
   id: number;
@@ -18,7 +31,7 @@ export type Tool = {
   id: string;
   nameKey: LangKey;
   descKey: LangKey;
-  sports: SportKey[];
+  sports: [SportKey, ...SportKey[]];
   icon: string;
 };
 

@@ -13,7 +13,8 @@
       "Bash(ls node_modules/@expo-google-fonts/inter/*.js)",
       "Bash(sed -i '' 's/fontFamily: '\\\\''BarlowCondensedBold'\\\\''/fontFamily: '\\\\''InterBold'\\\\''/g' /Users/iCherya/Front-end/Projects/sportik/src/onboarding/Onboarding.tsx)",
       "Bash(sed -i '' 's/fontFamily: '\\\\''BarlowSemiBold'\\\\''/fontFamily: '\\\\''InterSemiBold'\\\\''/g' /Users/iCherya/Front-end/Projects/sportik/src/overlays/EditProfileOverlay.tsx)",
-      "Bash(sed -i '' 's/fontFamily: '\\\\''Barlow'\\\\''/fontFamily: '\\\\''Inter'\\\\''/g' /Users/iCherya/Front-end/Projects/sportik/src/tools/PoolCounter.tsx /Users/iCherya/Front-end/Projects/sportik/src/overlays/PRDetail.tsx /Users/iCherya/Front-end/Projects/sportik/src/screens/AccountScreen.tsx /Users/iCherya/Front-end/Projects/sportik/src/screens/EventsScreen.tsx)"
+      "Bash(sed -i '' 's/fontFamily: '\\\\''Barlow'\\\\''/fontFamily: '\\\\''Inter'\\\\''/g' /Users/iCherya/Front-end/Projects/sportik/src/tools/PoolCounter.tsx /Users/iCherya/Front-end/Projects/sportik/src/overlays/PRDetail.tsx /Users/iCherya/Front-end/Projects/sportik/src/screens/AccountScreen.tsx /Users/iCherya/Front-end/Projects/sportik/src/screens/EventsScreen.tsx)",
+      "Bash(echo \"exit: $?\")"
     ]
   }
 }

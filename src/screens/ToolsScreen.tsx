@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
 import { useColors } from '../context/ThemeContext';
-import { TOOLS, type Tool } from '../data';
+import { isAllSports, toolPrimarySport, TOOLS, type Tool } from '../data';
 import { useT } from '../i18n';
 import { type ColorPalette, Font, Space, Sports, type SportKey } from '../theme';
 
@@ -134,10 +134,15 @@ export function ToolsScreen({ onSelect }: Props) {
 
       <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
         {filtered.map((tool) => {
-          const allSports = ['run', 'bike', 'swim', 'tri'] as SportKey[];
-          const isAll = allSports.every((s) => tool.sports.includes(s));
-          const primarySport = isAll ? null : Sports[tool.sports[0]];
+          const isAll = isAllSports(tool);
+          const primarySport = toolPrimarySport(tool);
           const accentColor = primarySport ? primarySport.color : colors.accent;
+          const sportLabels: Record<string, string> = {
+            run: t('sport_run'), bike: t('sport_bike'), swim: t('sport_swim'), tri: t('sport_tri'),
+          };
+          const badgeLabel = isAll
+            ? t('sport_all')
+            : tool.sports.map((s) => `${Sports[s].icon} ${sportLabels[s]}`).join(' · ');
           return (
             <Pressable key={tool.id} style={styles.toolCard} onPress={() => onSelect(tool)}>
               <View style={[styles.stripe, { backgroundColor: accentColor }]} />
@@ -157,9 +162,7 @@ export function ToolsScreen({ onSelect }: Props) {
                       color={accentColor}
                       uppercase
                       style={{ letterSpacing: 0.5 }}>
-                      {isAll
-                        ? t('sport_all')
-                        : tool.sports.map((s) => Sports[s].icon).join(' ')}
+                      {badgeLabel}
                     </AppText>
                   </View>
                 </View>
