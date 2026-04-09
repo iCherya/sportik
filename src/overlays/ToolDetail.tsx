@@ -60,7 +60,15 @@ export function ToolDetail({ tool, onBack }: Props) {
         color={sport.color}
         style={{ letterSpacing: 1.5 }}
         uppercase>
-        {sport.label}
+        {(
+          {
+            all: t('sport_all'),
+            swim: t('sport_swim'),
+            bike: t('sport_bike'),
+            run: t('sport_run'),
+            tri: t('sport_tri'),
+          } as Record<string, string>
+        )[tool.sport]}
       </AppText>
     </View>
   );

@@ -230,9 +230,9 @@ export const TOOLS: Tool[] = [
     id: 'cadence',
     nameKey: 'tool_cadence',
     descKey: 'tool_cadence_desc',
-    sport: 'bike',
+    sport: 'all',
     icon: '🎵',
-    tag: 'Bike',
+    tag: 'All',
   },
   {
     id: 'power',

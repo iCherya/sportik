@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { BottomNav } from './components/BottomNav';
+import { LangContext } from './context/LangContext';
 import type { Lang } from './context/LangContext';
 import { useColors } from './context/ThemeContext';
 import { EVENTS_DATA, type Event, type Tool } from './data';
@@ -173,11 +174,13 @@ export function MainApp({ isDark, setIsDark, lang, setLang, profile, setProfile 
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      {renderScreen()}
-      <BottomNav screen={screen} onNavigate={navigateTo} />
-      {renderOverlay()}
-    </View>
+    <LangContext.Provider value={lang}>
+      <View style={[styles.container, { backgroundColor: colors.bg }]}>
+        {renderScreen()}
+        <BottomNav screen={screen} onNavigate={navigateTo} />
+        {renderOverlay()}
+      </View>
+    </LangContext.Provider>
   );
 }
 

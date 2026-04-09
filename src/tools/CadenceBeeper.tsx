@@ -1,6 +1,7 @@
 import * as Haptics from 'expo-haptics';
+import { Audio } from 'expo-av';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
 import { useColors } from '../context/ThemeContext';
@@ -61,18 +62,64 @@ const makeStyles = (c: ColorPalette) =>
     },
   });
 
+// Web Audio API beep (browser only)
+let webAudioCtx: AudioContext | null = null;
+function playWebBeep() {
+  if (typeof AudioContext === 'undefined' && typeof (window as unknown as Record<string, unknown>).webkitAudioContext === 'undefined') return;
+  if (!webAudioCtx) {
+    const Ctx = AudioContext ?? (window as unknown as Record<string, unknown>).webkitAudioContext as typeof AudioContext;
+    webAudioCtx = new Ctx();
+  }
+  const ctx = webAudioCtx;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.type = 'sine';
+  osc.frequency.value = 880;
+  gain.gain.setValueAtTime(0, ctx.currentTime);
+  gain.gain.linearRampToValueAtTime(0.6, ctx.currentTime + 0.005);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.07);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.07);
+}
+
 export function CadenceBeeper() {
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const t = useT();
-  const [bpm, setBpm] = useState(85);
+  const [bpm, setBpm] = useState(175);
   const [playing, setPlaying] = useState(false);
   const [beat, setBeat] = useState(false);
   const [sport, setSport] = useState<SportKey>('run');
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const soundRef = useRef<Audio.Sound | null>(null);
+
+  useEffect(() => {
+    if (Platform.OS === 'web') return;
+    Audio.setAudioModeAsync({
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: false,
+    }).catch(() => {});
+    Audio.Sound.createAsync(
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      require('../../assets/beep.wav'),
+      { shouldPlay: false, volume: 1 }
+    ).then(({ sound }) => {
+      soundRef.current = sound;
+    }).catch(() => {});
+    return () => {
+      soundRef.current?.unloadAsync().catch(() => {});
+    };
+  }, []);
 
   const click = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    if (Platform.OS === 'web') {
+      playWebBeep();
+    } else if (soundRef.current) {
+      soundRef.current.setPositionAsync(0).then(() => soundRef.current?.playAsync()).catch(() => {});
+    }
     setBeat(true);
     setTimeout(() => setBeat(false), 80);
   };
