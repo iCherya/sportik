@@ -80,7 +80,7 @@ export function ToolsScreen({ onSelect }: Props) {
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [activeTab, setActiveTab] = useState<TabId>('all');
 
-  const filtered = activeTab === 'all' ? TOOLS : TOOLS.filter((tool) => tool.sport === activeTab);
+  const filtered = activeTab === 'all' ? TOOLS : TOOLS.filter((tool) => tool.sports.includes(activeTab as SportKey));
 
   return (
     <View style={styles.container}>
@@ -102,7 +102,7 @@ export function ToolsScreen({ onSelect }: Props) {
           const sport =
             tab.id === 'all' ? { icon: '⚡', color: colors.accent } : Sports[tab.id as SportKey];
           const count =
-            tab.id === 'all' ? TOOLS.length : TOOLS.filter((tool) => tool.sport === tab.id).length;
+            tab.id === 'all' ? TOOLS.length : TOOLS.filter((tool) => tool.sports.includes(tab.id as SportKey)).length;
           const active = activeTab === tab.id;
           return (
             <Pressable
@@ -134,14 +134,14 @@ export function ToolsScreen({ onSelect }: Props) {
 
       <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
         {filtered.map((tool) => {
-          const sport =
-            tool.sport === 'all'
-              ? { icon: '⚡', color: colors.accent, bg: '#1a1a0a' }
-              : Sports[tool.sport as SportKey];
+          const allSports = ['run', 'bike', 'swim', 'tri'] as SportKey[];
+          const isAll = allSports.every((s) => tool.sports.includes(s));
+          const primarySport = isAll ? null : Sports[tool.sports[0]];
+          const accentColor = primarySport ? primarySport.color : colors.accent;
           return (
             <Pressable key={tool.id} style={styles.toolCard} onPress={() => onSelect(tool)}>
-              <View style={[styles.stripe, { backgroundColor: sport.color }]} />
-              <View style={[styles.toolIcon, { backgroundColor: `${sport.color}22` }]}>
+              <View style={[styles.stripe, { backgroundColor: accentColor }]} />
+              <View style={[styles.toolIcon, { backgroundColor: `${accentColor}22` }]}>
                 <AppText size={20}>{tool.icon}</AppText>
               </View>
               <View style={styles.toolInfo}>
@@ -149,25 +149,17 @@ export function ToolsScreen({ onSelect }: Props) {
                   <AppText condensed weight="bold" size={16} style={{ flex: 1 }}>
                     {t(tool.nameKey)}
                   </AppText>
-                  <View style={[styles.tagBadge, { backgroundColor: `${sport.color}22` }]}>
+                  <View style={[styles.tagBadge, { backgroundColor: `${accentColor}22` }]}>
                     <AppText
                       condensed
                       weight="bold"
                       size={10}
-                      color={sport.color}
+                      color={accentColor}
                       uppercase
                       style={{ letterSpacing: 0.5 }}>
-                      {
-                        (
-                          {
-                            Run: t('sport_run'),
-                            Bike: t('sport_bike'),
-                            Swim: t('sport_swim'),
-                            Tri: t('sport_tri'),
-                            All: t('sport_all'),
-                          } as Record<string, string>
-                        )[tool.tag]
-                      }
+                      {isAll
+                        ? t('sport_all')
+                        : tool.sports.map((s) => Sports[s].icon).join(' ')}
                     </AppText>
                   </View>
                 </View>

@@ -18,9 +18,8 @@ export type Tool = {
   id: string;
   nameKey: LangKey;
   descKey: LangKey;
-  sport: SportKey | 'all';
+  sports: SportKey[];
   icon: string;
-  tag: string;
 };
 
 export type Session = {
@@ -210,117 +209,19 @@ export const EVENTS_DATA: Event[] = [
 ];
 
 export const TOOLS: Tool[] = [
-  {
-    id: 'pace',
-    nameKey: 'tool_pace',
-    descKey: 'tool_pace_desc',
-    sport: 'run',
-    icon: '⏱',
-    tag: 'Run',
-  },
-  {
-    id: 'predict',
-    nameKey: 'tool_predict',
-    descKey: 'tool_predict_desc',
-    sport: 'run',
-    icon: '📈',
-    tag: 'Run',
-  },
-  {
-    id: 'cadence',
-    nameKey: 'tool_cadence',
-    descKey: 'tool_cadence_desc',
-    sport: 'all',
-    icon: '🎵',
-    tag: 'All',
-  },
-  {
-    id: 'power',
-    nameKey: 'tool_power',
-    descKey: 'tool_power_desc',
-    sport: 'bike',
-    icon: '⚡',
-    tag: 'Bike',
-  },
-  {
-    id: 'speed',
-    nameKey: 'tool_speed',
-    descKey: 'tool_speed_desc',
-    sport: 'bike',
-    icon: '🚴',
-    tag: 'Bike',
-  },
-  { id: 'hr', nameKey: 'tool_hr', descKey: 'tool_hr_desc', sport: 'all', icon: '❤️', tag: 'All' },
-  {
-    id: 'calorie',
-    nameKey: 'tool_calorie',
-    descKey: 'tool_calorie_desc',
-    sport: 'all',
-    icon: '🔥',
-    tag: 'All',
-  },
-  {
-    id: 'swolf',
-    nameKey: 'tool_swolf',
-    descKey: 'tool_swolf_desc',
-    sport: 'swim',
-    icon: '🏊',
-    tag: 'Swim',
-  },
-  {
-    id: 'pool',
-    nameKey: 'tool_pool',
-    descKey: 'tool_pool_desc',
-    sport: 'swim',
-    icon: '🏁',
-    tag: 'Swim',
-  },
-  {
-    id: 'wetsuit',
-    nameKey: 'tool_wetsuit',
-    descKey: 'tool_wetsuit_desc',
-    sport: 'swim',
-    icon: '🌡️',
-    tag: 'Swim',
-  },
-  {
-    id: 'split',
-    nameKey: 'tool_split',
-    descKey: 'tool_split_desc',
-    sport: 'tri',
-    icon: '🔱',
-    tag: 'Tri',
-  },
-  {
-    id: 'nutrition',
-    nameKey: 'tool_nutrition',
-    descKey: 'tool_nutrition_desc',
-    sport: 'tri',
-    icon: '🍌',
-    tag: 'Tri',
-  },
-  {
-    id: 'transition',
-    nameKey: 'tool_transition',
-    descKey: 'tool_transition_desc',
-    sport: 'tri',
-    icon: '🔄',
-    tag: 'Tri',
-  },
-  {
-    id: 'checklist',
-    nameKey: 'tool_checklist',
-    descKey: 'tool_checklist_desc',
-    sport: 'tri',
-    icon: '✅',
-    tag: 'Tri',
-  },
-  {
-    id: 'taper',
-    nameKey: 'tool_taper',
-    descKey: 'tool_taper_desc',
-    sport: 'tri',
-    icon: '📉',
-    tag: 'Tri',
-  },
+  { id: 'pace',       nameKey: 'tool_pace',       descKey: 'tool_pace_desc',       sports: ['run'],                      icon: '⏱'  },
+  { id: 'predict',    nameKey: 'tool_predict',    descKey: 'tool_predict_desc',    sports: ['run'],                      icon: '📈'  },
+  { id: 'cadence',    nameKey: 'tool_cadence',    descKey: 'tool_cadence_desc',    sports: ['run', 'bike'],              icon: '🎵'  },
+  { id: 'power',      nameKey: 'tool_power',      descKey: 'tool_power_desc',      sports: ['bike'],                     icon: '⚡'  },
+  { id: 'speed',      nameKey: 'tool_speed',      descKey: 'tool_speed_desc',      sports: ['bike'],                     icon: '🚴'  },
+  { id: 'hr',         nameKey: 'tool_hr',         descKey: 'tool_hr_desc',         sports: ['run', 'bike', 'swim', 'tri'], icon: '❤️' },
+  { id: 'calorie',    nameKey: 'tool_calorie',    descKey: 'tool_calorie_desc',    sports: ['run', 'bike', 'swim', 'tri'], icon: '🔥' },
+  { id: 'swolf',      nameKey: 'tool_swolf',      descKey: 'tool_swolf_desc',      sports: ['swim'],                     icon: '🏊'  },
+  { id: 'pool',       nameKey: 'tool_pool',       descKey: 'tool_pool_desc',       sports: ['swim'],                     icon: '🏁'  },
+  { id: 'wetsuit',    nameKey: 'tool_wetsuit',    descKey: 'tool_wetsuit_desc',    sports: ['swim'],                     icon: '🌡️' },
+  { id: 'split',      nameKey: 'tool_split',      descKey: 'tool_split_desc',      sports: ['tri'],                      icon: '🔱'  },
+  { id: 'nutrition',  nameKey: 'tool_nutrition',  descKey: 'tool_nutrition_desc',  sports: ['tri'],                      icon: '🍌'  },
+  { id: 'transition', nameKey: 'tool_transition', descKey: 'tool_transition_desc', sports: ['tri'],                      icon: '🔄'  },
+  { id: 'checklist',  nameKey: 'tool_checklist',  descKey: 'tool_checklist_desc',  sports: ['tri'],                      icon: '✅'  },
+  { id: 'taper',      nameKey: 'tool_taper',      descKey: 'tool_taper_desc',      sports: ['tri'],                      icon: '📉'  },
 ];
