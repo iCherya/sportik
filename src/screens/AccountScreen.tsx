@@ -38,9 +38,9 @@ type SheetId =
 
 const PR_DATA = [
   { sport: 'swim' as const, icon: '🏊', val: '28:42', labelKey: 'pr_label_swim' as const },
-  { sport: 'bike' as const, icon: '🚴', val: '1:02h', labelKey: 'pr_label_bike' as const },
+  { sport: 'bike' as const, icon: '🚴', val: '1:02:22', labelKey: 'pr_label_bike' as const },
   { sport: 'run' as const, icon: '🏃', val: '42:10', labelKey: 'pr_label_run' as const },
-  { sport: 'tri' as const, icon: '🔱', val: '4:38h', labelKey: 'pr_label_tri' as const },
+  { sport: 'tri' as const, icon: '🔱', val: '4:38:00', labelKey: 'pr_label_tri' as const },
 ];
 
 const makeStyles = (c: ColorPalette) =>

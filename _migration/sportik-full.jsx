@@ -25,11 +25,11 @@ const SP = {
    MOCK DATA
 ═══════════════════════════════════════════════════════════ */
 const QUOTES = [
-  {text:"The body achieves what the mind believes.", author:"— Unknown"},
-  {text:"Pain is temporary. Quitting lasts forever.", author:"— Lance Armstrong"},
-  {text:"Swim. Bike. Run. Suffer. Repeat.", author:"— Every Triathlete"},
-  {text:"Your only limit is you.", author:"— Unknown"},
-  {text:"Champions aren't made in gyms.", author:"— Muhammad Ali"},
+  {text:"The body achieves what the mind believes.", author:"Unknown"},
+  {text:"Pain is temporary. Quitting lasts forever.", author:"Lance Armstrong"},
+  {text:"Swim. Bike. Run. Suffer. Repeat.", author:"Every Triathlete"},
+  {text:"Your only limit is you.", author:"Unknown"},
+  {text:"Champions aren't made in gyms.", author:"Muhammad Ali"},
 ];
 
 const PLAN_WEEKS = [

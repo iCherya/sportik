@@ -51,11 +51,11 @@ export type PlanWeek = {
 };
 
 export const QUOTES: { text: string; author: string }[] = [
-  { text: 'The body achieves what the mind believes.', author: '— Unknown' },
-  { text: 'Pain is temporary. Quitting lasts forever.', author: '— Lance Armstrong' },
-  { text: 'Swim. Bike. Run. Suffer. Repeat.', author: '— Every Triathlete' },
-  { text: 'Your only limit is you.', author: '— Unknown' },
-  { text: "Champions aren't made in gyms.", author: '— Muhammad Ali' },
+  { text: 'The body achieves what the mind believes.', author: 'Unknown' },
+  { text: 'Pain is temporary. Quitting lasts forever.', author: 'Lance Armstrong' },
+  { text: 'Swim. Bike. Run. Suffer. Repeat.', author: 'Every Triathlete' },
+  { text: 'Your only limit is you.', author: 'Unknown' },
+  { text: "Champions aren't made in gyms.", author: 'Muhammad Ali' },
 ];
 
 export const PLAN_WEEKS: PlanWeek[] = [

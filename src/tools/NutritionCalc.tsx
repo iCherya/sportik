@@ -77,15 +77,15 @@ export function NutritionCalc() {
   const tf = Math.round(((fr * dur) / 1000) * 10) / 10;
 
   const cards = [
-    { label: t('nut_carbs'), val: `${tc}g`, color: colors.accent, sub: `${cr}g/hr` },
-    { label: t('nut_fluid'), val: `${tf}L`, color: Sports.swim.color, sub: `${fr}ml/hr` },
+    { label: t('nut_carbs'), val: `${tc} ${t('unit_g')}`, color: colors.accent, sub: `${cr} ${t('unit_g_hr')}` },
+    { label: t('nut_fluid'), val: `${tf} ${t('unit_L')}`, color: Sports.swim.color, sub: `${fr} ${t('unit_ml_hr')}` },
     {
       label: t('nut_sodium'),
-      val: `${Math.round(500 * dur)}mg`,
+      val: `${Math.round(500 * dur)} ${t('unit_mg')}`,
       color: Sports.bike.color,
-      sub: '500mg/hr',
+      sub: `500 ${t('unit_mg_hr')}`,
     },
-    { label: t('nut_gels'), val: `${Math.ceil(tc / 25)}`, color: Sports.run.color, sub: '×25g' },
+    { label: t('nut_gels'), val: `${Math.ceil(tc / 25)}`, color: Sports.run.color, sub: t('unit_x25g') },
   ];
 
   return (
@@ -100,32 +100,28 @@ export function NutritionCalc() {
           uppercase>
           {t('nut_race_duration')}
         </AppText>
-        <View style={styles.inputRow}>
-          <TextInput
-            value={hours}
-            onChangeText={setHours}
-            placeholder="4"
-            placeholderTextColor={colors.textDim}
-            keyboardType="numeric"
-            style={[styles.input, { flex: 1 }]}
-          />
-          <View style={styles.unit}>
-            <AppText size={12} color={colors.textMid}>
-              h
-            </AppText>
+        <View style={{ flexDirection: 'row', gap: 12 }}>
+          <View style={{ flex: 1 }}>
+            <TextInput
+              value={hours}
+              onChangeText={setHours}
+              placeholder="4"
+              placeholderTextColor={colors.textDim}
+              keyboardType="numeric"
+              style={styles.input}
+            />
+            <AppText size={11} color={colors.textDim} style={{ textAlign: 'center', marginTop: 4 }}>{t('unit_h')}</AppText>
           </View>
-          <TextInput
-            value={mins}
-            onChangeText={setMins}
-            placeholder="30"
-            placeholderTextColor={colors.textDim}
-            keyboardType="numeric"
-            style={[styles.input, { flex: 1 }]}
-          />
-          <View style={styles.unit}>
-            <AppText size={12} color={colors.textMid}>
-              m
-            </AppText>
+          <View style={{ flex: 1 }}>
+            <TextInput
+              value={mins}
+              onChangeText={setMins}
+              placeholder="30"
+              placeholderTextColor={colors.textDim}
+              keyboardType="numeric"
+              style={styles.input}
+            />
+            <AppText size={11} color={colors.textDim} style={{ textAlign: 'center', marginTop: 4 }}>{t('unit_min')}</AppText>
           </View>
         </View>
       </View>

@@ -1,5 +1,15 @@
 import { ScrollViewStyleReset } from 'expo-router/html';
 
+// expo-router uses static HTML as a shell only — all rendering is client-side.
+// Suppress the spurious useLayoutEffect SSR warning from react-navigation.
+if (typeof window === 'undefined') {
+  const _err = console.error.bind(console);
+  console.error = (...args: unknown[]) => {
+    if (typeof args[0] === 'string' && args[0].includes('useLayoutEffect')) return;
+    _err(...args);
+  };
+}
+
 // This file is web-only and used to configure the root HTML for every
 // web page during static rendering.
 // The contents of this function only run in Node.js environments and

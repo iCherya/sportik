@@ -35,7 +35,7 @@ const makeStyles = (c: ColorPalette) =>
       backgroundColor: c.card,
       alignItems: 'center',
     },
-    row2: { flexDirection: 'row', gap: 10 },
+    row2: { flexDirection: 'row', gap: 32 },
     field: { marginBottom: 14 },
     fieldLabel: { letterSpacing: 2, marginBottom: 6 },
     inputRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
@@ -122,21 +122,15 @@ export function CalorieBurn() {
             uppercase>
             {t('tool_weight')}
           </AppText>
-          <View style={styles.inputRow}>
-            <TextInput
-              value={weight}
-              onChangeText={setWeight}
-              placeholder="72"
-              placeholderTextColor={colors.textDim}
-              keyboardType="decimal-pad"
-              style={styles.input}
-            />
-            <View style={styles.unit}>
-              <AppText size={11} color={colors.textMid}>
-                kg
-              </AppText>
-            </View>
-          </View>
+          <TextInput
+            value={weight}
+            onChangeText={setWeight}
+            placeholder="72"
+            placeholderTextColor={colors.textDim}
+            keyboardType="decimal-pad"
+            style={styles.input}
+          />
+          <AppText size={11} color={colors.textDim} style={{ textAlign: 'center', marginTop: 4 }}>{t('unit_kg')}</AppText>
         </View>
         <View style={[styles.field, { flex: 1 }]}>
           <AppText
@@ -148,32 +142,28 @@ export function CalorieBurn() {
             uppercase>
             {t('tool_duration')}
           </AppText>
-          <View style={styles.inputRow}>
-            <TextInput
-              value={hours}
-              onChangeText={setHours}
-              placeholder="1"
-              placeholderTextColor={colors.textDim}
-              keyboardType="numeric"
-              style={[styles.input, { flex: 1 }]}
-            />
-            <View style={styles.unit}>
-              <AppText size={11} color={colors.textMid}>
-                h
-              </AppText>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <View style={{ flex: 1 }}>
+              <TextInput
+                value={hours}
+                onChangeText={setHours}
+                placeholder="1"
+                placeholderTextColor={colors.textDim}
+                keyboardType="numeric"
+                style={styles.input}
+              />
+              <AppText size={11} color={colors.textDim} style={{ textAlign: 'center', marginTop: 4 }}>{t('unit_h')}</AppText>
             </View>
-            <TextInput
-              value={mins}
-              onChangeText={setMins}
-              placeholder="30"
-              placeholderTextColor={colors.textDim}
-              keyboardType="numeric"
-              style={[styles.input, { flex: 1 }]}
-            />
-            <View style={styles.unit}>
-              <AppText size={11} color={colors.textMid}>
-                m
-              </AppText>
+            <View style={{ flex: 1 }}>
+              <TextInput
+                value={mins}
+                onChangeText={setMins}
+                placeholder="30"
+                placeholderTextColor={colors.textDim}
+                keyboardType="numeric"
+                style={styles.input}
+              />
+              <AppText size={11} color={colors.textDim} style={{ textAlign: 'center', marginTop: 4 }}>{t('unit_min')}</AppText>
             </View>
           </View>
         </View>
