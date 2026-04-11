@@ -22,4 +22,5 @@ export const STORAGE_KEYS = {
   personalEvents: 'sportik_personal_events',
   doneSessions: 'sportik_done_sessions',
   prHistory: 'sportik_pr_history',
+  personalBests: 'sportik_personal_bests',
 } as const;

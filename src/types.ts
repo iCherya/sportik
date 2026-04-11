@@ -16,15 +16,8 @@ export type Profile = {
   hoursPerWeek: number;
 };
 
-export type PRData = {
-  sport: string;
-  label: string;
-  val: string;
-};
-
 export type OverlayType =
   | { type: 'tool'; tool: Tool }
-  | { type: 'pr'; pr: PRData }
   | { type: 'plan' }
   | { type: 'about' }
   | { type: 'editProfile'; profile: Profile; onSave: (p: Profile) => void }

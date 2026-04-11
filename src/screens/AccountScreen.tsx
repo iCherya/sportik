@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '../components/AppText';
@@ -10,6 +10,7 @@ import { Toggle } from '../components/Toggle';
 import type { Lang } from '../context/LangContext';
 import { useColors } from '../context/ThemeContext';
 import { useT } from '../i18n';
+import type { LangKey } from '../i18n';
 import { STORAGE_KEYS, Storage } from '../storage';
 import { type ColorPalette, Font, Space, Sports } from '../theme';
 import type { OverlayType, Profile } from '../types';
@@ -34,14 +35,45 @@ type SheetId =
   | 'suggest'
   | 'rate'
   | 'logout'
+  | 'pb'
   | null;
 
-const PR_DATA = [
-  { sport: 'swim' as const, icon: '🏊', val: '28:42', labelKey: 'pr_label_swim' as const },
-  { sport: 'bike' as const, icon: '🚴', val: '1:02:22', labelKey: 'pr_label_bike' as const },
-  { sport: 'run' as const, icon: '🏃', val: '42:10', labelKey: 'pr_label_run' as const },
-  { sport: 'tri' as const, icon: '🔱', val: '4:38:00', labelKey: 'pr_label_tri' as const },
+type PBSport = 'swim' | 'bike' | 'run' | 'tri';
+
+const PB_SPORTS: { id: PBSport; icon: string }[] = [
+  { id: 'swim', icon: '🏊' },
+  { id: 'bike', icon: '🚴' },
+  { id: 'run', icon: '🏃' },
+  { id: 'tri', icon: '🔱' },
 ];
+
+const PB_DISTANCES: Record<PBSport, { id: string; lKey: LangKey }[]> = {
+  swim: [
+    { id: 'swim_400', lKey: 'pb_swim_400' },
+    { id: 'swim_750', lKey: 'pb_swim_750' },
+    { id: 'swim_1500', lKey: 'pb_swim_1500' },
+    { id: 'swim_1900', lKey: 'pb_swim_1900' },
+    { id: 'swim_3800', lKey: 'pb_swim_3800' },
+  ],
+  bike: [
+    { id: 'bike_20', lKey: 'pb_bike_20' },
+    { id: 'bike_40', lKey: 'pb_bike_40' },
+    { id: 'bike_90', lKey: 'pb_bike_90' },
+    { id: 'bike_180', lKey: 'pb_bike_180' },
+  ],
+  run: [
+    { id: 'run_5k', lKey: 'pb_run_5k' },
+    { id: 'run_10k', lKey: 'pb_run_10k' },
+    { id: 'run_hm', lKey: 'pb_run_hm' },
+    { id: 'run_marathon', lKey: 'pb_run_marathon' },
+  ],
+  tri: [
+    { id: 'tri_sprint', lKey: 'pb_tri_sprint' },
+    { id: 'tri_olympic', lKey: 'pb_tri_olympic' },
+    { id: 'tri_703', lKey: 'pb_tri_703' },
+    { id: 'tri_ironman', lKey: 'pb_tri_ironman' },
+  ],
+};
 
 const makeStyles = (c: ColorPalette) =>
   StyleSheet.create({
@@ -79,15 +111,36 @@ const makeStyles = (c: ColorPalette) =>
       paddingHorizontal: 5,
       paddingVertical: 2,
     },
-    prRow: { flexDirection: 'row', gap: 8, marginTop: 18 },
-    prBox: {
+    pbTabBar: { flexDirection: 'row', gap: 8, marginBottom: 10 },
+    pbTab: {
       flex: 1,
+      alignItems: 'center',
+      paddingVertical: 10,
+      borderRadius: Space.radius.md,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.card,
+      gap: 3,
+    },
+    pbDistRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      paddingHorizontal: 14,
+      paddingVertical: 14,
+    },
+    pbInput: {
       backgroundColor: c.card,
       borderWidth: 1,
       borderColor: c.border,
       borderRadius: 14,
-      padding: 10,
-      alignItems: 'center',
+      paddingHorizontal: 14,
+      paddingVertical: 14,
+      fontFamily: Font.bodyBold,
+      fontSize: 22,
+      color: c.text,
+      marginBottom: 14,
+      textAlign: 'center',
     },
     group: { marginHorizontal: Space.screen, marginBottom: 16 },
     groupLabel: { marginBottom: 8, letterSpacing: 1 },
@@ -247,6 +300,10 @@ export function AccountScreen({
   const [goal, setGoal] = useState(profile.raceType || 'Ironman 70.3');
   const [units, setUnits] = useState('km');
   const [sheet, setSheet] = useState<SheetId>(null);
+  const [pbSport, setPbSport] = useState<PBSport>('run');
+  const [personalBests, setPersonalBests] = useState<Record<string, string>>({});
+  const [pbEditId, setPbEditId] = useState<string>('');
+  const [pbInput, setPbInput] = useState('');
   const [suggestText, setSuggestText] = useState('');
   const [suggestSent, setSuggestSent] = useState(false);
   const [stars, setStars] = useState(0);
@@ -254,6 +311,16 @@ export function AccountScreen({
   const [loggedOut, setLoggedOut] = useState(false);
 
   const closeSheet = () => setSheet(null);
+
+  useEffect(() => {
+    Storage.get<Record<string, string>>(STORAGE_KEYS.personalBests).then((v) => {
+      if (v) setPersonalBests(v);
+    });
+  }, []);
+
+  useEffect(() => {
+    Storage.set(STORAGE_KEYS.personalBests, personalBests);
+  }, [personalBests]);
 
   const handleSetLang = async (id: Lang) => {
     setLang(id);
@@ -294,317 +361,363 @@ export function AccountScreen({
 
   return (
     <View style={{ flex: 1 }}>
-    <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-      {/* Hero */}
-      <View style={styles.hero}>
-        <View style={styles.heroTop}>
-          <AppText condensed weight="black" size={22} uppercase style={{ letterSpacing: 1 }}>
-            {t('account_title')}
-          </AppText>
-          <Pressable
-            style={styles.editBtn}
-            onPress={() =>
-              setOverlay({
-                type: 'editProfile',
-                profile,
-                onSave: (p) => {
-                  setProfile(p);
-                  setOverlay(null);
-                },
-              })
-            }>
-            <AppText
-              weight="semibold"
-              size={12}
-              color={colors.accent}
-              style={{ letterSpacing: 0.5 }}>
-              {t('account_edit')}
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+        {/* Hero */}
+        <View style={styles.hero}>
+          <View style={styles.heroTop}>
+            <AppText condensed weight="black" size={22} uppercase style={{ letterSpacing: 1 }}>
+              {t('account_title')}
             </AppText>
-          </Pressable>
-        </View>
-        <View style={styles.avatarRow}>
-          <View style={styles.avatarWrap}>
-            <AppText size={40}>{profile.avatar}</AppText>
-            <View style={styles.proBadge}>
-              <AppText
-                condensed
-                weight="black"
-                size={9}
-                color={colors.bg}
-                uppercase
-                style={{ letterSpacing: 0.5 }}>
-                PRO
-              </AppText>
-            </View>
-          </View>
-          <View style={{ flex: 1 }}>
-            <AppText condensed weight="black" size={24} style={{ lineHeight: 28 }}>
-              {profile.name}
-            </AppText>
-            <AppText weight="medium" size={13} color={colors.textMid} style={{ marginTop: 2 }}>
-              {profile.focus} · {profile.city} 🇺🇦
-            </AppText>
-            <AppText size={12} color={colors.textDim} style={{ marginTop: 4 }}>
-              {profile.raceType
-                ? `${t('account_goal_label')}: ${profile.raceType} · ${t('account_active_plan')}`
-                : t('account_no_plan')}
-            </AppText>
-          </View>
-        </View>
-        <View style={styles.prRow}>
-          {PR_DATA.map((p) => (
             <Pressable
-              key={p.labelKey}
-              style={styles.prBox}
+              style={styles.editBtn}
               onPress={() =>
-                setOverlay({ type: 'pr', pr: { sport: p.sport, label: t(p.labelKey), val: p.val } })
+                setOverlay({
+                  type: 'editProfile',
+                  profile,
+                  onSave: (p) => {
+                    setProfile(p);
+                    setOverlay(null);
+                  },
+                })
               }>
-              <AppText size={18}>{p.icon}</AppText>
               <AppText
-                condensed
-                weight="black"
-                size={16}
-                color={Sports[p.sport].color}
-                style={{ marginTop: 4 }}>
-                {p.val}
-              </AppText>
-              <AppText
-                size={9}
-                color={colors.textDim}
-                style={{ textAlign: 'center', marginTop: 2 }}>
-                {t(p.labelKey)}
+                weight="semibold"
+                size={12}
+                color={colors.accent}
+                style={{ letterSpacing: 0.5 }}>
+                {t('account_edit')}
               </AppText>
             </Pressable>
-          ))}
-        </View>
-      </View>
-
-      {/* Training Profile group */}
-      <View style={styles.group}>
-        <AppText
-          weight="semibold"
-          size={11}
-          color={colors.textDim}
-          uppercase
-          style={styles.groupLabel}>
-          {t('account_training')}
-        </AppText>
-        <View style={styles.groupItems}>
-          <Row
-            icon="⚡"
-            iconBg="#1a1400"
-            label={t('account_ftp')}
-            right={
-              <View style={styles.rowRight}>
-                <AppText weight="semibold" size={13} color={colors.textMid}>
-                  {ftp} W
-                </AppText>
-                <AppText size={14} color={colors.textDim}>
-                  ›
-                </AppText>
-              </View>
-            }
-            onPress={() => setSheet('ftp')}
-          />
-          <Row
-            icon="❤️"
-            iconBg="#200010"
-            label={t('account_maxhr')}
-            right={
-              <View style={styles.rowRight}>
-                <AppText weight="semibold" size={13} color={colors.textMid}>
-                  {maxHR} {t('unit_bpm')}
-                </AppText>
-                <AppText size={14} color={colors.textDim}>
-                  ›
-                </AppText>
-              </View>
-            }
-            onPress={() =>
-              setOverlay({
-                type: 'hrZones',
-                maxHR,
-                hrMethod,
-                onSave: (v: unknown) => {
-                  const data = v as { maxHR: string; hrMethod: string };
-                  setMaxHR(data.maxHR);
-                  setHrMethod(data.hrMethod);
-                  setOverlay(null);
-                },
-              })
-            }
-          />
-          <Row
-            icon="🎯"
-            iconBg="#001a08"
-            label={t('account_goal')}
-            right={
-              <View style={styles.rowRight}>
+          </View>
+          <View style={styles.avatarRow}>
+            <View style={styles.avatarWrap}>
+              <AppText size={40}>{profile.avatar}</AppText>
+              <View style={styles.proBadge}>
                 <AppText
-                  weight="semibold"
-                  size={13}
-                  color={colors.textMid}
-                  numberOfLines={1}
-                  style={{ maxWidth: 100 }}>
-                  {goal}
-                </AppText>
-                <AppText size={14} color={colors.textDim}>
-                  ›
+                  condensed
+                  weight="black"
+                  size={9}
+                  color={colors.bg}
+                  uppercase
+                  style={{ letterSpacing: 0.5 }}>
+                  PRO
                 </AppText>
               </View>
-            }
-            onPress={() => setSheet('goal')}
-          />
-        </View>
-      </View>
-
-      {/* Preferences group */}
-      <View style={styles.group}>
-        <AppText
-          weight="semibold"
-          size={11}
-          color={colors.textDim}
-          uppercase
-          style={styles.groupLabel}>
-          {t('account_prefs')}
-        </AppText>
-        <View style={styles.groupItems}>
-          <Row
-            icon="🔔"
-            iconBg="#001020"
-            label={t('account_notif')}
-            right={<Toggle on={notif} onToggle={() => setNotif(!notif)} />}
-          />
-          <Row
-            icon="🌙"
-            iconBg="#141414"
-            label={t('account_dark')}
-            right={<Toggle on={isDark} onToggle={handleToggleDark} />}
-          />
-          <Row
-            icon="📏"
-            iconBg="#001a08"
-            label={t('account_units')}
-            right={
-              <View style={styles.rowRight}>
-                <AppText weight="semibold" size={13} color={colors.textMid}>
-                  {units === 'km' ? t('ac_km_kg') : t('ac_mi_lb')}
-                </AppText>
-                <AppText size={14} color={colors.textDim}>
-                  ›
-                </AppText>
-              </View>
-            }
-            onPress={() => setSheet('units')}
-          />
-          <Row
-            icon={t('ac_hr_abbr')}
-            iconBg="#0a0a1a"
-            label={t('account_hr_method')}
-            right={
-              <View style={styles.rowRight}>
-                <AppText
-                  weight="semibold"
-                  size={13}
-                  color={colors.textMid}
-                  numberOfLines={1}
-                  style={{ maxWidth: 120 }}>
-                  {hrMethod === 'Max HR %' ? t('ac_max_hr_pct') : hrMethod}
-                </AppText>
-                <AppText size={14} color={colors.textDim}>
-                  ›
-                </AppText>
-              </View>
-            }
-            onPress={() => setSheet('hrmethod')}
-          />
-        </View>
-      </View>
-
-      {/* App group */}
-      <View style={styles.group}>
-        <AppText
-          weight="semibold"
-          size={11}
-          color={colors.textDim}
-          uppercase
-          style={styles.groupLabel}>
-          {t('account_app')}
-        </AppText>
-        <View style={styles.groupItems}>
-          <Row
-            icon="💡"
-            iconBg="#1a1200"
-            label={t('account_suggest')}
-            right={
-              <AppText size={14} color={colors.textDim}>
-                ›
+            </View>
+            <View style={{ flex: 1 }}>
+              <AppText condensed weight="black" size={24} style={{ lineHeight: 28 }}>
+                {profile.name}
               </AppText>
-            }
-            onPress={() => {
-              setSuggestSent(false);
-              setSuggestText('');
-              setSheet('suggest');
-            }}
-          />
-          <Row
-            icon="⭐"
-            iconBg="#1a1500"
-            label={t('account_rate')}
-            right={
-              <AppText size={14} color={colors.textDim}>
-                ›
+              <AppText weight="medium" size={13} color={colors.textMid} style={{ marginTop: 2 }}>
+                {profile.focus} · {profile.city} 🇺🇦
               </AppText>
-            }
-            onPress={() => {
-              setRated(false);
-              setStars(0);
-              setSheet('rate');
-            }}
-          />
-          <Row
-            icon="🌐"
-            iconBg="#0a1020"
-            label={t('lang_title')}
-            right={
-              <View style={styles.rowRight}>
-                <AppText weight="semibold" size={13} color={colors.textMid}>
-                  {lang === 'uk' ? '🇺🇦 UA' : '🇬🇧 EN'}
+              {profile.raceType ? (
+                <AppText size={12} color={colors.textDim} style={{ marginTop: 4 }}>
+                  {t('account_goal_label')}: {profile.raceType}
                 </AppText>
-                <AppText size={14} color={colors.textDim}>
-                  ›
-                </AppText>
-              </View>
-            }
-            onPress={() => setSheet('lang')}
-          />
-          <Row
-            icon="ℹ️"
-            iconBg="#0a0a14"
-            label={t('account_about')}
-            right={
-              <View style={styles.rowRight}>
-                <AppText weight="semibold" size={13} color={colors.textMid}>
-                  v1.0.0
-                </AppText>
-                <AppText size={14} color={colors.textDim}>
-                  ›
-                </AppText>
-              </View>
-            }
-            onPress={() => setOverlay({ type: 'about' })}
-          />
+              ) : null}
+            </View>
+          </View>
         </View>
-      </View>
 
-      <Pressable style={styles.logoutBtn} onPress={() => setSheet('logout')}>
-        <AppText size={18}>🚪</AppText>
-        <AppText weight="semibold" size={14} color={colors.heart}>
-          {t('account_logout')}
-        </AppText>
-      </Pressable>
-      <View style={{ height: 8 }} />
-    </ScrollView>
+        {/* Personal Bests */}
+        <View style={styles.group}>
+          <AppText
+            weight="semibold"
+            size={11}
+            color={colors.textDim}
+            uppercase
+            style={styles.groupLabel}>
+            {t('pb_title')}
+          </AppText>
+          {/* Sport tabs */}
+          <View style={styles.pbTabBar}>
+            {PB_SPORTS.map((s) => {
+              const active = pbSport === s.id;
+              const color = Sports[s.id].color;
+              return (
+                <Pressable
+                  key={s.id}
+                  style={[
+                    styles.pbTab,
+                    active && { backgroundColor: `${color}18`, borderColor: `${color}55` },
+                  ]}
+                  onPress={() => setPbSport(s.id)}>
+                  <AppText size={18}>{s.icon}</AppText>
+                  <AppText
+                    weight="semibold"
+                    size={10}
+                    color={active ? color : colors.textDim}
+                    uppercase
+                    style={{ letterSpacing: 0.5 }}>
+                    {t(`tools_tab_${s.id}` as LangKey)}
+                  </AppText>
+                </Pressable>
+              );
+            })}
+          </View>
+          {/* Distance rows */}
+          <View style={styles.groupItems}>
+            {PB_DISTANCES[pbSport].map((d, idx) => {
+              const time = personalBests[d.id];
+              const isLast = idx === PB_DISTANCES[pbSport].length - 1;
+              return (
+                <Pressable
+                  key={d.id}
+                  style={[
+                    styles.pbDistRow,
+                    !isLast && { borderBottomWidth: 1, borderBottomColor: colors.borderSub },
+                  ]}
+                  onPress={() => {
+                    setPbEditId(d.id);
+                    setPbInput(time ?? '');
+                    setSheet('pb');
+                  }}>
+                  <AppText weight="semibold" size={14} style={{ flex: 1 }}>
+                    {t(d.lKey)}
+                  </AppText>
+                  <AppText
+                    weight={time ? 'bold' : 'regular'}
+                    size={14}
+                    color={time ? Sports[pbSport].color : colors.textDim}
+                    style={{ marginRight: 6 }}>
+                    {time ?? t('pb_not_set')}
+                  </AppText>
+                  <AppText size={14} color={colors.textDim}>
+                    ›
+                  </AppText>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+
+        {/* Training Profile group */}
+        <View style={styles.group}>
+          <AppText
+            weight="semibold"
+            size={11}
+            color={colors.textDim}
+            uppercase
+            style={styles.groupLabel}>
+            {t('account_training')}
+          </AppText>
+          <View style={styles.groupItems}>
+            <Row
+              icon="⚡"
+              iconBg="#1a1400"
+              label={t('account_ftp')}
+              right={
+                <View style={styles.rowRight}>
+                  <AppText weight="semibold" size={13} color={colors.textMid}>
+                    {ftp} W
+                  </AppText>
+                  <AppText size={14} color={colors.textDim}>
+                    ›
+                  </AppText>
+                </View>
+              }
+              onPress={() => setSheet('ftp')}
+            />
+            <Row
+              icon="❤️"
+              iconBg="#200010"
+              label={t('account_maxhr')}
+              right={
+                <View style={styles.rowRight}>
+                  <AppText weight="semibold" size={13} color={colors.textMid}>
+                    {maxHR} {t('unit_bpm')}
+                  </AppText>
+                  <AppText size={14} color={colors.textDim}>
+                    ›
+                  </AppText>
+                </View>
+              }
+              onPress={() =>
+                setOverlay({
+                  type: 'hrZones',
+                  maxHR,
+                  hrMethod,
+                  onSave: (v: unknown) => {
+                    const data = v as { maxHR: string; hrMethod: string };
+                    setMaxHR(data.maxHR);
+                    setHrMethod(data.hrMethod);
+                    setOverlay(null);
+                  },
+                })
+              }
+            />
+            <Row
+              icon="🎯"
+              iconBg="#001a08"
+              label={t('account_goal')}
+              right={
+                <View style={styles.rowRight}>
+                  <AppText
+                    weight="semibold"
+                    size={13}
+                    color={colors.textMid}
+                    numberOfLines={1}
+                    style={{ maxWidth: 100 }}>
+                    {goal}
+                  </AppText>
+                  <AppText size={14} color={colors.textDim}>
+                    ›
+                  </AppText>
+                </View>
+              }
+              onPress={() => setSheet('goal')}
+            />
+          </View>
+        </View>
+
+        {/* Preferences group */}
+        <View style={styles.group}>
+          <AppText
+            weight="semibold"
+            size={11}
+            color={colors.textDim}
+            uppercase
+            style={styles.groupLabel}>
+            {t('account_prefs')}
+          </AppText>
+          <View style={styles.groupItems}>
+            <Row
+              icon="🔔"
+              iconBg="#001020"
+              label={t('account_notif')}
+              right={<Toggle on={notif} onToggle={() => setNotif(!notif)} />}
+            />
+            <Row
+              icon="🌙"
+              iconBg="#141414"
+              label={t('account_dark')}
+              right={<Toggle on={isDark} onToggle={handleToggleDark} />}
+            />
+            <Row
+              icon="📏"
+              iconBg="#001a08"
+              label={t('account_units')}
+              right={
+                <View style={styles.rowRight}>
+                  <AppText weight="semibold" size={13} color={colors.textMid}>
+                    {units === 'km' ? t('ac_km_kg') : t('ac_mi_lb')}
+                  </AppText>
+                  <AppText size={14} color={colors.textDim}>
+                    ›
+                  </AppText>
+                </View>
+              }
+              onPress={() => setSheet('units')}
+            />
+            <Row
+              icon={t('ac_hr_abbr')}
+              iconBg="#0a0a1a"
+              label={t('account_hr_method')}
+              right={
+                <View style={styles.rowRight}>
+                  <AppText
+                    weight="semibold"
+                    size={13}
+                    color={colors.textMid}
+                    numberOfLines={1}
+                    style={{ maxWidth: 120 }}>
+                    {hrMethod === 'Max HR %' ? t('ac_max_hr_pct') : hrMethod}
+                  </AppText>
+                  <AppText size={14} color={colors.textDim}>
+                    ›
+                  </AppText>
+                </View>
+              }
+              onPress={() => setSheet('hrmethod')}
+            />
+          </View>
+        </View>
+
+        {/* App group */}
+        <View style={styles.group}>
+          <AppText
+            weight="semibold"
+            size={11}
+            color={colors.textDim}
+            uppercase
+            style={styles.groupLabel}>
+            {t('account_app')}
+          </AppText>
+          <View style={styles.groupItems}>
+            <Row
+              icon="💡"
+              iconBg="#1a1200"
+              label={t('account_suggest')}
+              right={
+                <AppText size={14} color={colors.textDim}>
+                  ›
+                </AppText>
+              }
+              onPress={() => {
+                setSuggestSent(false);
+                setSuggestText('');
+                setSheet('suggest');
+              }}
+            />
+            <Row
+              icon="⭐"
+              iconBg="#1a1500"
+              label={t('account_rate')}
+              right={
+                <AppText size={14} color={colors.textDim}>
+                  ›
+                </AppText>
+              }
+              onPress={() => {
+                setRated(false);
+                setStars(0);
+                setSheet('rate');
+              }}
+            />
+            <Row
+              icon="🌐"
+              iconBg="#0a1020"
+              label={t('lang_title')}
+              right={
+                <View style={styles.rowRight}>
+                  <AppText weight="semibold" size={13} color={colors.textMid}>
+                    {lang === 'uk' ? '🇺🇦 UA' : '🇬🇧 EN'}
+                  </AppText>
+                  <AppText size={14} color={colors.textDim}>
+                    ›
+                  </AppText>
+                </View>
+              }
+              onPress={() => setSheet('lang')}
+            />
+            <Row
+              icon="ℹ️"
+              iconBg="#0a0a14"
+              label={t('account_about')}
+              right={
+                <View style={styles.rowRight}>
+                  <AppText weight="semibold" size={13} color={colors.textMid}>
+                    v1.0.0
+                  </AppText>
+                  <AppText size={14} color={colors.textDim}>
+                    ›
+                  </AppText>
+                </View>
+              }
+              onPress={() => setOverlay({ type: 'about' })}
+            />
+          </View>
+        </View>
+
+        <Pressable style={styles.logoutBtn} onPress={() => setSheet('logout')}>
+          <AppText size={18}>🚪</AppText>
+          <AppText weight="semibold" size={14} color={colors.heart}>
+            {t('account_logout')}
+          </AppText>
+        </Pressable>
+        <View style={{ height: 8 }} />
+      </ScrollView>
 
       {/* FTP Sheet */}
       {sheet === 'ftp' && (
@@ -883,6 +996,50 @@ export function AccountScreen({
                 disabled={stars === 0}
               />
             </>
+          )}
+        </Sheet>
+      )}
+
+      {/* PB Edit Sheet */}
+      {sheet === 'pb' && (
+        <Sheet
+          onClose={closeSheet}
+          title={t(PB_DISTANCES[pbSport].find((d) => d.id === pbEditId)?.lKey ?? 'pb_edit_title')}>
+          <AppText size={13} color={colors.textMid} style={{ marginBottom: 12 }}>
+            {t('pb_time_hint')}
+          </AppText>
+          <TextInput
+            value={pbInput}
+            onChangeText={setPbInput}
+            placeholder="00:00:00"
+            placeholderTextColor={colors.textDim}
+            keyboardType="numbers-and-punctuation"
+            style={styles.pbInput}
+            autoFocus
+            selectTextOnFocus
+          />
+          <Button
+            label={t('save')}
+            onPress={() => {
+              if (pbInput.trim()) setPersonalBests((p) => ({ ...p, [pbEditId]: pbInput.trim() }));
+              closeSheet();
+            }}
+          />
+          {personalBests[pbEditId] && (
+            <Pressable
+              style={{ alignItems: 'center', marginTop: 16 }}
+              onPress={() => {
+                setPersonalBests((p) => {
+                  const n = { ...p };
+                  delete n[pbEditId];
+                  return n;
+                });
+                closeSheet();
+              }}>
+              <AppText size={13} color={colors.heart}>
+                {t('pb_clear')}
+              </AppText>
+            </Pressable>
           )}
         </Sheet>
       )}

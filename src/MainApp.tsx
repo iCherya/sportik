@@ -11,7 +11,6 @@ import { AboutOverlay } from './overlays/AboutOverlay';
 import { EditProfileOverlay } from './overlays/EditProfileOverlay';
 import { HRZonesOverlay } from './overlays/HRZonesOverlay';
 import { PlanOverlay } from './overlays/PlanOverlay';
-import { PRDetail } from './overlays/PRDetail';
 import { ToolDetail } from './overlays/ToolDetail';
 import { AccountScreen } from './screens/AccountScreen';
 import { EventsScreen } from './screens/EventsScreen';
@@ -36,8 +35,6 @@ export function MainApp({ isDark, setIsDark, lang, setLang, profile, setProfile 
   const [overlay, setOverlay] = useState<OverlayType | null>(null);
   const [favs, setFavs] = useState<number[]>([1]);
   const [personalEvents, setPersonalEvents] = useState<Event[]>([EVENTS_DATA[6]]);
-  const [doneSessions, setDoneSessions] = useState<Record<string, boolean>>({});
-  const [qi, setQi] = useState(0);
   const mounted = useRef(false);
 
   // Load persisted state on mount
@@ -45,11 +42,9 @@ export function MainApp({ isDark, setIsDark, lang, setLang, profile, setProfile 
     Promise.all([
       Storage.get<number[]>(STORAGE_KEYS.favs),
       Storage.get<Event[]>(STORAGE_KEYS.personalEvents),
-      Storage.get<Record<string, boolean>>(STORAGE_KEYS.doneSessions),
-    ]).then(([savedFavs, savedPersonal, savedDone]) => {
+    ]).then(([savedFavs, savedPersonal]) => {
       if (savedFavs) setFavs(savedFavs);
       if (savedPersonal) setPersonalEvents(savedPersonal);
-      if (savedDone) setDoneSessions(savedDone);
       mounted.current = true;
     });
   }, []);
@@ -64,11 +59,6 @@ export function MainApp({ isDark, setIsDark, lang, setLang, profile, setProfile 
     if (!mounted.current) return;
     Storage.set(STORAGE_KEYS.personalEvents, personalEvents);
   }, [personalEvents]);
-
-  useEffect(() => {
-    if (!mounted.current) return;
-    Storage.set(STORAGE_KEYS.doneSessions, doneSessions);
-  }, [doneSessions]);
 
   // Derived: nearest upcoming favourited event
   const allEvents = [...EVENTS_DATA.filter((e) => e.global), ...personalEvents];
@@ -110,10 +100,6 @@ export function MainApp({ isDark, setIsDark, lang, setLang, profile, setProfile 
             nextRace={nextRace}
             dateStr={dateStr}
             greeting={greeting}
-            doneSessions={doneSessions}
-            setDoneSessions={setDoneSessions}
-            qi={qi}
-            setQi={setQi}
             onOpenTool={handleOpenTool}
             onOpenPlan={() => setOverlay({ type: 'plan' })}
           />
@@ -151,8 +137,6 @@ export function MainApp({ isDark, setIsDark, lang, setLang, profile, setProfile 
     switch (overlay.type) {
       case 'tool':
         return <ToolDetail tool={overlay.tool} onBack={close} />;
-      case 'pr':
-        return <PRDetail pr={overlay.pr} onBack={close} />;
       case 'plan':
         return <PlanOverlay onBack={close} />;
       case 'about':
