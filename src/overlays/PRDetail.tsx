@@ -4,11 +4,22 @@ import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { AppText } from '../components/AppText';
 import { Button } from '../components/Button';
 import { Overlay } from '../components/Overlay';
+import { useLang } from '../context/LangContext';
 import { useColors } from '../context/ThemeContext';
 import { useT } from '../i18n';
 import { STORAGE_KEYS, Storage } from '../storage';
 import { type ColorPalette, Sports, type SportKey } from '../theme';
-import type { PRData } from '../types';
+
+type PRData = { sport: string; label: string; val: string };
+
+function formatDate(iso: string, locale: string): string {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString(locale, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
 
 type HistoryEntry = {
   date: string;
@@ -104,7 +115,9 @@ const makeStyles = (c: ColorPalette) =>
 
 export function PRDetail({ pr, onBack }: Props) {
   const t = useT();
+  const lang = useLang();
   const colors = useColors();
+  const locale = lang === 'uk' ? 'uk-UA' : 'en-US';
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const sport = Sports[pr.sport as SportKey];
   const [showLog, setShowLog] = useState(false);
@@ -154,13 +167,26 @@ export function PRDetail({ pr, onBack }: Props) {
         color={sport.color}
         style={{ letterSpacing: 1.5 }}
         uppercase>
-        {({ run: t('sport_run'), bike: t('sport_bike'), swim: t('sport_swim'), tri: t('sport_tri') } as Record<string, string>)[pr.sport]}
+        {
+          (
+            {
+              run: t('sport_run'),
+              bike: t('sport_bike'),
+              swim: t('sport_swim'),
+              tri: t('sport_tri'),
+            } as Record<string, string>
+          )[pr.sport]
+        }
       </AppText>
     </View>
   );
 
   return (
-    <Overlay onBack={onBack} title={`${pr.label} ${t('account_pr_title')}`} backLabel={t('nav_account')} badge={badge}>
+    <Overlay
+      onBack={onBack}
+      title={`${pr.label} ${t('account_pr_title')}`}
+      backLabel={t('nav_account')}
+      badge={badge}>
       {/* Hero */}
       <View
         style={[
@@ -183,7 +209,7 @@ export function PRDetail({ pr, onBack }: Props) {
           {pr.val}
         </AppText>
         <AppText size={12} color={colors.textMid} style={{ marginTop: 4 }}>
-          {defaultHistory[0].date} · {t('account_pr_training')}
+          {formatDate(defaultHistory[0].date, locale)} · {t('account_pr_training')}
         </AppText>
       </View>
 
@@ -234,7 +260,7 @@ export function PRDetail({ pr, onBack }: Props) {
                   {h.event}
                 </AppText>
                 <AppText size={12} color={colors.textMid} style={{ marginTop: 2 }}>
-                  {h.date}
+                  {formatDate(h.date, locale)}
                 </AppText>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>

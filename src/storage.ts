@@ -20,7 +20,6 @@ export const STORAGE_KEYS = {
   isDark: 'sportik_dark',
   favs: 'sportik_favs',
   personalEvents: 'sportik_personal_events',
-  doneSessions: 'sportik_done_sessions',
   prHistory: 'sportik_pr_history',
   personalBests: 'sportik_personal_bests',
 } as const;

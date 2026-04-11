@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { AppText } from '../components/AppText';
 import { useColors } from '../context/ThemeContext';
 import { useT } from '../i18n';
-import { type ColorPalette, Sports, type SportKey } from '../theme';
+import { type ColorPalette, Font, Sports, type SportKey } from '../theme';
 
 const SPORTS: SportKey[] = ['run', 'bike', 'swim'];
 
@@ -55,7 +55,7 @@ const makeStyles = (c: ColorPalette) =>
       borderColor: c.border,
       borderRadius: 12,
       padding: 14,
-      fontFamily: 'BarlowCondensedBlack',
+      fontFamily: Font.numericInput,
       fontSize: 24,
       color: c.text,
       textAlign: 'center',
@@ -125,19 +125,24 @@ function Stepper({
   return (
     <View style={styles.stepperWrap}>
       <Pressable style={styles.stepBtn} onPress={() => onChange(clamp(value + 1))}>
-        <AppText size={14} color={colors.textMid}>▲</AppText>
+        <AppText size={14} color={colors.textMid}>
+          ▲
+        </AppText>
       </Pressable>
       <View style={styles.stepValue}>
         <TextInput
           value={focused ? editing : String(value).padStart(2, '0')}
           onChangeText={setEditing}
-          onFocus={() => { setEditing(String(value)); setFocused(true); }}
+          onFocus={() => {
+            setEditing(String(value));
+            setFocused(true);
+          }}
           onBlur={commitEdit}
           onSubmitEditing={commitEdit}
           keyboardType="number-pad"
           selectTextOnFocus
           style={{
-            fontFamily: 'BarlowCondensedBlack',
+            fontFamily: Font.numericInput,
             fontSize: 28,
             color,
             textAlign: 'center',
@@ -147,7 +152,9 @@ function Stepper({
         />
       </View>
       <Pressable style={styles.stepBtn} onPress={() => onChange(clamp(value - 1))}>
-        <AppText size={14} color={colors.textMid}>▼</AppText>
+        <AppText size={14} color={colors.textMid}>
+          ▼
+        </AppText>
       </Pressable>
       <View style={styles.stepUnit}>
         <AppText size={11} color={colors.textDim} uppercase style={{ letterSpacing: 1 }}>
@@ -177,8 +184,11 @@ export function PaceCalc() {
   const dk = sport === 'swim' ? d / 10 : d;
 
   // Derived values depending on what was last edited
-  let displayH = h, displayM = m, displayS = s;
-  let displayPaceMin = paceMin, displayPaceSec = paceSec;
+  let displayH = h,
+    displayM = m,
+    displayS = s;
+  let displayPaceMin = paceMin,
+    displayPaceSec = paceSec;
 
   if (lastEdited === 'time') {
     const totalS = h * 3600 + m * 60 + s;
@@ -207,12 +217,12 @@ export function PaceCalc() {
   };
 
   const speedKph =
-    dk > 0 && (displayH * 3600 + displayM * 60 + displayS) > 0
+    dk > 0 && displayH * 3600 + displayM * 60 + displayS > 0
       ? (dk / ((displayH * 3600 + displayM * 60 + displayS) / 3600)).toFixed(1)
       : '--';
 
   const marathonEquiv =
-    dk > 0 && (displayPaceMin * 60 + displayPaceSec) > 0
+    dk > 0 && displayPaceMin * 60 + displayPaceSec > 0
       ? (() => {
           const total = Math.round((displayPaceMin * 60 + displayPaceSec) * 42.2);
           return `${Math.floor(total / 3600)}${t('unit_h')} ${Math.floor((total % 3600) / 60)}${t('unit_min')}`;
@@ -230,12 +240,25 @@ export function PaceCalc() {
               key={id}
               style={[
                 styles.segBtn,
-                active && { borderColor: Sports[id].color, backgroundColor: `${Sports[id].color}18` },
+                active && {
+                  borderColor: Sports[id].color,
+                  backgroundColor: `${Sports[id].color}18`,
+                },
               ]}
               onPress={() => setSport(id)}>
-              <AppText size={13} weight="semibold" color={active ? Sports[id].color : colors.textMid}>
+              <AppText
+                size={13}
+                weight="semibold"
+                color={active ? Sports[id].color : colors.textMid}>
                 {Sports[id].icon}{' '}
-                {({ run: t('sport_run'), bike: t('sport_bike'), swim: t('sport_swim') } as Record<string, string>)[id]}
+                {
+                  (
+                    { run: t('sport_run'), bike: t('sport_bike'), swim: t('sport_swim') } as Record<
+                      string,
+                      string
+                    >
+                  )[id]
+                }
               </AppText>
             </Pressable>
           );
@@ -244,7 +267,13 @@ export function PaceCalc() {
 
       {/* Time input */}
       <View style={styles.field}>
-        <AppText style={styles.fieldLabel} condensed weight="bold" size={11} color={colors.textDim} uppercase>
+        <AppText
+          style={styles.fieldLabel}
+          condensed
+          weight="bold"
+          size={11}
+          color={colors.textDim}
+          uppercase>
           {t('tool_target_time')}
         </AppText>
         <View style={styles.timeRow}>
@@ -280,13 +309,22 @@ export function PaceCalc() {
 
       {/* Distance input */}
       <View style={styles.field}>
-        <AppText style={styles.fieldLabel} condensed weight="bold" size={11} color={colors.textDim} uppercase>
+        <AppText
+          style={styles.fieldLabel}
+          condensed
+          weight="bold"
+          size={11}
+          color={colors.textDim}
+          uppercase>
           {t('tool_distance')}
         </AppText>
         <View style={styles.inputRow}>
           <TextInput
             value={dist}
-            onChangeText={(v) => { setDist(v); setLastEdited('time'); }}
+            onChangeText={(v) => {
+              setDist(v);
+              setLastEdited('time');
+            }}
             placeholder="10"
             placeholderTextColor={colors.textDim}
             keyboardType="decimal-pad"
@@ -302,7 +340,13 @@ export function PaceCalc() {
 
       {/* Pace — adjustable */}
       <View style={styles.field}>
-        <AppText style={styles.fieldLabel} condensed weight="bold" size={11} color={colors.textDim} uppercase>
+        <AppText
+          style={styles.fieldLabel}
+          condensed
+          weight="bold"
+          size={11}
+          color={colors.textDim}
+          uppercase>
           {t('pc_your_pace')}
         </AppText>
         <View style={[styles.timeRow, { maxWidth: 160 }]}>
@@ -337,8 +381,12 @@ export function PaceCalc() {
           [t('pc_marathon'), marathonEquiv],
         ].map(([l, v]) => (
           <View key={l} style={styles.infoRow}>
-            <AppText size={13} color={colors.textMid}>{l}</AppText>
-            <AppText condensed weight="bold" size={14}>{v}</AppText>
+            <AppText size={13} color={colors.textMid}>
+              {l}
+            </AppText>
+            <AppText condensed weight="bold" size={14}>
+              {v}
+            </AppText>
           </View>
         ))}
       </View>
