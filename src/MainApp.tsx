@@ -5,7 +5,7 @@ import { BottomNav } from './components/BottomNav';
 import { LangContext } from './context/LangContext';
 import type { Lang } from './context/LangContext';
 import { useColors } from './context/ThemeContext';
-import { EVENTS_DATA, type Event, type Tool } from './data';
+import { daysUntil, type Event, type Tool } from './data';
 import { useT } from './i18n';
 import { AboutOverlay } from './overlays/AboutOverlay';
 import { EditProfileOverlay } from './overlays/EditProfileOverlay';
@@ -33,38 +33,28 @@ export function MainApp({ isDark, setIsDark, lang, setLang, profile, setProfile 
   const t = useT();
   const [screen, setScreen] = useState<Screen>('home');
   const [overlay, setOverlay] = useState<OverlayType | null>(null);
-  const [favs, setFavs] = useState<number[]>([1]);
-  const [personalEvents, setPersonalEvents] = useState<Event[]>([EVENTS_DATA[6]]);
+  const [personalEvents, setPersonalEvents] = useState<Event[]>([]);
   const mounted = useRef(false);
 
   // Load persisted state on mount
   useEffect(() => {
-    Promise.all([
-      Storage.get<number[]>(STORAGE_KEYS.favs),
-      Storage.get<Event[]>(STORAGE_KEYS.personalEvents),
-    ]).then(([savedFavs, savedPersonal]) => {
-      if (savedFavs) setFavs(savedFavs);
-      if (savedPersonal) setPersonalEvents(savedPersonal);
+    Storage.get<Event[]>(STORAGE_KEYS.personalEvents).then((saved) => {
+      if (saved) setPersonalEvents(saved);
       mounted.current = true;
     });
   }, []);
 
-  // Persist shared state on change (skip first render — data was just loaded)
-  useEffect(() => {
-    if (!mounted.current) return;
-    Storage.set(STORAGE_KEYS.favs, favs);
-  }, [favs]);
-
+  // Persist on change (skip first render — data was just loaded)
   useEffect(() => {
     if (!mounted.current) return;
     Storage.set(STORAGE_KEYS.personalEvents, personalEvents);
   }, [personalEvents]);
 
-  // Derived: nearest upcoming favourited event
-  const allEvents = [...EVENTS_DATA.filter((e) => e.global), ...personalEvents];
+  // Derived: nearest upcoming race (computed live from date)
   const nextRace =
-    allEvents.filter((e) => favs.includes(e.id) && e.days > 0).sort((a, b) => a.days - b.days)[0] ??
-    null;
+    personalEvents
+      .filter((e) => daysUntil(e.date) > 0)
+      .sort((a, b) => daysUntil(a.date) - daysUntil(b.date))[0] ?? null;
 
   // Derived: live date string — locale follows language setting
   const dateStr = new Date().toLocaleDateString(lang === 'uk' ? 'uk-UA' : 'en-GB', {
@@ -108,12 +98,7 @@ export function MainApp({ isDark, setIsDark, lang, setLang, profile, setProfile 
         return <ToolsScreen onSelect={(tool) => setOverlay({ type: 'tool', tool })} />;
       case 'events':
         return (
-          <EventsScreen
-            favs={favs}
-            setFavs={setFavs}
-            personalEvents={personalEvents}
-            setPersonalEvents={setPersonalEvents}
-          />
+          <EventsScreen personalEvents={personalEvents} setPersonalEvents={setPersonalEvents} />
         );
       case 'account':
         return (

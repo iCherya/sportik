@@ -10,6 +10,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useColors } from '../context/ThemeContext';
+import { useT } from '../i18n';
 import { type ColorPalette, Font } from '../theme';
 import { AppText } from './AppText';
 
@@ -46,9 +47,11 @@ const makeStyles = (c: ColorPalette) =>
     },
   });
 
-export function Overlay({ onBack, title, backLabel = 'Back', badge, children }: Props) {
+export function Overlay({ onBack, title, backLabel, badge, children }: Props) {
   const insets = useSafeAreaInsets();
   const colors = useColors();
+  const t = useT();
+  const resolvedBackLabel = backLabel ?? t('back');
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const translateY = useSharedValue(800);
 
@@ -79,7 +82,7 @@ export function Overlay({ onBack, title, backLabel = 'Back', badge, children }: 
             ←
           </AppText>
           <AppText weight="medium" size={13} color={colors.textMid}>
-            {backLabel}
+            {resolvedBackLabel}
           </AppText>
         </Pressable>
         {badge}
