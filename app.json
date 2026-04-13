@@ -33,6 +33,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "21e80fd2-1b3b-42cf-a338-d8dcbe76fcaa"
+      }
+    },
+    "owner": "icherya"
   }
 }
