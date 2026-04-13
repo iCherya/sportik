@@ -54,13 +54,12 @@ export default function Index() {
   const handleOnboardingComplete = (data: OBData) => {
     const p: Profile = {
       ...DEFAULT_PROFILE,
-      name: data.name || 'Athlete',
+      name: data.name || (lang === 'uk' ? 'Атлет' : 'Athlete'),
       sports: data.sports,
       raceType: data.raceType,
       raceDate: data.raceDate,
       maxHR: data.maxHR,
       ftp: data.ftp,
-      hoursPerWeek: data.hoursPerWeek,
     };
     Storage.set(STORAGE_KEYS.profile, p);
     Storage.set(STORAGE_KEYS.onboarded, true);
@@ -69,9 +68,18 @@ export default function Index() {
   };
 
   const handleSkipAll = () => {
-    Storage.set(STORAGE_KEYS.profile, DEFAULT_PROFILE);
+    const p = { ...DEFAULT_PROFILE, name: lang === 'uk' ? 'Атлет' : 'Athlete' };
+    Storage.set(STORAGE_KEYS.profile, p);
+    setProfile(p);
     Storage.set(STORAGE_KEYS.onboarded, true);
     setOnboarded(true);
+  };
+
+  const handleLogout = () => {
+    setProfile(DEFAULT_PROFILE);
+    setLang('en');
+    setIsDark(true);
+    setOnboarded(false);
   };
 
   if (loading) {
@@ -88,11 +96,20 @@ export default function Index() {
     );
   }
 
+  const handleSetLang = (v: Lang) => {
+    Storage.set(STORAGE_KEYS.lang, v);
+    setLang(v);
+  };
+
   if (!onboarded) {
     return (
       <ThemeContext.Provider value={isDark}>
         <LangContext.Provider value={lang}>
-          <Onboarding onComplete={handleOnboardingComplete} onSkipAll={handleSkipAll} />
+          <Onboarding
+            onComplete={handleOnboardingComplete}
+            onSkipAll={handleSkipAll}
+            setLang={handleSetLang}
+          />
         </LangContext.Provider>
       </ThemeContext.Provider>
     );
@@ -108,6 +125,7 @@ export default function Index() {
           setLang={setLang}
           profile={profile}
           setProfile={handleSetProfile}
+          onLogout={handleLogout}
         />
       </LangContext.Provider>
     </ThemeContext.Provider>

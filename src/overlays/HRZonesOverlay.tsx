@@ -126,7 +126,7 @@ export function HRZonesOverlay({ maxHR: initHR, hrMethod: initMethod, onSave, on
   const t = useT();
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const [maxHR, setMaxHR] = useState(initHR || '185');
+  const [maxHR, setMaxHR] = useState(initHR || '');
   const [method, setMethod] = useState(initMethod || 'Max HR %');
   const [rhr, setRhr] = useState('52');
   const [overrides, setOverrides] = useState<Record<number, Override>>({});

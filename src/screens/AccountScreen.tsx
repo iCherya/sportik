@@ -23,20 +23,10 @@ type Props = {
   setProfile: (p: Profile) => void;
   lang: Lang;
   setLang: (v: Lang) => void;
+  onLogout: () => void;
 };
 
-type SheetId =
-  | 'ftp'
-  | 'maxhr'
-  | 'goal'
-  | 'units'
-  | 'hrmethod'
-  | 'lang'
-  | 'suggest'
-  | 'rate'
-  | 'logout'
-  | 'pb'
-  | null;
+type SheetId = 'ftp' | 'maxhr' | 'units' | 'lang' | 'suggest' | 'rate' | 'logout' | 'pb' | null;
 
 type PBSport = 'swim' | 'bike' | 'run' | 'tri';
 
@@ -203,15 +193,6 @@ const makeStyles = (c: ColorPalette) =>
       borderBottomColor: c.borderSub,
       gap: 14,
     },
-    hrMethodRow: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      paddingVertical: 14,
-      paddingHorizontal: 4,
-      borderBottomWidth: 1,
-      borderBottomColor: c.borderSub,
-      gap: 14,
-    },
     textarea: {
       backgroundColor: c.card,
       borderWidth: 1,
@@ -243,43 +224,7 @@ const makeStyles = (c: ColorPalette) =>
       backgroundColor: c.heart,
       alignItems: 'center',
     },
-    loggedOutScreen: {
-      flex: 1,
-      backgroundColor: c.bg,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 40,
-    },
   });
-
-function PickerRow({
-  label,
-  selected,
-  onSelect,
-}: {
-  label: string;
-  selected: boolean;
-  onSelect: () => void;
-}) {
-  const colors = useColors();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
-  return (
-    <Pressable style={styles.pickerRow} onPress={onSelect}>
-      <AppText
-        weight="medium"
-        size={14}
-        color={selected ? colors.text : colors.textMid}
-        style={{ flex: 1 }}>
-        {label}
-      </AppText>
-      {selected && (
-        <AppText size={18} color={colors.accent}>
-          ✓
-        </AppText>
-      )}
-    </Pressable>
-  );
-}
 
 export function AccountScreen({
   setOverlay,
@@ -289,15 +234,15 @@ export function AccountScreen({
   setProfile,
   lang,
   setLang,
+  onLogout,
 }: Props) {
   const t = useT();
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [notif, setNotif] = useState(true);
-  const [ftp, setFtp] = useState(profile.ftp || '245');
-  const [maxHR, setMaxHR] = useState(profile.maxHR || '185');
+  const [ftp, setFtp] = useState(profile.ftp || '');
+  const [maxHR, setMaxHR] = useState(profile.maxHR || '');
   const [hrMethod, setHrMethod] = useState('Max HR %');
-  const [goal, setGoal] = useState(profile.raceType || 'Ironman 70.3');
   const [units, setUnits] = useState('km');
   const [sheet, setSheet] = useState<SheetId>(null);
   const [pbSport, setPbSport] = useState<PBSport>('run');
@@ -308,8 +253,6 @@ export function AccountScreen({
   const [suggestSent, setSuggestSent] = useState(false);
   const [stars, setStars] = useState(0);
   const [rated, setRated] = useState(false);
-  const [loggedOut, setLoggedOut] = useState(false);
-
   const closeSheet = () => setSheet(null);
 
   useEffect(() => {
@@ -333,31 +276,6 @@ export function AccountScreen({
     setIsDark(next);
     await Storage.set(STORAGE_KEYS.isDark, next);
   };
-
-  if (loggedOut) {
-    return (
-      <View style={styles.loggedOutScreen}>
-        <AppText size={48} style={{ marginBottom: 16 }}>
-          👋
-        </AppText>
-        <AppText
-          condensed
-          weight="black"
-          size={24}
-          style={{ textAlign: 'center', marginBottom: 8 }}>
-          {t('account_logged_out')}
-        </AppText>
-        <AppText size={13} color={colors.textMid} style={{ textAlign: 'center', marginBottom: 24 }}>
-          {t('account_logged_out_sub')}
-        </AppText>
-        <Button
-          label={t('account_log_back')}
-          onPress={() => setLoggedOut(false)}
-          style={{ width: 200 }}
-        />
-      </View>
-    );
-  }
 
   return (
     <View style={{ flex: 1 }}>
@@ -509,8 +427,11 @@ export function AccountScreen({
               label={t('account_ftp')}
               right={
                 <View style={styles.rowRight}>
-                  <AppText weight="semibold" size={13} color={colors.textMid}>
-                    {ftp} W
+                  <AppText
+                    weight="semibold"
+                    size={13}
+                    color={ftp ? colors.textMid : colors.textDim}>
+                    {ftp ? `${ftp} W` : '—'}
                   </AppText>
                   <AppText size={14} color={colors.textDim}>
                     ›
@@ -525,8 +446,11 @@ export function AccountScreen({
               label={t('account_maxhr')}
               right={
                 <View style={styles.rowRight}>
-                  <AppText weight="semibold" size={13} color={colors.textMid}>
-                    {maxHR} {t('unit_bpm')}
+                  <AppText
+                    weight="semibold"
+                    size={13}
+                    color={maxHR ? colors.textMid : colors.textDim}>
+                    {maxHR ? `${maxHR} ${t('unit_bpm')}` : '—'}
                   </AppText>
                   <AppText size={14} color={colors.textDim}>
                     ›
@@ -546,27 +470,6 @@ export function AccountScreen({
                   },
                 })
               }
-            />
-            <Row
-              icon="🎯"
-              iconBg="#001a08"
-              label={t('account_goal')}
-              right={
-                <View style={styles.rowRight}>
-                  <AppText
-                    weight="semibold"
-                    size={13}
-                    color={colors.textMid}
-                    numberOfLines={1}
-                    style={{ maxWidth: 100 }}>
-                    {goal}
-                  </AppText>
-                  <AppText size={14} color={colors.textDim}>
-                    ›
-                  </AppText>
-                </View>
-              }
-              onPress={() => setSheet('goal')}
             />
           </View>
         </View>
@@ -609,27 +512,6 @@ export function AccountScreen({
                 </View>
               }
               onPress={() => setSheet('units')}
-            />
-            <Row
-              icon={t('ac_hr_abbr')}
-              iconBg="#0a0a1a"
-              label={t('account_hr_method')}
-              right={
-                <View style={styles.rowRight}>
-                  <AppText
-                    weight="semibold"
-                    size={13}
-                    color={colors.textMid}
-                    numberOfLines={1}
-                    style={{ maxWidth: 120 }}>
-                    {hrMethod === 'Max HR %' ? t('ac_max_hr_pct') : hrMethod}
-                  </AppText>
-                  <AppText size={14} color={colors.textDim}>
-                    ›
-                  </AppText>
-                </View>
-              }
-              onPress={() => setSheet('hrmethod')}
             />
           </View>
         </View>
@@ -792,32 +674,6 @@ export function AccountScreen({
         </Sheet>
       )}
 
-      {/* Goal Sheet */}
-      {sheet === 'goal' && (
-        <Sheet onClose={closeSheet} title={t('goal_title')}>
-          {[
-            { id: 'Sprint Triathlon', label: t('ac_goal_sprint') },
-            { id: 'Olympic Triathlon', label: t('ac_goal_olympic') },
-            { id: 'Ironman 70.3', label: t('ac_goal_703') },
-            { id: 'Ironman', label: t('ac_goal_im') },
-            { id: 'Marathon', label: t('ac_goal_marathon') },
-            { id: 'Half Marathon', label: t('ac_goal_hm') },
-            { id: 'Gran Fondo', label: t('ac_goal_fondo') },
-            { id: 'Custom', label: t('ac_goal_custom') },
-          ].map((g) => (
-            <PickerRow
-              key={g.id}
-              label={g.label}
-              selected={goal === g.id}
-              onSelect={() => {
-                setGoal(g.id);
-                closeSheet();
-              }}
-            />
-          ))}
-        </Sheet>
-      )}
-
       {/* Units Sheet */}
       {sheet === 'units' && (
         <Sheet onClose={closeSheet} title={t('units_title')}>
@@ -848,45 +704,6 @@ export function AccountScreen({
               </View>
               {units === u.id && (
                 <AppText size={18} color={colors.accent}>
-                  ✓
-                </AppText>
-              )}
-            </Pressable>
-          ))}
-        </Sheet>
-      )}
-
-      {/* HR Method Sheet */}
-      {sheet === 'hrmethod' && (
-        <Sheet onClose={closeSheet} title={t('hrmethod_title')}>
-          <AppText size={13} color={colors.textMid} style={{ marginBottom: 16, lineHeight: 19 }}>
-            {t('hrmethod_sub')}
-          </AppText>
-          {[
-            { id: 'Max HR %', label: t('hrmethod_maxhr'), sub: t('hrmethod_maxhr_sub') },
-            { id: 'HR Reserve', label: t('hrmethod_hrr'), sub: t('hrmethod_hrr_sub') },
-            { id: 'Lactate Threshold', label: t('hrmethod_lt'), sub: t('hrmethod_lt_sub') },
-          ].map((m) => (
-            <Pressable
-              key={m.id}
-              style={styles.hrMethodRow}
-              onPress={() => {
-                setHrMethod(m.id);
-                closeSheet();
-              }}>
-              <View style={{ flex: 1 }}>
-                <AppText
-                  weight="semibold"
-                  size={14}
-                  color={hrMethod === m.id ? colors.text : colors.textMid}>
-                  {m.label}
-                </AppText>
-                <AppText size={12} color={colors.textDim} style={{ marginTop: 3, lineHeight: 17 }}>
-                  {m.sub}
-                </AppText>
-              </View>
-              {hrMethod === m.id && (
-                <AppText size={18} color={colors.accent} style={{ marginTop: 2 }}>
                   ✓
                 </AppText>
               )}
@@ -1064,9 +881,10 @@ export function AccountScreen({
             </Pressable>
             <Pressable
               style={styles.confirmLogoutBtn}
-              onPress={() => {
+              onPress={async () => {
                 closeSheet();
-                setLoggedOut(true);
+                await Promise.all(Object.values(STORAGE_KEYS).map((k) => Storage.remove(k)));
+                onLogout();
               }}>
               <AppText
                 condensed

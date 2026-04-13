@@ -113,9 +113,9 @@ function QuoteCard() {
           showsHorizontalScrollIndicator={false}
           scrollEventThrottle={16}
           nestedScrollEnabled
-          onMomentumScrollEnd={(e) => {
+          onScroll={(e) => {
             const idx = Math.round(e.nativeEvent.contentOffset.x / slideWidth);
-            setCur(idx);
+            if (idx !== cur) setCur(idx);
           }}>
           {weekQuotes.map((item, i) => {
             const isToday = item.daysAgo === 0;
