@@ -1072,7 +1072,15 @@ function OBReady({
     ironman: t('ob_race_im'),
     marathon: t('ob_race_marathon'),
     hm: t('ob_race_hm'),
+    '10k': t('ob_race_10k'),
+    '5k': t('ob_race_5k'),
     fondo: t('ob_race_fondo'),
+    sotka: t('ob_race_sotka'),
+    bike40: t('ob_race_bike40'),
+    swim1000: t('ob_race_swim1000'),
+    swim2000: t('ob_race_swim2000'),
+    swim5000: t('ob_race_swim5000'),
+    swim10000: t('ob_race_swim10000'),
   };
 
   const summaryItems = [
