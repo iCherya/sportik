@@ -16,6 +16,7 @@ type Props = {
   onClose: () => void;
   title?: string;
   children: React.ReactNode;
+  maxHeight?: `${number}%` | number;
 };
 
 const makeStyles = (c: ColorPalette) =>
@@ -31,8 +32,8 @@ const makeStyles = (c: ColorPalette) =>
       backgroundColor: c.surface,
       borderTopLeftRadius: Space.radius.overlay,
       borderTopRightRadius: Space.radius.overlay,
-      padding: 20,
-      paddingBottom: 32,
+      paddingTop: 20,
+      paddingHorizontal: 20,
       maxHeight: '80%',
     },
     handle: {
@@ -45,7 +46,7 @@ const makeStyles = (c: ColorPalette) =>
     },
   });
 
-export function Sheet({ onClose, title, children }: Props) {
+export function Sheet({ onClose, title, children, maxHeight = '80%' }: Props) {
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const translateY = useSharedValue(600);
@@ -73,7 +74,9 @@ export function Sheet({ onClose, title, children }: Props) {
     <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
       <Pressable style={[StyleSheet.absoluteFill, styles.backdrop]} onPress={handleClose} />
       <View style={styles.anchor} pointerEvents="box-none">
-        <Animated.View style={[styles.sheet, animStyle]} onStartShouldSetResponder={() => true}>
+        <Animated.View
+          style={[styles.sheet, { maxHeight }, animStyle]}
+          onStartShouldSetResponder={() => true}>
           <View style={styles.handle} />
           {title && (
             <AppText
@@ -84,7 +87,10 @@ export function Sheet({ onClose, title, children }: Props) {
               {title}
             </AppText>
           )}
-          <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+            contentContainerStyle={{ paddingBottom: 32 }}>
             {children}
           </ScrollView>
         </Animated.View>

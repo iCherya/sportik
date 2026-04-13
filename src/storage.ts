@@ -18,7 +18,6 @@ export const STORAGE_KEYS = {
   onboarded: 'sportik_onboarded',
   lang: 'sportik_lang',
   isDark: 'sportik_dark',
-  favs: 'sportik_favs',
   personalEvents: 'sportik_personal_events',
   prHistory: 'sportik_pr_history',
   personalBests: 'sportik_personal_bests',

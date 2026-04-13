@@ -21,11 +21,13 @@ export type Event = {
   dist: string;
   location: string;
   date: string;
-  days: number;
-  fav: boolean;
-  global: boolean;
   notes?: string;
 };
+
+/** Days from now until the event date (negative = past). */
+export function daysUntil(dateStr: string): number {
+  return Math.ceil((new Date(dateStr).getTime() - Date.now()) / 86400000);
+}
 
 export type Tool = {
   id: string;
@@ -267,86 +269,6 @@ export const TODAY_SESSIONS: Session[] = [
     duration: '28 min',
     type: 'Brick',
     done: false,
-  },
-];
-
-export const EVENTS_DATA: Event[] = [
-  {
-    id: 1,
-    name: 'Ironman 70.3 Kyiv',
-    sport: 'tri',
-    dist: '70.3 mi',
-    location: 'Kyiv',
-    date: '2025-06-15',
-    days: 80,
-    fav: true,
-    global: true,
-  },
-  {
-    id: 2,
-    name: 'Kyiv Half Marathon',
-    sport: 'run',
-    dist: '21.1 km',
-    location: 'Kyiv',
-    date: '2025-04-13',
-    days: 17,
-    fav: false,
-    global: true,
-  },
-  {
-    id: 3,
-    name: 'Lviv Gran Fondo',
-    sport: 'bike',
-    dist: '120 km',
-    location: 'Lviv',
-    date: '2025-05-04',
-    days: 38,
-    fav: false,
-    global: true,
-  },
-  {
-    id: 4,
-    name: 'Open Water Swim Dnipro',
-    sport: 'swim',
-    dist: '5 km',
-    location: 'Dnipro',
-    date: '2025-07-19',
-    days: 114,
-    fav: false,
-    global: true,
-  },
-  {
-    id: 5,
-    name: 'Odesa Sprint Tri',
-    sport: 'tri',
-    dist: 'Sprint',
-    location: 'Odesa',
-    date: '2025-08-10',
-    days: 136,
-    fav: false,
-    global: true,
-  },
-  {
-    id: 6,
-    name: 'Kharkiv Night Run 10K',
-    sport: 'run',
-    dist: '10 km',
-    location: 'Kharkiv',
-    date: '2025-05-24',
-    days: 58,
-    fav: false,
-    global: true,
-  },
-  {
-    id: 7,
-    name: 'My Training Duathlon',
-    sport: 'tri',
-    dist: 'Custom',
-    location: 'Kyiv',
-    date: '2025-04-20',
-    days: 24,
-    fav: false,
-    global: false,
   },
 ];
 

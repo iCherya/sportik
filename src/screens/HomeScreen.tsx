@@ -5,7 +5,7 @@ import { AppText } from '../components/AppText';
 import { Card } from '../components/Card';
 import { LangContext } from '../context/LangContext';
 import { useColors } from '../context/ThemeContext';
-import { QUOTES, TOOLS, type Event, type Tool } from '../data';
+import { QUOTES, TOOLS, daysUntil, type Event, type Tool } from '../data';
 import { useT } from '../i18n';
 import { type ColorPalette, Font, Space, Sports } from '../theme';
 import type { Profile } from '../types';
@@ -316,7 +316,7 @@ export function HomeScreen({
           </View>
           <View style={styles.raceDays}>
             <AppText condensed weight="black" size={28} color={colors.accent}>
-              {nextRace.days}
+              {daysUntil(nextRace.date)}
             </AppText>
             <AppText weight="semibold" size={10} color={colors.textMid} uppercase>
               {t('home_days_to_go')}

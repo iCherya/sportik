@@ -4,36 +4,25 @@ import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native
 
 import { AppText } from '../components/AppText';
 import { Button } from '../components/Button';
+import { DateField } from '../components/DateField';
 import { Overlay } from '../components/Overlay';
 import { Sheet } from '../components/Sheet';
 import { useColors } from '../context/ThemeContext';
-import { EVENTS_DATA, type Event } from '../data';
+import { daysUntil, type Event } from '../data';
 import { useT } from '../i18n';
 import { type ColorPalette, Space, Sports, type SportKey } from '../theme';
 
 type Props = {
-  favs: number[];
-  setFavs: Dispatch<SetStateAction<number[]>>;
   personalEvents: Event[];
   setPersonalEvents: Dispatch<SetStateAction<Event[]>>;
 };
 
-type TabId = 'discover' | 'my';
 type FilterId = SportKey | 'all';
 
 const makeStyles = (c: ColorPalette) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: c.bg },
     header: { paddingHorizontal: Space.screen, paddingTop: 20, paddingBottom: 0 },
-    tabRow: {
-      flexDirection: 'row',
-      marginTop: 14,
-      backgroundColor: c.surface,
-      borderRadius: 14,
-      padding: 4,
-    },
-    etab: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 10 },
-    etabActive: { backgroundColor: c.card },
     list: { flex: 1 },
     listContent: { padding: Space.screen, paddingTop: 14 },
     filterChips: { flexDirection: 'row', gap: 8 },
@@ -73,14 +62,7 @@ const makeStyles = (c: ColorPalette) =>
       marginRight: 10,
     },
     eventInfo: { flex: 1 },
-    eventNameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    myBadge: {
-      paddingHorizontal: 5,
-      paddingVertical: 2,
-      borderRadius: 4,
-      backgroundColor: `${c.accent}22`,
-    },
-    eventRight: { alignItems: 'center', gap: 6, marginLeft: 10 },
+    eventRight: { alignItems: 'center', marginLeft: 10 },
     daysWrap: { alignItems: 'center' },
     dashedBtn: {
       flexDirection: 'row',
@@ -102,7 +84,7 @@ const makeStyles = (c: ColorPalette) =>
       marginTop: 12,
       marginBottom: 8,
     },
-    emptyMy: { alignItems: 'center', paddingVertical: 40 },
+    emptyState: { alignItems: 'center', paddingVertical: 48 },
     detailHero: {
       borderRadius: Space.radius.lg,
       padding: 28,
@@ -125,12 +107,6 @@ const makeStyles = (c: ColorPalette) =>
       paddingHorizontal: 16,
       borderBottomWidth: 1,
       borderBottomColor: c.borderSub,
-    },
-    communityNote: {
-      marginTop: 16,
-      padding: 14,
-      backgroundColor: c.surface,
-      borderRadius: Space.radius.md,
     },
     textInput: {
       backgroundColor: c.card,
@@ -161,14 +137,10 @@ const makeStyles = (c: ColorPalette) =>
 
 function EventCard({
   ev,
-  isFav,
-  onToggleFav,
   onPress,
   archived = false,
 }: {
   ev: Event;
-  isFav: boolean;
-  onToggleFav: () => void;
   onPress: () => void;
   archived?: boolean;
 }) {
@@ -176,6 +148,7 @@ function EventCard({
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const sport = Sports[ev.sport];
+  const days = daysUntil(ev.date);
   return (
     <Pressable style={[styles.eventCard, archived && styles.eventCardArchived]} onPress={onPress}>
       <View
@@ -185,23 +158,14 @@ function EventCard({
         <AppText size={22}>{sport.icon}</AppText>
       </View>
       <View style={styles.eventInfo}>
-        <View style={styles.eventNameRow}>
-          <AppText
-            condensed
-            weight="bold"
-            size={16}
-            color={archived ? colors.textMid : colors.text}
-            style={{ flex: 1, textDecorationLine: archived ? 'line-through' : 'none' }}>
-            {ev.name}
-          </AppText>
-          {!ev.global && (
-            <View style={styles.myBadge}>
-              <AppText condensed weight="bold" size={9} color={colors.accent} uppercase>
-                {t('events_my_event')}
-              </AppText>
-            </View>
-          )}
-        </View>
+        <AppText
+          condensed
+          weight="bold"
+          size={16}
+          color={archived ? colors.textMid : colors.text}
+          style={{ textDecorationLine: archived ? 'line-through' : 'none' }}>
+          {ev.name}
+        </AppText>
         <AppText size={12} color={colors.textDim} style={{ marginTop: 3 }}>
           📍 {ev.location}
         </AppText>
@@ -210,28 +174,23 @@ function EventCard({
         </AppText>
       </View>
       <View style={styles.eventRight}>
-        <Pressable onPress={onToggleFav} hitSlop={8}>
-          <AppText size={18}>{isFav ? '⭐' : '☆'}</AppText>
-        </Pressable>
-        {ev.days > 0 ? (
+        {days > 0 ? (
           <View style={styles.daysWrap}>
             <AppText
               condensed
               weight="black"
               size={22}
               color={archived ? colors.textDim : sport.color}>
-              {ev.days}
+              {days}
             </AppText>
             <AppText weight="semibold" size={9} color={colors.textDim} uppercase>
               {t('events_days')}
             </AppText>
           </View>
         ) : (
-          <View style={styles.daysWrap}>
-            <AppText weight="semibold" size={10} color={colors.textDim}>
-              {t('events_past')}
-            </AppText>
-          </View>
+          <AppText weight="semibold" size={10} color={colors.textDim}>
+            {t('events_past')}
+          </AppText>
         )}
       </View>
     </Pressable>
@@ -240,19 +199,20 @@ function EventCard({
 
 function EventDetail({
   ev,
-  isFav,
-  onToggleFav,
   onBack,
+  onEdit,
+  onDelete,
 }: {
   ev: Event;
-  isFav: boolean;
-  onToggleFav: () => void;
   onBack: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
 }) {
   const t = useT();
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const sport = Sports[ev.sport];
+  const days = daysUntil(ev.date);
   const infoRows = [
     { icon: '📅', label: t('ev_date_label'), value: ev.date },
     { icon: '📍', label: t('ev_location_label'), value: ev.location },
@@ -267,7 +227,7 @@ function EventDetail({
         <AppText size={48} style={{ textAlign: 'center' }}>
           {sport.icon}
         </AppText>
-        {ev.days > 0 ? (
+        {days > 0 ? (
           <>
             <AppText
               condensed
@@ -275,7 +235,7 @@ function EventDetail({
               size={64}
               color={sport.color}
               style={{ textAlign: 'center', lineHeight: 68 }}>
-              {ev.days}
+              {days}
             </AppText>
             <AppText
               condensed
@@ -314,20 +274,10 @@ function EventDetail({
           </View>
         ))}
       </View>
-      <View style={{ marginTop: 20 }}>
-        <Button
-          label={isFav ? t('ev_unsave') : t('save')}
-          onPress={onToggleFav}
-          variant={isFav ? 'ghost' : 'accent'}
-        />
+      <View style={{ marginTop: 20, gap: 10 }}>
+        <Button label={t('account_edit')} onPress={onEdit} />
+        <Button label={t('ev_delete')} onPress={onDelete} variant="ghost" />
       </View>
-      {!ev.global && (
-        <View style={styles.communityNote}>
-          <AppText size={12} color={colors.textDim} style={{ lineHeight: 18, textAlign: 'center' }}>
-            {t('ev_community_note')}
-          </AppText>
-        </View>
-      )}
     </Overlay>
   );
 }
@@ -341,17 +291,25 @@ type EventForm = {
   notes: string;
 };
 
-function AddEventSheet({ onClose, onAdd }: { onClose: () => void; onAdd: (ev: Event) => void }) {
+function AddEventSheet({
+  onClose,
+  onAdd,
+  initial,
+}: {
+  onClose: () => void;
+  onAdd: (ev: Event) => void;
+  initial?: Event;
+}) {
   const t = useT();
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [form, setForm] = useState<EventForm>({
-    name: '',
-    sport: 'tri',
-    dist: '',
-    date: '',
-    location: '',
-    notes: '',
+    name: initial?.name ?? '',
+    sport: initial?.sport ?? 'tri',
+    dist: initial?.dist ?? '',
+    date: initial?.date ?? '',
+    location: initial?.location ?? '',
+    notes: initial?.notes ?? '',
   });
   const [errors, setErrors] = useState<Partial<Record<keyof EventForm, string>>>({});
 
@@ -359,35 +317,38 @@ function AddEventSheet({ onClose, onAdd }: { onClose: () => void; onAdd: (ev: Ev
     const errs: Partial<Record<keyof EventForm, string>> = {};
     if (!form.name.trim()) errs.name = t('required');
     if (!form.date) errs.date = t('required');
-    if (!form.location.trim()) errs.location = t('required');
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
   const submit = () => {
     if (!validate()) return;
-    const days = Math.ceil((new Date(form.date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
     onAdd({
-      id: Date.now(),
+      id: initial?.id ?? Date.now(),
       name: form.name.trim(),
       sport: form.sport,
       dist: form.dist || t('ev_custom'),
       location: form.location.trim(),
       date: form.date,
       notes: form.notes.trim(),
-      days,
-      fav: false,
-      global: false,
     });
     onClose();
   };
 
   const sportOptions: SportKey[] = ['tri', 'run', 'bike', 'swim'];
   return (
-    <Sheet onClose={onClose} title={t('events_add_title')}>
-      <AppText weight="medium" size={13} color={colors.textMid} style={{ marginBottom: 4 }}>
-        {t('events_name')}
-      </AppText>
+    <Sheet
+      onClose={onClose}
+      title={initial ? t('account_edit') : t('events_add_title')}
+      maxHeight="93%">
+      <View style={{ flexDirection: 'row', gap: 2, marginBottom: 4 }}>
+        <AppText weight="medium" size={13} color={colors.textMid}>
+          {t('events_name')}
+        </AppText>
+        <AppText weight="bold" size={13} color={colors.heart}>
+          *
+        </AppText>
+      </View>
       <TextInput
         value={form.name}
         onChangeText={(v) => setForm((f) => ({ ...f, name: v }))}
@@ -444,15 +405,22 @@ function AddEventSheet({ onClose, onAdd }: { onClose: () => void; onAdd: (ev: Ev
           />
         </View>
         <View style={{ flex: 1 }}>
-          <AppText weight="medium" size={13} color={colors.textMid} style={{ marginBottom: 4 }}>
-            {t('events_date')}
-          </AppText>
-          <TextInput
+          <View style={{ flexDirection: 'row', gap: 2, marginBottom: 4 }}>
+            <AppText weight="medium" size={13} color={colors.textMid}>
+              {t('events_date')}
+            </AppText>
+            <AppText weight="bold" size={13} color={colors.heart}>
+              *
+            </AppText>
+          </View>
+          <DateField
             value={form.date}
-            onChangeText={(v) => setForm((f) => ({ ...f, date: v }))}
+            onChange={(v) => {
+              setForm((f) => ({ ...f, date: v }));
+              setErrors((e) => ({ ...e, date: undefined }));
+            }}
+            error={!!errors.date}
             placeholder={t('ev_date_ph')}
-            placeholderTextColor={colors.textDim}
-            style={[styles.textInput, errors.date ? styles.inputError : null]}
           />
         </View>
       </View>
@@ -464,7 +432,7 @@ function AddEventSheet({ onClose, onAdd }: { onClose: () => void; onAdd: (ev: Ev
         onChangeText={(v) => setForm((f) => ({ ...f, location: v }))}
         placeholder={t('ev_loc_ph')}
         placeholderTextColor={colors.textDim}
-        style={[styles.textInput, errors.location ? styles.inputError : null]}
+        style={styles.textInput}
       />
       <AppText weight="medium" size={13} color={colors.textMid} style={styles.fieldLabel}>
         {t('events_notes')}
@@ -478,9 +446,13 @@ function AddEventSheet({ onClose, onAdd }: { onClose: () => void; onAdd: (ev: Ev
         numberOfLines={3}
         style={[styles.textInput, { height: 80, textAlignVertical: 'top' }]}
       />
-      <View style={{ marginTop: 8 }}>
-        <Button label={t('events_submit')} onPress={submit} />
-      </View>
+      <AppText size={11} color={colors.textDim} style={{ marginTop: 4, marginBottom: 12 }}>
+        <AppText size={11} color={colors.heart}>
+          *{' '}
+        </AppText>
+        {t('required')}
+      </AppText>
+      <Button label={initial ? t('save') : t('events_add_personal')} onPress={submit} />
     </Sheet>
   );
 }
@@ -595,25 +567,24 @@ function SuggestSheet({ onClose }: { onClose: () => void }) {
   );
 }
 
-export function EventsScreen({ favs, setFavs, personalEvents, setPersonalEvents }: Props) {
+export function EventsScreen({ personalEvents, setPersonalEvents }: Props) {
   const t = useT();
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const [tab, setTab] = useState<TabId>('discover');
   const [filter, setFilter] = useState<FilterId>('all');
   const [showArchived, setShowArchived] = useState(false);
   const [showAddEvent, setShowAddEvent] = useState(false);
   const [showSuggest, setShowSuggest] = useState(false);
   const [detailEvent, setDetailEvent] = useState<Event | null>(null);
+  const [editEvent, setEditEvent] = useState<Event | null>(null);
 
-  const allEvents = [...EVENTS_DATA.filter((e) => e.global), ...personalEvents];
-  const toggleFav = (id: number) =>
-    setFavs((fs) => (fs.includes(id) ? fs.filter((f) => f !== id) : [...fs, id]));
-
-  const discoverEvents = allEvents.filter((e) => filter === 'all' || e.sport === filter);
-  const myEvents = allEvents.filter((e) => favs.includes(e.id));
-  const upcoming = myEvents.filter((e) => e.days > 0).sort((a, b) => a.days - b.days);
-  const archived = myEvents.filter((e) => e.days <= 0);
+  const filtered = personalEvents.filter((e) => filter === 'all' || e.sport === filter);
+  const upcoming = filtered
+    .filter((e) => daysUntil(e.date) > 0)
+    .sort((a, b) => daysUntil(a.date) - daysUntil(b.date));
+  const archived = filtered
+    .filter((e) => daysUntil(e.date) <= 0)
+    .sort((a, b) => daysUntil(b.date) - daysUntil(a.date));
 
   const filterTabs: { id: FilterId; label: string; icon: string }[] = [
     { id: 'all', label: t('sport_all'), icon: '⚡' },
@@ -623,179 +594,164 @@ export function EventsScreen({ favs, setFavs, personalEvents, setPersonalEvents 
     { id: 'swim', label: t('sport_swim'), icon: Sports['swim'].icon },
   ];
 
+  const deleteEvent = (id: number) => {
+    setPersonalEvents((evs) => evs.filter((e) => e.id !== id));
+    setDetailEvent(null);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <AppText condensed weight="black" size={34} uppercase style={{ letterSpacing: 1 }}>
           {t('events_title')}
         </AppText>
-        <View style={styles.tabRow}>
-          {(['discover', 'my'] as TabId[]).map((id) => (
-            <Pressable
-              key={id}
-              style={[styles.etab, tab === id && styles.etabActive]}
-              onPress={() => setTab(id)}>
-              <AppText
-                weight="semibold"
-                size={13}
-                color={tab === id ? colors.text : colors.textMid}>
-                {id === 'discover' ? t('events_discover') : t('events_my')}
-              </AppText>
-            </Pressable>
-          ))}
-        </View>
       </View>
 
       <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
-        {tab === 'discover' ? (
-          <>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={{ marginBottom: 14 }}>
-              <View style={styles.filterChips}>
-                {filterTabs.map((f) => {
-                  const active = filter === f.id;
-                  return (
-                    <Pressable
-                      key={f.id}
-                      style={[styles.chip, active && styles.chipActive]}
-                      onPress={() => setFilter(f.id)}>
-                      <AppText size={14}>{f.icon}</AppText>
-                      <AppText
-                        weight="semibold"
-                        size={12}
-                        color={active ? colors.text : colors.textMid}>
-                        {f.label}
-                      </AppText>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </ScrollView>
-            {discoverEvents.map((ev) => (
-              <EventCard
-                key={ev.id}
-                ev={ev}
-                isFav={favs.includes(ev.id)}
-                onToggleFav={() => toggleFav(ev.id)}
-                onPress={() => setDetailEvent(ev)}
-              />
-            ))}
-            <Pressable style={styles.dashedBtn} onPress={() => setShowSuggest(true)}>
-              <AppText size={16}>📬</AppText>
-              <AppText weight="semibold" size={13} color={colors.textMid}>
-                {t('events_suggest')}
-              </AppText>
-            </Pressable>
-          </>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 14 }}>
+          <View style={styles.filterChips}>
+            {filterTabs.map((f) => {
+              const active = filter === f.id;
+              return (
+                <Pressable
+                  key={f.id}
+                  style={[styles.chip, active && styles.chipActive]}
+                  onPress={() => setFilter(f.id)}>
+                  <AppText size={14}>{f.icon}</AppText>
+                  <AppText
+                    weight="semibold"
+                    size={12}
+                    color={active ? colors.text : colors.textMid}>
+                    {f.label}
+                  </AppText>
+                </Pressable>
+              );
+            })}
+          </View>
+        </ScrollView>
+
+        {personalEvents.length === 0 ? (
+          <View style={styles.emptyState}>
+            <AppText size={48} style={{ marginBottom: 12 }}>
+              🏁
+            </AppText>
+            <AppText
+              condensed
+              weight="black"
+              size={20}
+              color={colors.textMid}
+              style={{ marginBottom: 8 }}>
+              {t('events_no_events')}
+            </AppText>
+            <AppText
+              size={13}
+              color={colors.textDim}
+              style={{ lineHeight: 20, textAlign: 'center', marginBottom: 20 }}>
+              {t('events_no_events_sub')}
+            </AppText>
+            <Button
+              label={t('events_add_personal')}
+              onPress={() => setShowAddEvent(true)}
+              variant="accent"
+            />
+          </View>
         ) : (
           <>
-            {upcoming.length === 0 && archived.length === 0 ? (
-              <View style={styles.emptyMy}>
-                <AppText size={40} style={{ marginBottom: 12 }}>
-                  ⭐
-                </AppText>
+            {upcoming.length > 0 && (
+              <>
                 <AppText
                   condensed
-                  weight="black"
-                  size={20}
-                  color={colors.textMid}
-                  style={{ marginBottom: 8 }}>
-                  {t('events_no_events')}
-                </AppText>
-                <AppText
-                  size={13}
+                  weight="bold"
+                  size={12}
                   color={colors.textDim}
-                  style={{ lineHeight: 20, textAlign: 'center', marginBottom: 20 }}>
-                  {t('events_no_events_sub')}
+                  uppercase
+                  style={styles.sectionLabel}>
+                  {t('events_upcoming')} · {upcoming.length}
                 </AppText>
-                <Button
-                  label={t('events_browse')}
-                  onPress={() => setTab('discover')}
-                  variant="surface"
-                />
-              </View>
-            ) : (
-              <>
-                {upcoming.length > 0 && (
-                  <>
-                    <AppText
-                      condensed
-                      weight="bold"
-                      size={12}
-                      color={colors.textDim}
-                      uppercase
-                      style={styles.sectionLabel}>
-                      {t('events_upcoming')} · {upcoming.length}
-                    </AppText>
-                    {upcoming.map((ev) => (
-                      <EventCard
-                        key={ev.id}
-                        ev={ev}
-                        isFav
-                        onToggleFav={() => toggleFav(ev.id)}
-                        onPress={() => setDetailEvent(ev)}
-                      />
-                    ))}
-                  </>
-                )}
-                {archived.length > 0 && (
-                  <>
-                    <Pressable
-                      style={styles.archiveToggle}
-                      onPress={() => setShowArchived(!showArchived)}>
-                      <AppText
-                        condensed
-                        weight="bold"
-                        size={12}
-                        color={colors.textDim}
-                        uppercase
-                        style={{ letterSpacing: 1 }}>
-                        {t('events_past')} · {archived.length}
-                      </AppText>
-                      <AppText size={14} color={colors.textDim}>
-                        {showArchived ? '▾' : '▸'}
-                      </AppText>
-                    </Pressable>
-                    {showArchived &&
-                      archived.map((ev) => (
-                        <EventCard
-                          key={ev.id}
-                          ev={ev}
-                          isFav
-                          onToggleFav={() => toggleFav(ev.id)}
-                          onPress={() => setDetailEvent(ev)}
-                          archived
-                        />
-                      ))}
-                  </>
-                )}
+                {upcoming.map((ev) => (
+                  <EventCard key={ev.id} ev={ev} onPress={() => setDetailEvent(ev)} />
+                ))}
               </>
             )}
-            <Pressable style={styles.dashedBtn} onPress={() => setShowAddEvent(true)}>
-              <AppText size={16}>＋</AppText>
-              <AppText weight="semibold" size={13} color={colors.textMid}>
-                {t('events_add_personal')}
-              </AppText>
-            </Pressable>
+
+            {archived.length > 0 && (
+              <>
+                <Pressable
+                  style={styles.archiveToggle}
+                  onPress={() => setShowArchived(!showArchived)}>
+                  <AppText
+                    condensed
+                    weight="bold"
+                    size={12}
+                    color={colors.textDim}
+                    uppercase
+                    style={{ letterSpacing: 1 }}>
+                    {t('events_past')} · {archived.length}
+                  </AppText>
+                  <AppText size={14} color={colors.textDim}>
+                    {showArchived ? '▾' : '▸'}
+                  </AppText>
+                </Pressable>
+                {showArchived &&
+                  archived.map((ev) => (
+                    <EventCard key={ev.id} ev={ev} onPress={() => setDetailEvent(ev)} archived />
+                  ))}
+              </>
+            )}
+
+            {upcoming.length === 0 && archived.length === 0 && (
+              <View style={styles.emptyState}>
+                <AppText size={32} style={{ marginBottom: 8 }}>
+                  🔍
+                </AppText>
+                <AppText size={13} color={colors.textDim} style={{ textAlign: 'center' }}>
+                  {t('events_no_events')}
+                </AppText>
+              </View>
+            )}
           </>
         )}
+
+        <Pressable
+          style={[styles.dashedBtn, personalEvents.length > 0 && { marginTop: 16 }]}
+          onPress={() => setShowAddEvent(true)}>
+          <AppText size={16}>＋</AppText>
+          <AppText weight="semibold" size={13} color={colors.textMid}>
+            {t('events_add_personal')}
+          </AppText>
+        </Pressable>
+        <Pressable style={styles.dashedBtn} onPress={() => setShowSuggest(true)}>
+          <AppText size={16}>📬</AppText>
+          <AppText weight="semibold" size={13} color={colors.textMid}>
+            {t('events_suggest')}
+          </AppText>
+        </Pressable>
       </ScrollView>
 
-      {showAddEvent && (
+      {(showAddEvent || editEvent) && (
         <AddEventSheet
-          onClose={() => setShowAddEvent(false)}
-          onAdd={(ev) => setPersonalEvents((evs) => [ev, ...evs])}
+          onClose={() => {
+            setShowAddEvent(false);
+            setEditEvent(null);
+          }}
+          initial={editEvent ?? undefined}
+          onAdd={(ev) => {
+            if (editEvent) {
+              setPersonalEvents((evs) => evs.map((e) => (e.id === editEvent.id ? ev : e)));
+              setDetailEvent(ev);
+            } else {
+              setPersonalEvents((evs) => [ev, ...evs]);
+            }
+          }}
         />
       )}
       {showSuggest && <SuggestSheet onClose={() => setShowSuggest(false)} />}
-      {detailEvent && (
+      {detailEvent && !editEvent && (
         <EventDetail
           ev={detailEvent}
-          isFav={favs.includes(detailEvent.id)}
-          onToggleFav={() => toggleFav(detailEvent.id)}
           onBack={() => setDetailEvent(null)}
+          onEdit={() => setEditEvent(detailEvent)}
+          onDelete={() => deleteEvent(detailEvent.id)}
         />
       )}
     </View>
