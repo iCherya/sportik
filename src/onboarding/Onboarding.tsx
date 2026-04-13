@@ -4,6 +4,8 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppText } from '../components/AppText';
+import { DateField } from '../components/DateField';
+import { type Lang, useLang } from '../context/LangContext';
 import { useColors } from '../context/ThemeContext';
 import { useT } from '../i18n';
 import { type ColorPalette, Sports } from '../theme';
@@ -14,13 +16,13 @@ export type OBData = {
   raceDate: string;
   maxHR: string;
   ftp: string;
-  hoursPerWeek: number;
   name: string;
 };
 
 type Props = {
   onComplete: (data: OBData) => void;
   onSkipAll: () => void;
+  setLang: (v: Lang) => void;
 };
 
 const { width: SCREEN_W } = Dimensions.get('window');
@@ -75,7 +77,9 @@ const makeStyles = (c: ColorPalette) =>
     /* welcome */
     welcomeSkipRow: {
       paddingHorizontal: 20,
-      alignItems: 'flex-end',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
       flexShrink: 0,
     },
     skipChip: {
@@ -83,6 +87,16 @@ const makeStyles = (c: ColorPalette) =>
       paddingVertical: 6,
       borderRadius: 8,
       borderWidth: 1,
+    },
+    langToggle: {
+      flexDirection: 'row',
+      borderRadius: 8,
+      borderWidth: 1,
+      overflow: 'hidden',
+    },
+    langBtn: {
+      paddingHorizontal: 10,
+      paddingVertical: 6,
     },
     welcomeCenter: {
       flex: 1,
@@ -176,17 +190,6 @@ const makeStyles = (c: ColorPalette) =>
       justifyContent: 'center',
       paddingHorizontal: 32,
     },
-    dateInput: {
-      backgroundColor: c.card,
-      borderWidth: 1,
-      borderColor: c.border,
-      borderRadius: 12,
-      padding: 14,
-      fontFamily: 'InterBold',
-      fontSize: 16,
-      color: c.text,
-    },
-
     /* baseline */
     baselineList: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
     baseCard: {
@@ -233,61 +236,6 @@ const makeStyles = (c: ColorPalette) =>
       borderWidth: 1,
       alignItems: 'center',
       justifyContent: 'center',
-    },
-
-    /* training hours */
-    hoursCenter: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingHorizontal: 24,
-    },
-    hrsControls: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      marginBottom: 24,
-      width: '100%',
-    },
-    hrsBtn: {
-      width: 44,
-      height: 44,
-      borderRadius: 12,
-      backgroundColor: c.card,
-      borderWidth: 1,
-      borderColor: c.border,
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexShrink: 0,
-    },
-    hrsPresets: {
-      flex: 1,
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 4,
-      justifyContent: 'center',
-    },
-    hrsPreset: {
-      paddingHorizontal: 8,
-      paddingVertical: 5,
-      borderRadius: 8,
-      borderWidth: 1,
-    },
-    levelBadge: {
-      width: '100%',
-      borderRadius: 20,
-      borderWidth: 1,
-      padding: 18,
-      alignItems: 'center',
-      marginBottom: 16,
-    },
-    breakdownRow: { flexDirection: 'row', gap: 8, width: '100%' },
-    breakdownCard: {
-      flex: 1,
-      borderRadius: 14,
-      borderWidth: 1,
-      padding: 10,
-      alignItems: 'center',
     },
 
     /* ready */
@@ -446,8 +394,17 @@ function OBBtn({
 }
 
 /* ── Screen 1: Welcome ── */
-function OBWelcome({ onNext, onSkipAll }: { onNext: () => void; onSkipAll: () => void }) {
+function OBWelcome({
+  onNext,
+  onSkipAll,
+  setLang,
+}: {
+  onNext: () => void;
+  onSkipAll: () => void;
+  setLang: (v: Lang) => void;
+}) {
   const t = useT();
+  const lang = useLang();
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
@@ -467,8 +424,27 @@ function OBWelcome({ onNext, onSkipAll }: { onNext: () => void; onSkipAll: () =>
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.bg }]}>
-      {/* Skip button top-right */}
+      {/* Top row: lang toggle left, skip right */}
       <View style={[styles.welcomeSkipRow, { paddingTop: insets.top + 12 }]}>
+        <View style={[styles.langToggle, { borderColor: colors.border }]}>
+          {(['en', 'uk'] as Lang[]).map((l) => (
+            <Pressable
+              key={l}
+              style={[
+                styles.langBtn,
+                { backgroundColor: lang === l ? colors.accent : colors.surface },
+              ]}
+              onPress={() => setLang(l)}>
+              <AppText
+                size={12}
+                weight="bold"
+                color={lang === l ? '#000' : colors.textDim}
+                style={{ letterSpacing: 0.5 }}>
+                {l === 'en' ? 'EN' : 'UA'}
+              </AppText>
+            </Pressable>
+          ))}
+        </View>
         <Pressable
           style={[styles.skipChip, { borderColor: colors.border, backgroundColor: colors.surface }]}
           onPress={onSkipAll}>
@@ -589,15 +565,11 @@ function OBSportFocus({
       color: colors.textMid,
     },
   ];
-  const toggle = (id: string) =>
-    setData((d) => ({
-      ...d,
-      sports: d.sports.includes(id) ? d.sports.filter((s) => s !== id) : [...d.sports, id],
-    }));
+  const select = (id: string) => setData((d) => ({ ...d, sports: [id] }));
 
   return (
     <View style={styles.screen}>
-      <OBProgress step={1} total={5} onBack={onBack} onSkip={() => {}} showBack showSkip={false} />
+      <OBProgress step={1} total={4} onBack={onBack} onSkip={() => {}} showBack showSkip={false} />
       <View style={styles.stepHeader}>
         <AppText condensed weight="black" size={32} style={{ letterSpacing: 0.5, lineHeight: 36 }}>
           {t('ob_sport_q')}
@@ -623,7 +595,7 @@ function OBSportFocus({
                   borderWidth: sel ? 2 : 1,
                 },
               ]}
-              onPress={() => toggle(s.id)}>
+              onPress={() => select(s.id)}>
               <View
                 style={[
                   styles.sportCardIcon,
@@ -684,44 +656,119 @@ function OBGoalRace({
   const insets = useSafeAreaInsets();
   const [hasRace, setHasRace] = useState<boolean | null>(data.raceType ? true : null);
 
-  const raceTypes = [
+  const primarySport = data.sports[0];
+  const allRaceTypes = [
     {
       id: 'sprint',
+      sport: 'tri',
       label: t('ob_race_sprint'),
       detail: t('ob_race_sprint_dist'),
       color: Sports.tri.color,
     },
     {
       id: 'olympic',
+      sport: 'tri',
       label: t('ob_race_olympic'),
       detail: t('ob_race_olympic_dist'),
       color: Sports.tri.color,
     },
-    { id: '703', label: t('ob_race_703'), detail: t('ob_race_703_dist'), color: Sports.tri.color },
+    {
+      id: '703',
+      sport: 'tri',
+      label: t('ob_race_703'),
+      detail: t('ob_race_703_dist'),
+      color: Sports.tri.color,
+    },
     {
       id: 'ironman',
+      sport: 'tri',
       label: t('ob_race_im'),
       detail: t('ob_race_im_dist'),
       color: Sports.tri.color,
     },
     {
       id: 'marathon',
+      sport: 'run',
       label: t('ob_race_marathon'),
       detail: t('ob_race_marathon_dist'),
       color: Sports.run.color,
     },
-    { id: 'hm', label: t('ob_race_hm'), detail: t('ob_race_hm_dist'), color: Sports.run.color },
+    {
+      id: 'hm',
+      sport: 'run',
+      label: t('ob_race_hm'),
+      detail: t('ob_race_hm_dist'),
+      color: Sports.run.color,
+    },
+    {
+      id: '10k',
+      sport: 'run',
+      label: t('ob_race_10k'),
+      detail: t('ob_race_10k_dist'),
+      color: Sports.run.color,
+    },
+    {
+      id: '5k',
+      sport: 'run',
+      label: t('ob_race_5k'),
+      detail: t('ob_race_5k_dist'),
+      color: Sports.run.color,
+    },
     {
       id: 'fondo',
+      sport: 'bike',
       label: t('ob_race_fondo'),
       detail: t('ob_race_fondo_dist'),
       color: Sports.bike.color,
     },
+    {
+      id: 'sotka',
+      sport: 'bike',
+      label: t('ob_race_sotka'),
+      detail: t('ob_race_sotka_dist'),
+      color: Sports.bike.color,
+    },
+    {
+      id: 'bike40',
+      sport: 'bike',
+      label: t('ob_race_bike40'),
+      detail: t('ob_race_bike40_dist'),
+      color: Sports.bike.color,
+    },
+    {
+      id: 'swim1000',
+      sport: 'swim',
+      label: t('ob_race_swim1000'),
+      detail: t('ob_race_swim1000_dist'),
+      color: Sports.swim.color,
+    },
+    {
+      id: 'swim2000',
+      sport: 'swim',
+      label: t('ob_race_swim2000'),
+      detail: t('ob_race_swim2000_dist'),
+      color: Sports.swim.color,
+    },
+    {
+      id: 'swim5000',
+      sport: 'swim',
+      label: t('ob_race_swim5000'),
+      detail: t('ob_race_swim5000_dist'),
+      color: Sports.swim.color,
+    },
+    {
+      id: 'swim10000',
+      sport: 'swim',
+      label: t('ob_race_swim10000'),
+      detail: t('ob_race_swim10000_dist'),
+      color: Sports.swim.color,
+    },
   ];
+  const raceTypes = allRaceTypes.filter((r) => !primarySport || r.sport === primarySport);
 
   return (
     <View style={styles.screen}>
-      <OBProgress step={2} total={5} onBack={onBack} onSkip={onSkip} showBack showSkip />
+      <OBProgress step={2} total={4} onBack={onBack} onSkip={onSkip} showBack showSkip />
       <View style={styles.stepHeader}>
         <AppText condensed weight="black" size={32} style={{ letterSpacing: 0.5, lineHeight: 36 }}>
           {t('ob_race_q')}
@@ -813,13 +860,9 @@ function OBGoalRace({
             style={{ letterSpacing: 2, marginBottom: 8, marginTop: 20 }}>
             {t('ob_race_date')}
           </AppText>
-          <TextInput
+          <DateField
             value={data.raceDate}
-            onChangeText={(v) => setData((d) => ({ ...d, raceDate: v }))}
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor={colors.textDim}
-            keyboardType="numbers-and-punctuation"
-            style={styles.dateInput}
+            onChange={(v) => setData((d) => ({ ...d, raceDate: v }))}
           />
         </ScrollView>
       )}
@@ -886,7 +929,7 @@ function OBBaseline({
 
   return (
     <View style={styles.screen}>
-      <OBProgress step={3} total={5} onBack={onBack} onSkip={onSkip} showBack showSkip />
+      <OBProgress step={3} total={4} onBack={onBack} onSkip={onSkip} showBack showSkip />
       <View style={styles.stepHeader}>
         <AppText condensed weight="black" size={32} style={{ letterSpacing: 0.5, lineHeight: 36 }}>
           {t('ob_baseline_q')}
@@ -997,160 +1040,7 @@ function OBBaseline({
   );
 }
 
-/* ── Screen 5: Training Hours ── */
-function OBTrainingHours({
-  onNext,
-  onBack,
-  onSkip,
-  data,
-  setData,
-}: {
-  onNext: () => void;
-  onBack: () => void;
-  onSkip: () => void;
-  data: OBData;
-  setData: React.Dispatch<React.SetStateAction<OBData>>;
-}) {
-  const t = useT();
-  const colors = useColors();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
-  const insets = useSafeAreaInsets();
-  const hrs = data.hoursPerWeek;
-  const setHrs = (v: number) =>
-    setData((d) => ({ ...d, hoursPerWeek: Math.min(20, Math.max(3, v)) }));
-
-  const level =
-    hrs <= 5
-      ? { l: t('ob_level_base'), c: Sports.run.color, sub: t('ob_level_base_sub') }
-      : hrs <= 10
-        ? { l: t('ob_level_inter'), c: Sports.swim.color, sub: t('ob_level_inter_sub') }
-        : hrs <= 15
-          ? { l: t('ob_level_adv'), c: Sports.bike.color, sub: t('ob_level_adv_sub') }
-          : { l: t('ob_level_elite'), c: Sports.tri.color, sub: t('ob_level_elite_sub') };
-
-  const sportBreakdown = [
-    { sport: 'swim', color: Sports.swim.color, icon: '🏊', pct: 0.25 },
-    { sport: 'bike', color: Sports.bike.color, icon: '🚴', pct: 0.45 },
-    { sport: 'run', color: Sports.run.color, icon: '🏃', pct: 0.3 },
-  ].filter((s) => {
-    if (data.sports.length === 0) return true;
-    return (
-      data.sports.includes(s.sport) ||
-      (data.sports.includes('tri') && ['swim', 'bike', 'run'].includes(s.sport)) ||
-      data.sports.includes('tbd')
-    );
-  });
-
-  const presets = [3, 5, 8, 12, 16, 20];
-
-  return (
-    <View style={styles.screen}>
-      <OBProgress step={4} total={5} onBack={onBack} onSkip={onSkip} showBack showSkip />
-      <View style={styles.stepHeader}>
-        <AppText condensed weight="black" size={32} style={{ letterSpacing: 0.5, lineHeight: 36 }}>
-          {t('ob_hours_q')}
-        </AppText>
-        <AppText size={14} color={colors.textMid} style={{ marginTop: 8 }}>
-          {t('ob_hours_sub')}
-        </AppText>
-      </View>
-
-      <View style={styles.hoursCenter}>
-        {/* Big number */}
-        <View style={{ alignItems: 'center', marginBottom: 24 }}>
-          <AppText condensed weight="black" size={96} style={{ lineHeight: 96 }}>
-            {hrs >= 20 ? '20+' : String(hrs)}
-          </AppText>
-          <AppText size={14} weight="semibold" color={colors.textMid} style={{ letterSpacing: 1 }}>
-            {t('ob_hours_unit').toUpperCase()}
-          </AppText>
-        </View>
-
-        {/* +/- controls */}
-        <View style={styles.hrsControls}>
-          <Pressable style={styles.hrsBtn} onPress={() => setHrs(hrs - 1)} disabled={hrs <= 3}>
-            <AppText size={24} weight="black" color={hrs <= 3 ? colors.textDim : colors.text}>
-              −
-            </AppText>
-          </Pressable>
-          <View style={styles.hrsPresets}>
-            {presets.map((p) => (
-              <Pressable
-                key={p}
-                style={[
-                  styles.hrsPreset,
-                  {
-                    borderColor: hrs === p ? colors.accent : colors.border,
-                    backgroundColor: hrs === p ? `${colors.accent}22` : colors.card,
-                  },
-                ]}
-                onPress={() => setHrs(p)}>
-                <AppText
-                  size={12}
-                  weight="semibold"
-                  color={hrs === p ? colors.accent : colors.textMid}>
-                  {p === 20 ? '20+' : String(p)}
-                </AppText>
-              </Pressable>
-            ))}
-          </View>
-          <Pressable style={styles.hrsBtn} onPress={() => setHrs(hrs + 1)} disabled={hrs >= 20}>
-            <AppText size={24} weight="black" color={hrs >= 20 ? colors.textDim : colors.text}>
-              +
-            </AppText>
-          </Pressable>
-        </View>
-
-        {/* Level badge */}
-        <View
-          style={[
-            styles.levelBadge,
-            { backgroundColor: `${level.c}18`, borderColor: `${level.c}44` },
-          ]}>
-          <AppText condensed weight="black" size={22} color={level.c} style={{ marginBottom: 6 }}>
-            {level.l}
-          </AppText>
-          <AppText size={13} color={colors.textMid} style={{ lineHeight: 20, textAlign: 'center' }}>
-            {level.sub}
-          </AppText>
-        </View>
-
-        {/* Sport breakdown */}
-        {sportBreakdown.length > 0 && (
-          <View style={styles.breakdownRow}>
-            {sportBreakdown.map((s) => {
-              const h = Math.round(hrs * s.pct * 10) / 10;
-              return (
-                <View
-                  key={s.sport}
-                  style={[
-                    styles.breakdownCard,
-                    { backgroundColor: `${s.color}18`, borderColor: `${s.color}33` },
-                  ]}>
-                  <AppText size={16}>{s.icon}</AppText>
-                  <AppText
-                    condensed
-                    weight="black"
-                    size={16}
-                    color={s.color}
-                    style={{ marginTop: 4 }}>
-                    {h}h
-                  </AppText>
-                </View>
-              );
-            })}
-          </View>
-        )}
-      </View>
-
-      <View style={[styles.bottomPad, { paddingBottom: insets.bottom + 36 }]}>
-        <OBBtn label={t('ob_continue')} onPress={onNext} />
-      </View>
-    </View>
-  );
-}
-
-/* ── Screen 6: Ready ── */
+/* ── Screen 5: Ready ── */
 function OBReady({
   onFinish,
   onBack,
@@ -1200,11 +1090,6 @@ function OBReady({
     },
     { icon: '❤️', label: t('hr_max'), val: data.maxHR ? `${data.maxHR} bpm` : null },
     { icon: '⚡', label: t('pz_ftp_label'), val: data.ftp ? `${data.ftp} W` : null },
-    {
-      icon: '⏱',
-      label: t('ob_weekly_hours'),
-      val: data.hoursPerWeek ? `${data.hoursPerWeek >= 20 ? '20+' : data.hoursPerWeek}h` : null,
-    },
   ];
   const filledItems = summaryItems.filter((i) => i.val !== null);
   const skippedItems = summaryItems.filter((i) => i.val === null);
@@ -1212,7 +1097,7 @@ function OBReady({
 
   return (
     <View style={styles.screen}>
-      <OBProgress step={5} total={5} onBack={onBack} onSkip={() => {}} showBack showSkip={false} />
+      <OBProgress step={4} total={4} onBack={onBack} onSkip={() => {}} showBack showSkip={false} />
       <View style={styles.stepHeader}>
         <AppText condensed weight="black" size={32} style={{ letterSpacing: 0.5, lineHeight: 36 }}>
           {mostlySkipped ? t('ob_ready_q_skipped') : t('ob_ready_q')}
@@ -1314,9 +1199,8 @@ function OBReady({
           label={`${t('ob_lets_go')}${name ? ', ' + name.split(' ')[0] : ''} →`}
           onPress={() => {
             setData((d) => ({ ...d, name }));
-            onFinish(name || 'Athlete');
+            onFinish(name || t('default_athlete'));
           }}
-          disabled={!name.trim()}
         />
       </View>
     </View>
@@ -1324,7 +1208,7 @@ function OBReady({
 }
 
 /* ── Onboarding Shell ── */
-export function Onboarding({ onComplete, onSkipAll }: Props) {
+export function Onboarding({ onComplete, onSkipAll, setLang }: Props) {
   const colors = useColors();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const t = useT();
@@ -1337,20 +1221,22 @@ export function Onboarding({ onComplete, onSkipAll }: Props) {
     raceDate: '',
     maxHR: '',
     ftp: '',
-    hoursPerWeek: 8,
     name: '',
   });
+
+  const isTbd = data.sports[0] === 'tbd';
 
   const go = (nextStep: number) => {
     setDir(nextStep > step ? 'fwd' : 'bwd');
     setStep(nextStep);
   };
-  const next = () => go(step + 1);
-  const back = () => go(step - 1);
+  // Step 2 (GoalRace) is skipped when sport is 'tbd'
+  const next = () => go(step === 1 && isTbd ? 3 : step + 1);
+  const back = () => go(step === 3 && isTbd ? 1 : step - 1);
   const skip = () => go(step + 1);
 
   const screens = [
-    <OBWelcome key="welcome" onNext={next} onSkipAll={onSkipAll} />,
+    <OBWelcome key="welcome" onNext={next} onSkipAll={onSkipAll} setLang={setLang} />,
     <OBSportFocus key="sport" onNext={next} onBack={back} data={data} setData={setData} />,
     <OBGoalRace
       key="race"
@@ -1362,14 +1248,6 @@ export function Onboarding({ onComplete, onSkipAll }: Props) {
     />,
     <OBBaseline
       key="baseline"
-      onNext={next}
-      onBack={back}
-      onSkip={skip}
-      data={data}
-      setData={setData}
-    />,
-    <OBTrainingHours
-      key="hours"
       onNext={next}
       onBack={back}
       onSkip={skip}
@@ -1394,7 +1272,7 @@ export function Onboarding({ onComplete, onSkipAll }: Props) {
       </View>
 
       {/* "Skip onboarding entirely" floating pill (steps 1–4) */}
-      {step > 0 && step < 5 && (
+      {step > 0 && step < 4 && (
         <View style={[styles.skipAllWrap, { bottom: insets.bottom + 8 }]}>
           <Pressable
             style={[

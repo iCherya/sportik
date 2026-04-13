@@ -26,9 +26,18 @@ type Props = {
   setLang: (v: Lang) => void;
   profile: Profile;
   setProfile: (p: Profile) => void;
+  onLogout: () => void;
 };
 
-export function MainApp({ isDark, setIsDark, lang, setLang, profile, setProfile }: Props) {
+export function MainApp({
+  isDark,
+  setIsDark,
+  lang,
+  setLang,
+  profile,
+  setProfile,
+  onLogout,
+}: Props) {
   const colors = useColors();
   const t = useT();
   const [screen, setScreen] = useState<Screen>('home');
@@ -110,6 +119,7 @@ export function MainApp({ isDark, setIsDark, lang, setLang, profile, setProfile 
             setProfile={setProfile}
             lang={lang}
             setLang={setLang}
+            onLogout={onLogout}
           />
         );
     }

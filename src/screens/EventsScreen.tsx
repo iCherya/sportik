@@ -457,116 +457,6 @@ function AddEventSheet({
   );
 }
 
-type SuggestForm = {
-  name: string;
-  sport: SportKey;
-  location: string;
-  date: string;
-  dist: string;
-  desc: string;
-};
-
-function SuggestSheet({ onClose }: { onClose: () => void }) {
-  const t = useT();
-  const colors = useColors();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
-  const [form, setForm] = useState<SuggestForm>({
-    name: '',
-    sport: 'tri',
-    location: '',
-    date: '',
-    dist: '',
-    desc: '',
-  });
-  const [errors, setErrors] = useState<Partial<Record<keyof SuggestForm, string>>>({});
-  const [sent, setSent] = useState(false);
-
-  const validate = () => {
-    const errs: Partial<Record<keyof SuggestForm, string>> = {};
-    if (!form.name.trim()) errs.name = t('required');
-    if (!form.location.trim()) errs.location = t('required');
-    if (!form.date) errs.date = t('required');
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
-  };
-
-  if (sent) {
-    return (
-      <Sheet onClose={onClose} title={t('events_suggest_title')}>
-        <View style={{ alignItems: 'center', paddingVertical: 20 }}>
-          <AppText size={48} style={{ marginBottom: 12 }}>
-            🚀
-          </AppText>
-          <AppText
-            condensed
-            weight="black"
-            size={22}
-            style={{ marginBottom: 8, textAlign: 'center' }}>
-            {t('events_suggest_sent')}
-          </AppText>
-          <AppText
-            size={13}
-            color={colors.textMid}
-            style={{ lineHeight: 20, marginBottom: 24, textAlign: 'center' }}>
-            {t('events_suggest_sent_sub')}
-          </AppText>
-          <Button label={t('done')} onPress={onClose} />
-        </View>
-      </Sheet>
-    );
-  }
-
-  return (
-    <Sheet onClose={onClose} title={t('events_suggest_title')}>
-      <AppText size={13} color={colors.textMid} style={{ marginBottom: 14, lineHeight: 19 }}>
-        {t('events_suggest_sub')}
-      </AppText>
-      <TextInput
-        value={form.name}
-        onChangeText={(v) => setForm((f) => ({ ...f, name: v }))}
-        placeholder={t('ev_name_ph')}
-        placeholderTextColor={colors.textDim}
-        style={[styles.textInput, errors.name ? styles.inputError : null]}
-      />
-      <View style={styles.twoCol}>
-        <View style={{ flex: 1 }}>
-          <TextInput
-            value={form.location}
-            onChangeText={(v) => setForm((f) => ({ ...f, location: v }))}
-            placeholder={t('ev_loc_ph')}
-            placeholderTextColor={colors.textDim}
-            style={[styles.textInput, errors.location ? styles.inputError : null]}
-          />
-        </View>
-        <View style={{ flex: 1 }}>
-          <TextInput
-            value={form.date}
-            onChangeText={(v) => setForm((f) => ({ ...f, date: v }))}
-            placeholder={t('ev_date_ph')}
-            placeholderTextColor={colors.textDim}
-            style={[styles.textInput, errors.date ? styles.inputError : null]}
-          />
-        </View>
-      </View>
-      <TextInput
-        value={form.desc}
-        onChangeText={(v) => setForm((f) => ({ ...f, desc: v }))}
-        placeholder={t('ev_suggest_note_ph')}
-        placeholderTextColor={colors.textDim}
-        multiline
-        numberOfLines={3}
-        style={[styles.textInput, { height: 80, textAlignVertical: 'top', marginBottom: 12 }]}
-      />
-      <Button
-        label={t('events_submit')}
-        onPress={() => {
-          if (validate()) setSent(true);
-        }}
-      />
-    </Sheet>
-  );
-}
-
 export function EventsScreen({ personalEvents, setPersonalEvents }: Props) {
   const t = useT();
   const colors = useColors();
@@ -574,7 +464,6 @@ export function EventsScreen({ personalEvents, setPersonalEvents }: Props) {
   const [filter, setFilter] = useState<FilterId>('all');
   const [showArchived, setShowArchived] = useState(false);
   const [showAddEvent, setShowAddEvent] = useState(false);
-  const [showSuggest, setShowSuggest] = useState(false);
   const [detailEvent, setDetailEvent] = useState<Event | null>(null);
   const [editEvent, setEditEvent] = useState<Event | null>(null);
 
@@ -723,12 +612,6 @@ export function EventsScreen({ personalEvents, setPersonalEvents }: Props) {
             {t('events_add_personal')}
           </AppText>
         </Pressable>
-        <Pressable style={styles.dashedBtn} onPress={() => setShowSuggest(true)}>
-          <AppText size={16}>📬</AppText>
-          <AppText weight="semibold" size={13} color={colors.textMid}>
-            {t('events_suggest')}
-          </AppText>
-        </Pressable>
       </ScrollView>
 
       {(showAddEvent || editEvent) && (
@@ -748,7 +631,6 @@ export function EventsScreen({ personalEvents, setPersonalEvents }: Props) {
           }}
         />
       )}
-      {showSuggest && <SuggestSheet onClose={() => setShowSuggest(false)} />}
       {detailEvent && !editEvent && (
         <EventDetail
           ev={detailEvent}

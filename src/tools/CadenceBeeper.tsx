@@ -1,5 +1,5 @@
-import * as Haptics from 'expo-haptics';
 import { Audio } from 'expo-av';
+import * as Haptics from 'expo-haptics';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 
@@ -63,14 +63,29 @@ const makeStyles = (c: ColorPalette) =>
   });
 
 // Web Audio API beep (browser only)
+// AudioContext is kept as a module-level singleton so it survives re-renders.
 let webAudioCtx: AudioContext | null = null;
-function playWebBeep() {
-  if (typeof AudioContext === 'undefined' && typeof (window as unknown as Record<string, unknown>).webkitAudioContext === 'undefined') return;
+
+/** Must be called from a user-gesture handler to un-suspend the context on iOS PWA. */
+function resumeWebAudio() {
+  if (
+    typeof AudioContext === 'undefined' &&
+    typeof (window as unknown as Record<string, unknown>).webkitAudioContext === 'undefined'
+  )
+    return;
   if (!webAudioCtx) {
-    const Ctx = AudioContext ?? (window as unknown as Record<string, unknown>).webkitAudioContext as typeof AudioContext;
+    const Ctx = (AudioContext ??
+      (window as unknown as Record<string, unknown>).webkitAudioContext) as typeof AudioContext;
     webAudioCtx = new Ctx();
   }
+  if (webAudioCtx.state === 'suspended') {
+    webAudioCtx.resume().catch(() => {});
+  }
+}
+
+function playWebBeep() {
   const ctx = webAudioCtx;
+  if (!ctx || ctx.state !== 'running') return;
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
   osc.connect(gain);
@@ -105,9 +120,11 @@ export function CadenceBeeper() {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('../../assets/beep.wav'),
       { shouldPlay: false, volume: 1 }
-    ).then(({ sound }) => {
-      soundRef.current = sound;
-    }).catch(() => {});
+    )
+      .then(({ sound }) => {
+        soundRef.current = sound;
+      })
+      .catch(() => {});
     return () => {
       soundRef.current?.unloadAsync().catch(() => {});
     };
@@ -118,7 +135,10 @@ export function CadenceBeeper() {
     if (Platform.OS === 'web') {
       playWebBeep();
     } else if (soundRef.current) {
-      soundRef.current.setPositionAsync(0).then(() => soundRef.current?.playAsync()).catch(() => {});
+      soundRef.current
+        .setPositionAsync(0)
+        .then(() => soundRef.current?.playAsync())
+        .catch(() => {});
     }
     setBeat(true);
     setTimeout(() => setBeat(false), 80);
@@ -229,7 +249,10 @@ export function CadenceBeeper() {
       {/* Play / Stop */}
       <Pressable
         style={[styles.playBtn, { backgroundColor: playing ? colors.heart : colors.accent }]}
-        onPress={() => setPlaying((p) => !p)}>
+        onPress={() => {
+          if (Platform.OS === 'web') resumeWebAudio();
+          setPlaying((p) => !p);
+        }}>
         <AppText
           condensed
           weight="black"
