@@ -578,13 +578,16 @@ export function EventsScreen({ personalEvents, setPersonalEvents }: Props) {
   const [detailEvent, setDetailEvent] = useState<Event | null>(null);
   const [editEvent, setEditEvent] = useState<Event | null>(null);
 
-  const filtered = personalEvents.filter((e) => filter === 'all' || e.sport === filter);
+  const withDays = personalEvents.map((e) => ({ event: e, days: daysUntil(e.date) }));
+  const filtered = withDays.filter(({ event: e }) => filter === 'all' || e.sport === filter);
   const upcoming = filtered
-    .filter((e) => daysUntil(e.date) > 0)
-    .sort((a, b) => daysUntil(a.date) - daysUntil(b.date));
+    .filter(({ days }) => days > 0)
+    .sort((a, b) => a.days - b.days)
+    .map(({ event }) => event);
   const archived = filtered
-    .filter((e) => daysUntil(e.date) <= 0)
-    .sort((a, b) => daysUntil(b.date) - daysUntil(a.date));
+    .filter(({ days }) => days <= 0)
+    .sort((a, b) => b.days - a.days)
+    .map(({ event }) => event);
 
   const filterTabs: { id: FilterId; label: string; icon: string }[] = [
     { id: 'all', label: t('sport_all'), icon: '⚡' },

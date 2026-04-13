@@ -32,7 +32,7 @@ function injectStyles() {
   document.head.appendChild(el);
 }
 
-export function DateField({ value, onChange, error }: Props) {
+export function DateField({ value, onChange, error, placeholder }: Props) {
   const colors = useColors();
 
   useEffect(injectStyles, []);
@@ -43,6 +43,7 @@ export function DateField({ value, onChange, error }: Props) {
       className="sportik-date"
       data-has-value={value ? 'true' : 'false'}
       value={value}
+      placeholder={placeholder}
       onClick={(e) => (e.target as HTMLInputElement).showPicker?.()}
       onChange={(e) => onChange((e as React.ChangeEvent<HTMLInputElement>).target.value)}
       style={

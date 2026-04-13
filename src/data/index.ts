@@ -24,9 +24,11 @@ export type Event = {
   notes?: string;
 };
 
-/** Days from now until the event date (negative = past). */
+/** Days from now until the event date (negative = past). Returns 0 for invalid/empty input. */
 export function daysUntil(dateStr: string): number {
-  return Math.ceil((new Date(dateStr).getTime() - Date.now()) / 86400000);
+  const timestamp = new Date(dateStr).getTime();
+  if (Number.isNaN(timestamp)) return 0;
+  return Math.ceil((timestamp - Date.now()) / 86400000);
 }
 
 export type Tool = {

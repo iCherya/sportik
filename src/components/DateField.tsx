@@ -38,7 +38,6 @@ export function DateField({ value, onChange, error, placeholder }: Props) {
         onPress={() => setOpen(true)}
         style={[
           styles.field,
-          error && styles.fieldError,
           { borderColor: error ? colors.heart : colors.border, backgroundColor: colors.card },
         ]}>
         <AppText size={14} color={value ? colors.text : colors.textDim}>
@@ -93,5 +92,4 @@ const styles = StyleSheet.create({
     padding: 14,
     marginBottom: 10,
   },
-  fieldError: {},
 });
